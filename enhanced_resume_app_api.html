@@ -110,11 +110,10 @@
         /* Card Styles */
         .card {
             background: white;
-            border-radius: 10px;
             padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
         .card:hover {
@@ -390,16 +389,60 @@
             background-color: white;
             margin: 5% auto;
             padding: 2rem;
-            border-radius: 10px;
-            width: 90%;
+            border-radius: 12px;
+            width: 80%;
             max-width: 600px;
-            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select,
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
         }
         
         /* Utility Classes */
@@ -648,6 +691,386 @@
             font-size: 10px;
             margin-left: 8px;
         }
+        
+        /* Resume Importer Styles */
+        .resume-import-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .import-method {
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .upload-area {
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color) !important;
+            background: #f8f9ff;
+        }
+
+        .parse-status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #ddd;
+        }
+
+        .parse-status.loading {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #1976d2;
+        }
+
+        .parse-status.success {
+            background: #e8f5e8;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .parse-status.error {
+            background: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
+        }
+
+        /* Enhanced Component Display Styles */
+        .section-group {
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .section-header {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-icon {
+            font-size: 1.2rem;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex-grow: 1;
+        }
+
+        .section-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .select-all-section {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .select-all-section:hover {
+            opacity: 0.8;
+        }
+
+        .section-components {
+            padding: 1rem;
+        }
+
+        .component-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .component-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .component-header {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .component-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .component-checkbox input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .component-title {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .component-length {
+            font-size: 0.85rem;
+            color: #666;
+            background: #f5f5f5;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .component-preview {
+            padding: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #555;
+            max-height: 150px;
+            overflow: hidden;
+        }
+
+        .component-actions {
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+
+        .expand-btn, .edit-btn {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .expand-btn:hover, .edit-btn:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+
+        .component-full-content {
+            border-top: 1px solid #e0e0e0;
+            background: #f9f9f9;
+        }
+
+        .full-content-text {
+            margin: 0;
+            padding: 1rem;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .component-actions-footer {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 150px;
+        }
+
+        .action-btn.primary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .action-btn.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .action-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .action-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .no-components-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #666;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .no-components-message ul {
+            text-align: left;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .no-components-message li {
+            margin: 0.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .resume-import-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .resume-display-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            user-select: text;
+            cursor: text;
+        }
+
+        .resume-display-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .resume-display-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .resume-display-area::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .resume-display-area::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .resume-display-area::selection {
+            background: #007bff;
+            color: white;
+        }
+
+        /* Component Creation Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select,
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -696,6 +1119,67 @@
                     <h3>💼 Employment Records</h3>
                     <div class="stat-number" id="total-employers">-</div>
                     <p>Work history entries</p>
+                </div>
+            </div>
+            
+            <!-- Resume Importer Section -->
+            <div class="card">
+                <h2>📥 Resume Importer</h2>
+                <p>Upload your resume to extract the text, then manually select and create components from the displayed content.</p>
+                
+                <div class="resume-import-methods">
+                    <!-- File Upload Method -->
+                    <div class="import-method">
+                        <h3>📎 Upload Resume File</h3>
+                        <div class="upload-area" onclick="document.getElementById('resume-file-input').click()" style="border: 2px dashed #ddd; padding: 2rem; text-align: center; cursor: pointer; border-radius: 8px;">
+                            <p>Click here to select a resume file (PDF, DOC, DOCX, TXT)</p>
+                            <input type="file" id="resume-file-input" accept=".pdf,.doc,.docx,.txt" style="display: none;" onchange="uploadAndDisplayResume()">
+                        </div>
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <button onclick="clearDisplayedResume()" class="secondary">🗑️ Clear Resume</button>
+                        </div>
+                    </div>
+
+                    <!-- Text Paste Method -->
+                    <div class="import-method">
+                        <h3>📝 Paste Resume Text</h3>
+                        <textarea id="resume-text-input" placeholder="Paste your resume text here..." rows="10" style="width: 100%; margin-bottom: 1rem;"></textarea>
+                        <button onclick="displayPastedText()" class="success">📄 Display Resume Text</button>
+                    </div>
+                </div>
+                
+                <div id="resume-upload-status" style="margin-top: 1rem;"></div>
+            </div>
+            
+            <!-- Displayed Resume -->
+            <div id="displayed-resume-section" class="card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>📄 Your Resume Content</h3>
+                    <div>
+                        <button onclick="selectAllResumeText()" class="secondary" style="margin-right: 0.5rem;">📋 Select All</button>
+                        <button onclick="showCreateComponentModal()" class="success">➕ Create Component from Selection</button>
+                    </div>
+                </div>
+                <p><strong>Instructions:</strong> Select any text below, then click "Create Component" to add it to your library.</p>
+                
+                <div id="displayed-resume-content" class="resume-display-area">
+                    <!-- Resume content will be displayed here -->
+                </div>
+            </div>
+            
+            <!-- Parsed Resume Components -->
+            <div id="parsed-resume-results" class="card" style="display: none;">
+                <h3>📋 Extracted Resume Components</h3>
+                <p>Review and select the components you want to import into your database.</p>
+                
+                <div class="form-row">
+                    <button onclick="selectAllComponents()" class="secondary">✅ Select All</button>
+                    <button onclick="deselectAllComponents()" class="secondary">❌ Deselect All</button>
+                    <button onclick="importSelectedComponents()" class="success">💾 Import Selected</button>
+                </div>
+                
+                <div id="extracted-components-grid" class="component-grid" style="margin-top: 2rem;">
+                    <!-- Extracted components will be displayed here -->
                 </div>
             </div>
             
@@ -908,38 +1392,47 @@
     <!-- Component Modal -->
     <div id="component-modal" class="modal">
         <div class="modal-content">
-            <h2>Add New Component</h2>
-            <label for="modal-section-type">Section Type:</label>
-            <select id="modal-section-type">
-                <option value="professional_summary">Professional Summary</option>
-                <option value="technical_skills">Technical Skills</option>
-                <option value="professional_skills">Professional Skills</option>
-                <option value="work_experience">Work Experience</option>
-                <option value="education">Education</option>
-                <option value="certifications">Certifications</option>
-                <option value="projects">Projects</option>
-            </select>
-            
-            <label for="modal-skill-level">Skill Level:</label>
-            <select id="modal-skill-level">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-                <option value="expert">Expert</option>
-            </select>
-            
-            <label for="modal-title">Title:</label>
-            <input type="text" id="modal-title" placeholder="e.g., Windows Server Administration">
-            
-            <label for="modal-content">Content:</label>
-            <textarea id="modal-content" rows="5" placeholder="Detailed description of the skill, experience, or qualification..."></textarea>
-            
-            <label for="modal-keywords">Keywords (comma-separated):</label>
-            <input type="text" id="modal-keywords" placeholder="e.g., windows, server, active directory">
-            
-            <label for="modal-industry-tags">Industry Tags (comma-separated):</label>
-            <input type="text" id="modal-industry-tags" placeholder="e.g., healthcare, finance, technology">
-            
+            <div class="modal-header">
+                <h2>Add New Component</h2>
+                <span class="close" onclick="closeModal('component-modal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label for="modal-section-type">Section Type:</label>
+                <select id="modal-section-type">
+                    <option value="professional_summary">Professional Summary</option>
+                    <option value="technical_skills">Technical Skills</option>
+                    <option value="professional_skills">Professional Skills</option>
+                    <option value="work_experience">Work Experience</option>
+                    <option value="education">Education</option>
+                    <option value="certifications">Certifications</option>
+                    <option value="projects">Projects</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-skill-level">Skill Level:</label>
+                <select id="modal-skill-level">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="expert">Expert</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-title">Title:</label>
+                <input type="text" id="modal-title" placeholder="e.g., Windows Server Administration">
+            </div>
+            <div class="form-group">
+                <label for="modal-content">Content:</label>
+                <textarea id="modal-content" rows="5" placeholder="Detailed description of the skill, experience, or qualification..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="modal-keywords">Keywords (comma-separated):</label>
+                <input type="text" id="modal-keywords" placeholder="e.g., windows, server, active directory">
+            </div>
+            <div class="form-group">
+                <label for="modal-industry-tags">Industry Tags (comma-separated):</label>
+                <input type="text" id="modal-industry-tags" placeholder="e.g., healthcare, finance, technology">
+            </div>
             <div style="margin-top: 20px;">
                 <button onclick="saveComponent()" class="success">💾 Save Component</button>
                 <button onclick="closeModal('component-modal')" class="secondary">❌ Cancel</button>
@@ -950,13 +1443,18 @@
     <!-- Employment Modal -->
     <div id="employment-modal" class="modal">
         <div class="modal-content">
-            <h2>Add Employment Record</h2>
-            <label for="emp-company">Company Name:</label>
-            <input type="text" id="emp-company" placeholder="e.g., Tech Corp">
-            
-            <label for="emp-position">Position Title:</label>
-            <input type="text" id="emp-position" placeholder="e.g., Senior Desktop Support Technician">
-            
+            <div class="modal-header">
+                <h2>Add Employment Record</h2>
+                <span class="close" onclick="closeModal('employment-modal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label for="emp-company">Company Name:</label>
+                <input type="text" id="emp-company" placeholder="e.g., Tech Corp">
+            </div>
+            <div class="form-group">
+                <label for="emp-position">Position Title:</label>
+                <input type="text" id="emp-position" placeholder="e.g., Senior Desktop Support Technician">
+            </div>
             <div class="form-row">
                 <div>
                     <label for="emp-start-date">Start Date:</label>
@@ -967,7 +1465,6 @@
                     <input type="date" id="emp-end-date">
                 </div>
             </div>
-            
             <div class="form-row">
                 <div>
                     <label for="emp-location">Location:</label>
@@ -984,13 +1481,18 @@
                     </select>
                 </div>
             </div>
-            <label for="emp-responsibilities">Key Responsibilities (one per line):</label>
-            <textarea id="emp-responsibilities" rows="4" placeholder="• Managed IT infrastructure&#10;• Provided technical support&#10;• Led deployment projects"></textarea>
-            <label for="emp-achievements">Key Achievements (one per line):</label>
-            <textarea id="emp-achievements" rows="3" placeholder="• Reduced downtime by 50%&#10;• Improved customer satisfaction&#10;• Led successful migration"></textarea>
-            <label for="emp-technologies">Technologies Used (comma-separated):</label>
-            <input type="text" id="emp-technologies" placeholder="Windows, Active Directory, ServiceNow">
-            
+            <div class="form-group">
+                <label for="emp-responsibilities">Key Responsibilities (one per line):</label>
+                <textarea id="emp-responsibilities" rows="4" placeholder="• Managed IT infrastructure&#10;• Provided technical support&#10;• Led deployment projects"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="emp-achievements">Key Achievements (one per line):</label>
+                <textarea id="emp-achievements" rows="3" placeholder="• Reduced downtime by 50%&#10;• Improved customer satisfaction&#10;• Led successful migration"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="emp-technologies">Technologies Used (comma-separated):</label>
+                <input type="text" id="emp-technologies" placeholder="Windows, Active Directory, ServiceNow">
+            </div>
             <div style="margin-top: 20px;">
                 <button onclick="saveEmployment()" class="success">💾 Save Employment</button>
                 <button onclick="closeModal('employment-modal')" class="secondary">❌ Cancel</button>
@@ -1102,6 +1604,72 @@
         </div>
     </div>
 
+    <!-- Component Creation Modal -->
+    <div id="create-component-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Create Component from Selection</h2>
+                <span class="close" onclick="closeCreateComponentModal()">&times;</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="selected-text-preview">Selected Text:</label>
+                <textarea id="selected-text-preview" readonly style="background: #f8f9fa; color: #6c757d;" rows="8"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-section-type">Component Type:</label>
+                <select id="component-section-type">
+                    <option value="work_experience">💼 Work Experience</option>
+                    <option value="education">🎓 Education</option>
+                    <option value="technical_skills">🔧 Technical Skills</option>
+                    <option value="professional_skills">💻 Professional Skills</option>
+                    <option value="certifications">📜 Certifications</option>
+                    <option value="achievements">🏆 Achievements</option>
+                    <option value="professional_summary">📋 Professional Summary</option>
+                    <option value="projects">🚀 Projects</option>
+                    <option value="other">📝 Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-title">Title/Name:</label>
+                <input type="text" id="component-title" placeholder="e.g., Senior Network Administrator - Tech Corp">
+            </div>
+            
+            <div class="form-group">
+                <label for="component-content">Content (you can edit this):</label>
+                <textarea id="component-content" rows="10" placeholder="Component content will appear here..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-skill-level">Skill Level (for skills/technical components):</label>
+                <select id="component-skill-level">
+                    <option value="">Not applicable</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="expert">Expert</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-keywords">Keywords (comma-separated):</label>
+                <input type="text" id="component-keywords" placeholder="e.g., networking, cisco, routing, vpn">
+            </div>
+            
+            <div class="form-group">
+                <label for="component-industry-tags">Industry Tags (comma-separated):</label>
+                <input type="text" id="component-industry-tags" placeholder="e.g., healthcare, finance, technology">
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: right;">
+                <button onclick="closeCreateComponentModal()" class="secondary" style="margin-right: 1rem;">❌ Cancel</button>
+                <button onclick="saveSelectedComponent()" class="success">💾 Save Component</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // API Configuration
         const API_BASE_URL = 'http://localhost:5001/api';
@@ -1111,6 +1679,269 @@
         let selectedWorkOrders = [];
         let allProjects = [];
         let selectedItems = [];
+
+        // Global variables
+        let currentResumeText = '';
+        let selectedText = '';
+
+        // Upload and display resume file
+        async function uploadAndDisplayResume() {
+            const fileInput = document.getElementById('resume-file-input');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('Please select a file first.', 'error');
+                return;
+            }
+            
+            showStatus('📤 Uploading and processing file...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload_resume_file', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentResumeText = result.text;
+                    displayResumeContent(result.text, file.name);
+                    showStatus(`✅ Successfully uploaded and extracted text from ${file.name}`, 'success');
+                } else {
+                    showStatus(`❌ Error processing file: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Upload failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Display pasted text
+        function displayPastedText() {
+            const textInput = document.getElementById('resume-text-input');
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                showStatus('Please paste some resume text first.', 'error');
+                return;
+            }
+            
+            currentResumeText = text;
+            displayResumeContent(text, 'Pasted Text');
+            showStatus('✅ Resume text displayed successfully', 'success');
+        }
+
+        // Display resume content
+        function displayResumeContent(text, sourceName) {
+            const displaySection = document.getElementById('displayed-resume-section');
+            const contentDiv = document.getElementById('displayed-resume-content');
+            
+            contentDiv.textContent = text;
+            displaySection.style.display = 'block';
+            
+            // Scroll to the displayed resume
+            displaySection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Clear displayed resume
+        function clearDisplayedResume() {
+            const displaySection = document.getElementById('displayed-resume-section');
+            const contentDiv = document.getElementById('displayed-resume-content');
+            const fileInput = document.getElementById('resume-file-input');
+            const textInput = document.getElementById('resume-text-input');
+            
+            displaySection.style.display = 'none';
+            contentDiv.textContent = '';
+            fileInput.value = '';
+            textInput.value = '';
+            currentResumeText = '';
+            selectedText = '';
+            
+            showStatus('📄 Resume cleared', 'info');
+        }
+
+        // Select all resume text
+        function selectAllResumeText() {
+            const contentDiv = document.getElementById('displayed-resume-content');
+            
+            if (window.getSelection) {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(contentDiv);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                showStatus('📋 All text selected. Click "Create Component" to add it.', 'info');
+            }
+        }
+
+        // Show create component modal with selected text
+        function showCreateComponentModal() {
+            const selection = window.getSelection();
+            selectedText = selection.toString().trim();
+            
+            if (!selectedText) {
+                showStatus('⚠️ Please select some text from the resume first.', 'warning');
+                return;
+            }
+            
+            // Show the modal
+            const modal = document.getElementById('create-component-modal');
+            const previewTextarea = document.getElementById('selected-text-preview');
+            const contentTextarea = document.getElementById('component-content');
+            
+            previewTextarea.value = selectedText;
+            contentTextarea.value = selectedText;
+            
+            // Auto-suggest a title based on the selected text
+            const titleInput = document.getElementById('component-title');
+            titleInput.value = generateSuggestedTitle(selectedText);
+            
+            // Auto-suggest keywords
+            const keywordsInput = document.getElementById('component-keywords');
+            keywordsInput.value = generateSuggestedKeywords(selectedText);
+            
+            modal.style.display = 'block';
+        }
+
+        // Generate suggested title from selected text
+        function generateSuggestedTitle(text) {
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (lines.length === 0) return '';
+            
+            // Use the first substantial line as title
+            const firstLine = lines[0];
+            
+            // If it looks like a company/role combination
+            if (firstLine.includes(' - ') || firstLine.includes(' at ') || firstLine.includes(', ')) {
+                return firstLine;
+            }
+            
+            // If it's a short line (likely a header), use it
+            if (firstLine.length < 60) {
+                return firstLine;
+            }
+            
+            // Extract potential title from longer text
+            const words = firstLine.split(' ');
+            if (words.length > 8) {
+                return words.slice(0, 8).join(' ') + '...';
+            }
+            
+            return firstLine;
+        }
+
+        // Generate suggested keywords from selected text
+        function generateSuggestedKeywords(text) {
+            const commonKeywords = [
+                'windows', 'linux', 'server', 'network', 'security', 'database', 'sql',
+                'cisco', 'microsoft', 'active directory', 'exchange', 'office 365',
+                'vmware', 'virtualization', 'cloud', 'aws', 'azure', 'networking',
+                'support', 'administration', 'management', 'troubleshooting',
+                'powershell', 'python', 'java', 'html', 'css', 'javascript'
+            ];
+            
+            const lowerText = text.toLowerCase();
+            const foundKeywords = [];
+            
+            commonKeywords.forEach(keyword => {
+                if (lowerText.includes(keyword.toLowerCase()) && !foundKeywords.includes(keyword)) {
+                    foundKeywords.push(keyword);
+                }
+            });
+            
+            return foundKeywords.slice(0, 6).join(', ');
+        }
+
+        // Close create component modal
+        function closeCreateComponentModal() {
+            const modal = document.getElementById('create-component-modal');
+            modal.style.display = 'none';
+            
+            // Clear form
+            document.getElementById('component-title').value = '';
+            document.getElementById('component-content').value = '';
+            document.getElementById('component-keywords').value = '';
+            document.getElementById('component-industry-tags').value = '';
+            document.getElementById('component-section-type').value = 'work_experience';
+            document.getElementById('component-skill-level').value = '';
+        }
+
+        // Save selected component
+        async function saveSelectedComponent() {
+            const sectionType = document.getElementById('component-section-type').value;
+            const title = document.getElementById('component-title').value.trim();
+            const content = document.getElementById('component-content').value.trim();
+            const skillLevel = document.getElementById('component-skill-level').value;
+            const keywords = document.getElementById('component-keywords').value.trim();
+            const industryTags = document.getElementById('component-industry-tags').value.trim();
+            
+            if (!title) {
+                showStatus('❌ Please enter a title for the component.', 'error');
+                return;
+            }
+            
+            if (!content) {
+                showStatus('❌ Please enter content for the component.', 'error');
+                return;
+            }
+            
+            const componentData = {
+                section_type: sectionType,
+                title: title,
+                content: content,
+                skill_level: skillLevel || null,
+                keywords: keywords,
+                industry_tags: industryTags
+            };
+            
+            try {
+                const response = await fetch('/add_component', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(componentData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`✅ Component "${title}" saved successfully!`, 'success');
+                    closeCreateComponentModal();
+                    loadComponents(); // Refresh the components list
+                } else {
+                    showStatus(`❌ Error saving component: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Failed to save component: ${error.message}`, 'error');
+            }
+        }
+
+        // Show status messages
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('resume-upload-status');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            // Auto-clear success and info messages after 5 seconds
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('create-component-modal');
+            if (event.target === modal) {
+                closeCreateComponentModal();
+            }
+        }
 
         // Update tab switching to include new tabs
         function switchTab(tabName) {
@@ -1964,6 +2795,468 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboard();
         });
+
+        // Resume Importer Functions
+        let parsedComponents = [];
+        let selectedComponentIndices = new Set();
+
+        async function parseResumeText() {
+            const resumeText = document.getElementById('resume-text-input').value.trim();
+            if (!resumeText) {
+                alert('Please paste your resume text first.');
+                return;
+            }
+
+            const statusDiv = document.getElementById('resume-parse-status');
+            statusDiv.innerHTML = '<div class="parse-status loading">🔄 Parsing resume text and extracting components...</div>';
+
+            // Clear previous state
+            selectedComponentIndices.clear();
+            parsedComponents = [];
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/resumes/parse-text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: resumeText,
+                        source_name: 'Uploaded Resume'
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Parse result:', result); // Debug log
+
+                if (response.ok) {
+                    parsedComponents = result.components;
+                    displayParsedComponents(result.components);
+                    statusDiv.innerHTML = `<div class="parse-status success">✅ Successfully extracted ${Object.values(result.components).flat().length} components from your resume!</div>`;
+                } else {
+                    throw new Error(result.error || 'Failed to parse resume');
+                }
+            } catch (error) {
+                console.error('Error parsing resume:', error);
+                statusDiv.innerHTML = `<div class="parse-status error">❌ Error parsing resume: ${error.message}</div>`;
+            }
+        }
+
+        async function uploadResumeFile() {
+            console.log('uploadResumeFile called'); // Debug log
+            
+            const fileInput = document.getElementById('resume-file-input');
+            console.log('File input:', fileInput); // Debug log
+            
+            const file = fileInput.files[0];
+            console.log('Selected file:', file); // Debug log
+            
+            if (!file) {
+                console.log('No file selected');
+                alert('No file selected. Please choose a file first.');
+                return;
+            }
+
+            const statusDiv = document.getElementById('resume-parse-status');
+            console.log('Status div:', statusDiv); // Debug log
+            statusDiv.innerHTML = '<div class="parse-status loading">📁 Uploading and processing resume file...</div>';
+
+            // Clear previous state
+            selectedComponentIndices.clear();
+            parsedComponents = [];
+            console.log('Cleared previous state'); // Debug log
+
+            try {
+                console.log('Creating FormData...'); // Debug log
+                const formData = new FormData();
+                formData.append('resume', file);
+                console.log('FormData created with file:', file.name); // Debug log
+
+                console.log('Making API request...'); // Debug log
+                const response = await fetch(`${API_BASE_URL}/resumes/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response received:', response); // Debug log
+                const result = await response.json();
+                console.log('Upload result:', result); // Debug log
+
+                if (response.ok) {
+                    console.log('Upload successful, processing components...'); // Debug log
+                    parsedComponents = result.components;
+                    displayParsedComponents(result.components);
+                    statusDiv.innerHTML = `<div class="parse-status success">✅ Successfully processed ${file.name} and extracted ${Object.values(result.components).flat().length} components!</div>`;
+                    
+                    // Clear file input to allow re-upload
+                    fileInput.value = '';
+                } else {
+                    console.error('Upload failed:', result); // Debug log
+                    throw new Error(result.error || 'Failed to process resume file');
+                }
+            } catch (error) {
+                console.error('Error uploading resume:', error);
+                statusDiv.innerHTML = `<div class="parse-status error">❌ Error processing file: ${error.message}</div>`;
+                alert('Error uploading file: ' + error.message);
+            }
+        }
+
+        function displayParsedComponents(components) {
+            const resultsDiv = document.getElementById('parsed-resume-results');
+            const gridDiv = document.getElementById('extracted-components-grid');
+            
+            // Always show results section
+            resultsDiv.style.display = 'block';
+            
+            let html = '';
+            let componentIndex = 0;
+            
+            console.log('Displaying components:', components); // Debug log
+            
+            // Convert the components object to a flat array with metadata
+            const flatComponents = [];
+            
+            // Section type display names and colors
+            const sectionDisplayInfo = {
+                'professional_summary': { name: 'Professional Summary', color: '#2196F3', icon: '👤' },
+                'technical_skills': { name: 'Technical Skills', color: '#4CAF50', icon: '💻' },
+                'professional_skills': { name: 'Professional Skills', color: '#FF9800', icon: '🎯' },
+                'work_experience': { name: 'Work Experience', color: '#9C27B0', icon: '💼' },
+                'education': { name: 'Education', color: '#F44336', icon: '🎓' },
+                'certifications': { name: 'Certifications', color: '#795548', icon: '📜' },
+                'projects': { name: 'Projects', color: '#607D8B', icon: '🚀' },
+                'contact_info': { name: 'Contact Information', color: '#00BCD4', icon: '📞' },
+                'other_sections': { name: 'Other Sections', color: '#9E9E9E', icon: '📄' }
+            };
+            
+            for (const [sectionType, sectionComponents] of Object.entries(components)) {
+                if (Array.isArray(sectionComponents) && sectionComponents.length > 0) {
+                    const sectionInfo = sectionDisplayInfo[sectionType] || { 
+                        name: sectionType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()), 
+                        color: '#757575', 
+                        icon: '📋' 
+                    };
+                    
+                    sectionComponents.forEach((content, index) => {
+                        flatComponents.push({
+                            index: componentIndex++,
+                            sectionType: sectionType,
+                            sectionDisplayName: sectionInfo.name,
+                            sectionColor: sectionInfo.color,
+                            sectionIcon: sectionInfo.icon,
+                            content: content,
+                            originalIndex: index
+                        });
+                    });
+                }
+            }
+            
+            if (flatComponents.length === 0) {
+                html = `
+                    <div class="no-components-message">
+                        <p>🔍 No components were extracted from the resume.</p>
+                        <p>This might happen if:</p>
+                        <ul>
+                            <li>The resume doesn't have clear section headers</li>
+                            <li>The file format wasn't recognized properly</li>
+                            <li>The content is primarily images or special formatting</li>
+                        </ul>
+                        <p>Try using the text paste method or ensure your resume has clear section headers like "EXPERIENCE", "SKILLS", "EDUCATION".</p>
+                    </div>
+                `;
+            } else {
+                // Group components by section for better display
+                const groupedComponents = {};
+                flatComponents.forEach(component => {
+                    if (!groupedComponents[component.sectionType]) {
+                        groupedComponents[component.sectionType] = [];
+                    }
+                    groupedComponents[component.sectionType].push(component);
+                });
+                
+                // Create section-grouped display
+                for (const [sectionType, components] of Object.entries(groupedComponents)) {
+                    const sectionInfo = sectionDisplayInfo[sectionType] || { 
+                        name: sectionType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()), 
+                        color: '#757575', 
+                        icon: '📋' 
+                    };
+                    
+                    html += `
+                        <div class="section-group">
+                            <div class="section-header" style="border-left: 4px solid ${sectionInfo.color};">
+                                <span class="section-icon">${sectionInfo.icon}</span>
+                                <span class="section-title">${sectionInfo.name}</span>
+                                <span class="section-count">(${components.length} ${components.length === 1 ? 'component' : 'components'})</span>
+                                <button class="select-all-section" onclick="selectAllInSection('${sectionType}')" style="background: ${sectionInfo.color};">
+                                    Select All
+                                </button>
+                            </div>
+                            <div class="section-components">
+                    `;
+                    
+                    components.forEach(component => {
+                        // Create a preview of the content (first 200 characters)
+                        const preview = component.content.length > 200 
+                            ? component.content.substring(0, 200) + '...' 
+                            : component.content;
+                        
+                        // Format the content to show line breaks properly
+                        const formattedPreview = preview.replace(/\n/g, '<br>');
+                        
+                        html += `
+                            <div class="component-item" data-index="${component.index}" data-section="${component.sectionType}">
+                                <div class="component-header">
+                                    <label class="component-checkbox">
+                                        <input type="checkbox" 
+                                               value="${component.index}" 
+                                               onchange="toggleComponentSelection(this, ${component.index})"
+                                               id="component-${component.index}">
+                                        <span class="component-title">
+                                            ${sectionInfo.icon} Section ${component.originalIndex + 1}
+                                        </span>
+                                    </label>
+                                    <span class="component-length">${component.content.length} chars</span>
+                                </div>
+                                <div class="component-preview">${formattedPreview}</div>
+                                <div class="component-actions">
+                                    <button onclick="toggleComponentExpansion(${component.index})" class="expand-btn">
+                                        Show Full Content
+                                    </button>
+                                    <button onclick="editComponent(${component.index})" class="edit-btn">
+                                        Edit
+                                    </button>
+                                </div>
+                                <div class="component-full-content" id="full-content-${component.index}" style="display: none;">
+                                    <pre class="full-content-text">${component.content}</pre>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Add action buttons at the bottom
+                html += `
+                    <div class="component-actions-footer">
+                        <button onclick="selectAllComponents()" class="action-btn primary">
+                            Select All Components
+                        </button>
+                        <button onclick="clearAllSelections()" class="action-btn secondary">
+                            Clear Selections
+                        </button>
+                        <button onclick="importSelectedComponents()" class="action-btn success" id="import-selected-btn" disabled>
+                            Import Selected Components
+                        </button>
+                    </div>
+                `;
+            }
+            
+            gridDiv.innerHTML = html;
+            
+            // Update the parsed components data
+            parsedComponents = flatComponents;
+        }
+
+        // Component selection functions
+        function toggleComponentSelection(checkbox, componentIndex) {
+            if (checkbox.checked) {
+                selectedComponentIndices.add(componentIndex);
+            } else {
+                selectedComponentIndices.delete(componentIndex);
+            }
+            
+            updateImportButtonState();
+        }
+        
+        function selectAllComponents() {
+            parsedComponents.forEach(component => {
+                selectedComponentIndices.add(component.index);
+                const checkbox = document.getElementById(`component-${component.index}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            updateImportButtonState();
+        }
+        
+        function clearAllSelections() {
+            selectedComponentIndices.clear();
+            parsedComponents.forEach(component => {
+                const checkbox = document.getElementById(`component-${component.index}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            updateImportButtonState();
+        }
+        
+        function selectAllInSection(sectionType) {
+            parsedComponents.forEach(component => {
+                if (component.sectionType === sectionType) {
+                    selectedComponentIndices.add(component.index);
+                    const checkbox = document.getElementById(`component-${component.index}`);
+                    if (checkbox) checkbox.checked = true;
+                }
+            });
+            updateImportButtonState();
+        }
+        
+        function updateImportButtonState() {
+            const importBtn = document.getElementById('import-selected-btn');
+            if (importBtn) {
+                importBtn.disabled = selectedComponentIndices.size === 0;
+                importBtn.textContent = selectedComponentIndices.size > 0 
+                    ? `Import Selected Components (${selectedComponentIndices.size})` 
+                    : 'Import Selected Components';
+            }
+        }
+        
+        function toggleComponentExpansion(componentIndex) {
+            const fullContentDiv = document.getElementById(`full-content-${componentIndex}`);
+            const expandBtn = fullContentDiv.previousElementSibling.querySelector('.expand-btn');
+            
+            if (fullContentDiv.style.display === 'none') {
+                fullContentDiv.style.display = 'block';
+                expandBtn.textContent = 'Hide Full Content';
+            } else {
+                fullContentDiv.style.display = 'none';
+                expandBtn.textContent = 'Show Full Content';
+            }
+        }
+        
+        function editComponent(componentIndex) {
+            const component = parsedComponents.find(c => c.index === componentIndex);
+            if (!component) return;
+            
+            const newContent = prompt('Edit component content:', component.content);
+            if (newContent !== null && newContent !== component.content) {
+                component.content = newContent;
+                
+                // Update the preview
+                const componentItem = document.querySelector(`[data-index="${componentIndex}"]`);
+                const preview = componentItem.querySelector('.component-preview');
+                const formattedPreview = (newContent.length > 200 ? newContent.substring(0, 200) + '...' : newContent)
+                    .replace(/\n/g, '<br>');
+                preview.innerHTML = formattedPreview;
+                
+                // Update the full content
+                const fullContentText = document.querySelector(`#full-content-${componentIndex} .full-content-text`);
+                if (fullContentText) {
+                    fullContentText.textContent = newContent;
+                }
+                
+                // Update character count
+                const lengthSpan = componentItem.querySelector('.component-length');
+                if (lengthSpan) {
+                    lengthSpan.textContent = `${newContent.length} chars`;
+                }
+            }
+        }
+        
+        async function importSelectedComponents() {
+            if (selectedComponentIndices.size === 0) {
+                alert('Please select at least one component to import.');
+                return;
+            }
+            
+            const statusDiv = document.getElementById('resume-parse-status');
+            statusDiv.innerHTML = '<div class="parse-status loading">📥 Importing selected components...</div>';
+            
+            try {
+                // Prepare components for import
+                const componentsToImport = {};
+                
+                selectedComponentIndices.forEach(index => {
+                    const component = parsedComponents.find(c => c.index === index);
+                    if (component) {
+                        if (!componentsToImport[component.sectionType]) {
+                            componentsToImport[component.sectionType] = [];
+                        }
+                        componentsToImport[component.sectionType].push(component.content);
+                    }
+                });
+                
+                const response = await fetch(`${API_BASE_URL}/resumes/import-components`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        components: componentsToImport,
+                        source_name: 'Resume Import'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.innerHTML = `<div class="parse-status success">✅ Successfully imported ${result.imported_count} components!</div>`;
+                    
+                    // Clear selections after successful import
+                    clearAllSelections();
+                    
+                    // Refresh stats
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Failed to import components');
+                }
+                
+            } catch (error) {
+                console.error('Import error:', error);
+                statusDiv.innerHTML = `<div class="parse-status error">❌ Error importing components: ${error.message}</div>`;
+            }
+        }
+
+        // Test and debug functions
+        function testFileUpload() {
+            console.log('Testing file upload functionality...');
+            
+            const fileInput = document.getElementById('resume-file-input');
+            console.log('File input element:', fileInput);
+            
+            const files = fileInput.files;
+            console.log('Selected files:', files);
+            console.log('Number of files:', files.length);
+            
+            if (files.length > 0) {
+                console.log('File details:', {
+                    name: files[0].name,
+                    size: files[0].size,
+                    type: files[0].type,
+                    lastModified: files[0].lastModified
+                });
+                
+                alert(`File selected: ${files[0].name} (${files[0].size} bytes)`);
+            } else {
+                alert('No file selected. Please select a file first.');
+            }
+            
+            // Test API connectivity
+            fetch(`${API_BASE_URL}/health`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('API health check:', data);
+                    alert('API is ' + data.status);
+                })
+                .catch(error => {
+                    console.error('API health check failed:', error);
+                    alert('API health check failed: ' + error.message);
+                });
+        }
+        
+        function manualUpload() {
+            console.log('Manual upload triggered');
+            const fileInput = document.getElementById('resume-file-input');
+            
+            if (fileInput.files.length === 0) {
+                alert('Please select a file first by clicking the upload area above.');
+                return;
+            }
+            
+            // Manually trigger the upload
+            uploadResumeFile();
+        }
     </script>
 </body>
 </html>

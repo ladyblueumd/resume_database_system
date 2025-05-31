@@ -21,6 +21,9 @@ import requests
 from urllib.parse import urlparse
 import tempfile
 from werkzeug.utils import secure_filename
+import docx
+import PyPDF2
+import subprocess
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -71,94 +74,290 @@ def dict_from_row(row):
 
 # Resume parsing functions
 def parse_resume_text(text: str) -> Dict[str, List[str]]:
-    """Parse resume text and extract components by section"""
+    """
+    Enhanced resume text parser that extracts complete sections based on headers
+    """
     components = {
         'professional_summary': [],
         'technical_skills': [],
         'professional_skills': [],
         'work_experience': [],
-        'projects': [],
-        'certifications': [],
         'education': [],
-        'accomplishments': []
+        'certifications': [],
+        'projects': [],
+        'contact_info': [],
+        'other_sections': []
     }
     
-    # Define section patterns
-    section_patterns = {
-        'professional_summary': [
-            r'(professional\s+summary|summary|objective|profile)',
-            r'(career\s+objective|professional\s+objective)'
-        ],
-        'technical_skills': [
-            r'(technical\s+skills|programming\s+languages|technologies)',
-            r'(software|tools|platforms)'
-        ],
-        'professional_skills': [
-            r'(skills|core\s+competencies|key\s+skills)',
-            r'(soft\s+skills|professional\s+skills)'
-        ],
-        'work_experience': [
-            r'(work\s+experience|professional\s+experience|employment)',
-            r'(career\s+history|experience)'
-        ],
-        'projects': [
-            r'(projects|key\s+projects|notable\s+projects)',
-            r'(portfolio|achievements)'
-        ],
-        'certifications': [
-            r'(certifications|licenses|credentials)',
-            r'(training|professional\s+development)'
-        ],
-        'education': [
-            r'(education|academic\s+background|qualifications)',
-            r'(degree|university|college)'
-        ],
-        'accomplishments': [
-            r'(accomplishments|awards|honors)',
-            r'(recognition|achievements)'
-        ]
-    }
+    # Clean and normalize text
+    text = re.sub(r'\r\n', '\n', text)  # Normalize line endings
+    text = re.sub(r'\n{3,}', '\n\n', text)  # Reduce excessive line breaks
+    lines = [line.rstrip() for line in text.split('\n')]
     
-    # Split text into lines and process
-    lines = text.split('\n')
+    # Detect sections by finding lines that look like headers
+    sections = []
     current_section = None
     current_content = []
     
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-            
-        # Check if line is a section header
-        found_section = None
-        for section, patterns in section_patterns.items():
-            for pattern in patterns:
-                if re.search(pattern, line, re.IGNORECASE):
-                    found_section = section
-                    break
-            if found_section:
-                break
+    for i, line in enumerate(lines):
+        stripped_line = line.strip()
         
-        if found_section:
-            # Save previous section content
-            if current_section and current_content:
-                content_text = '\n'.join(current_content).strip()
-                if content_text:
-                    components[current_section].append(content_text)
+        # Skip empty lines
+        if not stripped_line:
+            if current_content and current_content[-1].strip():  # Don't add multiple empty lines
+                current_content.append(line)
+            continue
+        
+        # Check if this line looks like a header
+        is_header = detect_section_header(stripped_line, i, lines)
+        
+        if is_header:
+            # Save previous section if it exists
+            if current_section is not None and current_content:
+                sections.append({
+                    'header': current_section,
+                    'content': '\n'.join(current_content).strip(),
+                    'line_start': len(sections)
+                })
             
             # Start new section
-            current_section = found_section
+            current_section = stripped_line
             current_content = []
-        elif current_section:
+        else:
+            # Add to current section
             current_content.append(line)
     
     # Don't forget the last section
-    if current_section and current_content:
-        content_text = '\n'.join(current_content).strip()
-        if content_text:
-            components[current_section].append(content_text)
+    if current_section is not None and current_content:
+        sections.append({
+            'header': current_section,
+            'content': '\n'.join(current_content).strip(),
+            'line_start': len(sections)
+        })
+    
+    # Categorize sections based on their headers and content
+    for section in sections:
+        header = section['header'].lower()
+        content = section['content']
+        category = categorize_section(header, content)
+        
+        if category and content.strip():
+            # Create a complete component with header and content
+            full_component = f"{section['header']}\n{content}"
+            components[category].append(full_component)
+    
+    # Remove empty sections
+    components = {k: v for k, v in components.items() if v}
     
     return components
+
+
+def detect_section_header(line: str, line_index: int, all_lines: list) -> bool:
+    """
+    Detect if a line looks like a section header
+    """
+    # Skip very short lines
+    if len(line.strip()) < 2:
+        return False
+    
+    # Common header patterns
+    header_indicators = [
+        # All caps headers
+        lambda l: l.isupper() and len(l.split()) <= 5 and not any(char.isdigit() for char in l),
+        
+        # Headers that end with colons
+        lambda l: l.endswith(':') and len(l.split()) <= 4,
+        
+        # Company name patterns (contains Corp, Inc, LLC, etc.)
+        lambda l: any(indicator in l.upper() for indicator in ['CORP', 'INC', 'LLC', 'COMPANY', 'TECHNOLOGIES', 'SYSTEMS', 'GROUP', 'ASSOCIATES']),
+        
+        # Job title patterns (standalone titles that are likely headers)
+        lambda l: any(title in l.lower() for title in ['president', 'manager', 'specialist', 'technician', 'engineer', 'analyst', 'director', 'coordinator', 'representative']) and len(l.split()) <= 4,
+        
+        # Educational institution patterns
+        lambda l: any(edu in l.lower() for edu in ['university', 'college', 'school', 'institute', 'academy']) and len(l.split()) <= 6,
+        
+        # Common section headers
+        lambda l: any(section in l.lower().replace(' ', '') for section in [
+            'experience', 'employment', 'workhistory', 'careerhis',
+            'education', 'academic', 'qualifications', 'degrees',
+            'skills', 'competencies', 'expertise', 'abilities',
+            'certifications', 'certificates', 'licenses', 'credentials',
+            'projects', 'portfolio', 'achievements', 'accomplishments',
+            'summary', 'profile', 'objective', 'overview',
+            'contact', 'contactinfo', 'personalinfo'
+        ]),
+        
+        # Date range patterns (might be job duration headers)
+        lambda l: bool(re.search(r'\b(19|20)\d{2}\s*[-–—]\s*(19|20)\d{2}\b', l)) or 
+                 bool(re.search(r'\b(19|20)\d{2}\s*[-–—]\s*present\b', l, re.I)),
+        
+        # Location patterns (City, State format)
+        lambda l: bool(re.search(r'^[A-Z][a-z]+,\s*[A-Z]{2}(\s+\d{5})?$', l.strip())),
+    ]
+    
+    # Check if line matches any header pattern
+    for indicator in header_indicators:
+        try:
+            if indicator(line):
+                return True
+        except:
+            continue
+    
+    # Additional context-based checks
+    if line_index < len(all_lines) - 1:
+        next_line = all_lines[line_index + 1].strip()
+        
+        # If next line starts with bullet points or dashes, current line might be header
+        if next_line and (next_line.startswith('•') or next_line.startswith('-') or next_line.startswith('*')):
+            return True
+        
+        # If current line is shorter and next line is much longer, might be a header
+        if len(line) < 50 and len(next_line) > 80:
+            return True
+    
+    return False
+
+
+def categorize_section(header: str, content: str) -> str:
+    """
+    Categorize a section based on its header and content
+    """
+    header_lower = header.lower()
+    content_lower = content.lower()
+    combined = f"{header_lower} {content_lower}"
+    
+    # Professional summary indicators
+    if any(keyword in header_lower for keyword in ['summary', 'profile', 'objective', 'overview', 'about']):
+        return 'professional_summary'
+    
+    # Technical skills indicators
+    if any(keyword in header_lower for keyword in ['technical', 'computer', 'software', 'programming', 'technology', 'platform', 'tool']):
+        return 'technical_skills'
+    
+    # Professional skills indicators  
+    if any(keyword in header_lower for keyword in ['skill', 'competenc', 'abilit', 'strength', 'expertise']) and 'technical' not in header_lower:
+        return 'professional_skills'
+    
+    # Work experience indicators
+    if any(keyword in header_lower for keyword in ['experience', 'employment', 'work', 'career', 'history']):
+        return 'work_experience'
+    
+    # Company names and job titles are usually work experience
+    if any(indicator in header_lower for indicator in ['corp', 'inc', 'llc', 'company', 'technologies', 'systems']):
+        return 'work_experience'
+    
+    if any(title in header_lower for title in ['president', 'manager', 'specialist', 'technician', 'engineer', 'analyst', 'director', 'coordinator', 'representative']):
+        return 'work_experience'
+    
+    # Education indicators
+    if any(keyword in header_lower for keyword in ['education', 'academic', 'degree', 'university', 'college', 'school']):
+        return 'education'
+    
+    # Certification indicators
+    if any(keyword in header_lower for keyword in ['certification', 'certificate', 'license', 'credential', 'accreditation']):
+        return 'certifications'
+    
+    # Project indicators
+    if any(keyword in header_lower for keyword in ['project', 'portfolio', 'achievement', 'accomplishment']):
+        return 'projects'
+    
+    # Contact info indicators
+    if any(keyword in header_lower for keyword in ['contact', 'phone', 'email', 'address', 'linkedin']):
+        return 'contact_info'
+    
+    # Content-based categorization for unclear headers
+    if any(keyword in content_lower for keyword in ['managed', 'developed', 'implemented', 'led', 'coordinated', 'supervised', 'responsible for']):
+        return 'work_experience'
+    
+    if any(keyword in content_lower for keyword in ['bachelor', 'master', 'phd', 'degree', 'graduated', 'gpa']):
+        return 'education'
+    
+    if any(keyword in content_lower for keyword in ['certified', 'licensed', 'comptia', 'microsoft certified', 'cisco']):
+        return 'certifications'
+    
+    # If we can't categorize it, put it in other_sections
+    return 'other_sections'
+
+
+def extract_text_from_file(filepath: str, filename: str) -> str:
+    """Extract text from various file formats"""
+    try:
+        file_ext = filename.lower().split('.')[-1]
+        
+        if file_ext in ['txt', 'text']:
+            # Plain text file
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+                
+        elif file_ext == 'docx':
+            # Word 2007+ format
+            doc = docx.Document(filepath)
+            text = []
+            for paragraph in doc.paragraphs:
+                text.append(paragraph.text)
+            return '\n'.join(text)
+            
+        elif file_ext == 'doc':
+            # Older Word format - try using system commands
+            try:
+                # Try using antiword if available (common on macOS/Linux)
+                result = subprocess.run(['antiword', filepath], 
+                                      capture_output=True, text=True, timeout=30)
+                if result.returncode == 0 and result.stdout.strip():
+                    return result.stdout
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+                pass
+            
+            try:
+                # Try using textutil (macOS specific)
+                result = subprocess.run(['textutil', '-convert', 'txt', '-stdout', filepath], 
+                                      capture_output=True, text=True, timeout=30)
+                if result.returncode == 0 and result.stdout.strip():
+                    return result.stdout
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+                pass
+            
+            # If all else fails, try to read as plain text (may not work well)
+            try:
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    # Remove control characters and clean up
+                    import string
+                    printable = set(string.printable)
+                    content = ''.join(filter(lambda x: x in printable, content))
+                    return content if len(content.strip()) > 50 else None
+            except:
+                pass
+                
+        elif file_ext == 'pdf':
+            # PDF format
+            text = []
+            with open(filepath, 'rb') as f:
+                pdf_reader = PyPDF2.PdfReader(f)
+                for page in pdf_reader.pages:
+                    text.append(page.extract_text())
+            return '\n'.join(text)
+            
+        elif file_ext == 'html':
+            # HTML format - strip tags
+            from html import unescape
+            import re
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                html_content = f.read()
+                # Remove HTML tags
+                text = re.sub(r'<[^>]+>', ' ', html_content)
+                # Decode HTML entities
+                text = unescape(text)
+                # Clean up whitespace
+                text = re.sub(r'\s+', ' ', text).strip()
+                return text
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error extracting text from {filename}: {e}")
+        return None
 
 
 # API Routes
@@ -1572,42 +1771,56 @@ def delete_project(project_id):
 def upload_resume():
     """Upload and parse a resume file"""
     try:
-        if 'file' not in request.files:
+        # Check for both 'resume' and 'file' fields for compatibility
+        if 'resume' not in request.files and 'file' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
         
-        file = request.files['file']
-        if file.filename == '':
+        file = request.files.get('resume') or request.files.get('file')
+        if not file or file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
         
         if file and allowed_file(file.filename):
+            # Ensure uploads directory exists
+            upload_folder = os.path.join(os.getcwd(), 'uploads')
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+            
             filename = secure_filename(file.filename)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"{timestamp}_{filename}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            filepath = os.path.join(upload_folder, filename)
             file.save(filepath)
             
-            # Read and parse the file
-            if filename.lower().endswith('.txt'):
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            else:
-                # For other file types, just return the filename for now
-                # In a full implementation, you'd use libraries like python-docx, PyPDF2, etc.
-                content = f"File uploaded: {filename}. Please convert to text format for parsing."
+            # Extract text based on file type
+            content = extract_text_from_file(filepath, file.filename)
+            
+            if not content or len(content.strip()) < 50:
+                # Clean up uploaded file
+                try:
+                    os.remove(filepath)
+                except:
+                    pass
+                return jsonify({
+                    'error': f'Could not extract meaningful text from {file.filename}. Please try converting to .txt format or ensure the file contains readable text.'
+                }), 400
             
             # Parse the resume content
             parsed_components = parse_resume_text(content)
             
             # Clean up uploaded file
-            os.remove(filepath)
+            try:
+                os.remove(filepath)
+            except:
+                pass  # Don't fail if file cleanup fails
             
             return jsonify({
                 'message': 'Resume uploaded and parsed successfully',
-                'filename': filename,
-                'components': parsed_components
+                'filename': file.filename,
+                'components': parsed_components,
+                'extracted_text_length': len(content)
             })
         else:
-            return jsonify({'error': 'Invalid file type'}), 400
+            return jsonify({'error': 'Invalid file type. Please upload TXT, PDF, DOC, or DOCX files.'}), 400
             
     except Exception as e:
         logger.error(f"Error uploading resume: {e}")
@@ -1880,6 +2093,120 @@ def auto_create_projects_from_work_orders():
     except Exception as e:
         logger.error(f"Error auto-creating projects: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+# Add new endpoint for simple file upload and text extraction
+@app.route('/upload_resume_file', methods=['POST'])
+def upload_resume_file():
+    """Upload resume file and return extracted text for manual component creation"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file provided'})
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'})
+        
+        # Save the uploaded file temporarily
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join('uploads', filename)
+        
+        # Ensure uploads directory exists
+        os.makedirs('uploads', exist_ok=True)
+        
+        file.save(temp_path)
+        
+        # Extract text from the file
+        try:
+            extracted_text = extract_text_from_file(temp_path, filename)
+            
+            if not extracted_text or extracted_text.strip() == '':
+                return jsonify({
+                    'success': False, 
+                    'error': 'Could not extract text from file. The file may be empty or corrupted.'
+                })
+            
+            # Clean up temporary file
+            try:
+                os.remove(temp_path)
+            except:
+                pass  # Ignore cleanup errors
+            
+            return jsonify({
+                'success': True,
+                'text': extracted_text,
+                'filename': filename,
+                'message': f'Successfully extracted text from {filename}'
+            })
+            
+        except Exception as e:
+            # Clean up temporary file on error
+            try:
+                os.remove(temp_path)
+            except:
+                pass
+            
+            return jsonify({
+                'success': False,
+                'error': f'Failed to extract text from file: {str(e)}'
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Upload failed: {str(e)}'})
+
+
+@app.route('/add_component', methods=['POST'])
+def add_component():
+    """Add a manually created resume component"""
+    try:
+        data = request.json
+        
+        # Validate required fields
+        required_fields = ['section_type', 'title', 'content']
+        for field in required_fields:
+            if field not in data or not data[field].strip():
+                return jsonify({'success': False, 'error': f'Missing required field: {field}'}), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get section type ID
+        cursor.execute("SELECT id FROM section_types WHERE name = ?", (data['section_type'],))
+        section_type_row = cursor.fetchone()
+        if not section_type_row:
+            return jsonify({'success': False, 'error': 'Invalid section type'}), 400
+        
+        section_type_id = section_type_row['id']
+        
+        # Insert component
+        cursor.execute("""
+            INSERT INTO resume_components 
+            (section_type_id, title, content, keywords, industry_tags, skill_level, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            section_type_id,
+            data['title'],
+            data['content'],
+            data.get('keywords', ''),
+            data.get('industry_tags', ''),
+            data.get('skill_level'),
+            datetime.now().isoformat(),
+            datetime.now().isoformat()
+        ))
+        
+        component_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'id': component_id, 
+            'message': f'Component "{data["title"]}" added successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error adding component: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 if __name__ == '__main__':
