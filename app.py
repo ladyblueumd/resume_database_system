@@ -16,6 +16,11 @@ from typing import List, Dict, Any, Optional
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import re
+import requests
+from urllib.parse import urlparse
+import tempfile
+from werkzeug.utils import secure_filename
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -28,6 +33,15 @@ logger = logging.getLogger(__name__)
 # Database configuration
 DATABASE_PATH = os.getenv('DATABASE_PATH', 'resume_database.db')
 
+# File upload configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx', 'html'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Create upload directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 # Initialize AI model for semantic matching
 try:
     semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -35,6 +49,12 @@ try:
 except Exception as e:
     logger.warning(f"Could not load semantic model: {e}. Falling back to keyword matching.")
     semantic_model = None
+
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def get_db_connection():
@@ -47,6 +67,98 @@ def get_db_connection():
 def dict_from_row(row):
     """Convert a sqlite3.Row to a dictionary"""
     return dict(zip(row.keys(), row))
+
+
+# Resume parsing functions
+def parse_resume_text(text: str) -> Dict[str, List[str]]:
+    """Parse resume text and extract components by section"""
+    components = {
+        'professional_summary': [],
+        'technical_skills': [],
+        'professional_skills': [],
+        'work_experience': [],
+        'projects': [],
+        'certifications': [],
+        'education': [],
+        'accomplishments': []
+    }
+    
+    # Define section patterns
+    section_patterns = {
+        'professional_summary': [
+            r'(professional\s+summary|summary|objective|profile)',
+            r'(career\s+objective|professional\s+objective)'
+        ],
+        'technical_skills': [
+            r'(technical\s+skills|programming\s+languages|technologies)',
+            r'(software|tools|platforms)'
+        ],
+        'professional_skills': [
+            r'(skills|core\s+competencies|key\s+skills)',
+            r'(soft\s+skills|professional\s+skills)'
+        ],
+        'work_experience': [
+            r'(work\s+experience|professional\s+experience|employment)',
+            r'(career\s+history|experience)'
+        ],
+        'projects': [
+            r'(projects|key\s+projects|notable\s+projects)',
+            r'(portfolio|achievements)'
+        ],
+        'certifications': [
+            r'(certifications|licenses|credentials)',
+            r'(training|professional\s+development)'
+        ],
+        'education': [
+            r'(education|academic\s+background|qualifications)',
+            r'(degree|university|college)'
+        ],
+        'accomplishments': [
+            r'(accomplishments|awards|honors)',
+            r'(recognition|achievements)'
+        ]
+    }
+    
+    # Split text into lines and process
+    lines = text.split('\n')
+    current_section = None
+    current_content = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+            
+        # Check if line is a section header
+        found_section = None
+        for section, patterns in section_patterns.items():
+            for pattern in patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    found_section = section
+                    break
+            if found_section:
+                break
+        
+        if found_section:
+            # Save previous section content
+            if current_section and current_content:
+                content_text = '\n'.join(current_content).strip()
+                if content_text:
+                    components[current_section].append(content_text)
+            
+            # Start new section
+            current_section = found_section
+            current_content = []
+        elif current_section:
+            current_content.append(line)
+    
+    # Don't forget the last section
+    if current_section and current_content:
+        content_text = '\n'.join(current_content).strip()
+        if content_text:
+            components[current_section].append(content_text)
+    
+    return components
 
 
 # API Routes
@@ -321,7 +433,6 @@ def extract_keywords(text: str) -> List[str]:
             found_keywords.append(keyword)
     
     # Also extract any words that appear to be technologies (capitalized, contain numbers)
-    import re
     potential_tech = re.findall(r'\b[A-Z][A-Za-z0-9]+\b', text)
     for tech in potential_tech[:10]:  # Limit to prevent spam
         if len(tech) > 2 and tech.lower() not in found_keywords:
@@ -1376,6 +1487,399 @@ def extract_keywords(text: str) -> list:
     keyword_freq.sort(key=lambda x: x[1], reverse=True)
     
     return [word for word, freq in keyword_freq[:50]]  # Return top 50 keywords
+
+
+# DELETE FUNCTIONALITY ENDPOINTS
+
+@app.route('/api/components/<int:component_id>', methods=['DELETE'])
+def delete_component(component_id):
+    """Delete a resume component"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if component exists
+        cursor.execute("SELECT id FROM resume_components WHERE id = ?", (component_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Component not found'}), 404
+        
+        # Delete component (cascade deletes will handle related records)
+        cursor.execute("DELETE FROM resume_components WHERE id = ?", (component_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Component deleted successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error deleting component: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/work-orders/<int:work_order_id>', methods=['DELETE'])
+def delete_work_order(work_order_id):
+    """Delete a work order"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if work order exists
+        cursor.execute("SELECT id FROM work_orders WHERE id = ?", (work_order_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Work order not found'}), 404
+        
+        # Delete work order
+        cursor.execute("DELETE FROM work_orders WHERE id = ?", (work_order_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Work order deleted successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error deleting work order: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/projects/<int:project_id>', methods=['DELETE'])
+def delete_project(project_id):
+    """Delete a project"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if project exists
+        cursor.execute("SELECT id FROM work_order_projects WHERE id = ?", (project_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Project not found'}), 404
+        
+        # Delete project (this will also remove work order associations)
+        cursor.execute("DELETE FROM work_order_projects WHERE id = ?", (project_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Project deleted successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error deleting project: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# RESUME UPLOAD AND PARSING ENDPOINTS
+
+@app.route('/api/resumes/upload', methods=['POST'])
+def upload_resume():
+    """Upload and parse a resume file"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{timestamp}_{filename}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            
+            # Read and parse the file
+            if filename.lower().endswith('.txt'):
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            else:
+                # For other file types, just return the filename for now
+                # In a full implementation, you'd use libraries like python-docx, PyPDF2, etc.
+                content = f"File uploaded: {filename}. Please convert to text format for parsing."
+            
+            # Parse the resume content
+            parsed_components = parse_resume_text(content)
+            
+            # Clean up uploaded file
+            os.remove(filepath)
+            
+            return jsonify({
+                'message': 'Resume uploaded and parsed successfully',
+                'filename': filename,
+                'components': parsed_components
+            })
+        else:
+            return jsonify({'error': 'Invalid file type'}), 400
+            
+    except Exception as e:
+        logger.error(f"Error uploading resume: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/resumes/parse-text', methods=['POST'])
+def parse_resume_text_endpoint():
+    """Parse resume text directly without file upload"""
+    try:
+        data = request.json
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
+        
+        resume_text = data['text']
+        parsed_components = parse_resume_text(resume_text)
+        
+        return jsonify({
+            'message': 'Resume text parsed successfully',
+            'components': parsed_components
+        })
+        
+    except Exception as e:
+        logger.error(f"Error parsing resume text: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/resumes/import-components', methods=['POST'])
+def import_resume_components():
+    """Import parsed components into the database"""
+    try:
+        data = request.json
+        if not data or 'components' not in data:
+            return jsonify({'error': 'No components provided'}), 400
+        
+        components = data['components']
+        source_name = data.get('source_name', 'Uploaded Resume')
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        imported_count = 0
+        
+        for section_type, section_components in components.items():
+            if not section_components:
+                continue
+                
+            # Get section type ID
+            cursor.execute("SELECT id FROM section_types WHERE name = ?", (section_type,))
+            section_type_row = cursor.fetchone()
+            if not section_type_row:
+                continue
+                
+            section_type_id = section_type_row['id']
+            
+            for i, content in enumerate(section_components):
+                if not content.strip():
+                    continue
+                    
+                title = f"{source_name} - {section_type.replace('_', ' ').title()} {i+1}"
+                
+                cursor.execute("""
+                    INSERT INTO resume_components 
+                    (section_type_id, title, content, keywords, industry_tags, skill_level, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    section_type_id,
+                    title,
+                    content,
+                    json.dumps([]),  # Empty keywords for now
+                    json.dumps([]),  # Empty industry tags for now
+                    'intermediate',
+                    datetime.now().isoformat(),
+                    datetime.now().isoformat()
+                ))
+                imported_count += 1
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'message': f'Successfully imported {imported_count} components',
+            'imported_count': imported_count
+        })
+        
+    except Exception as e:
+        logger.error(f"Error importing components: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# TEMPLATE MANAGEMENT ENDPOINTS
+
+@app.route('/api/templates', methods=['GET'])
+def get_templates():
+    """Get all resume templates"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT * FROM resume_templates 
+            ORDER BY is_default DESC, usage_count DESC, created_at DESC
+        """)
+        templates = [dict_from_row(row) for row in cursor.fetchall()]
+        
+        conn.close()
+        return jsonify(templates)
+        
+    except Exception as e:
+        logger.error(f"Error fetching templates: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/templates', methods=['POST'])
+def create_template():
+    """Create a new resume template"""
+    try:
+        data = request.json
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO resume_templates 
+            (template_name, description, target_role, target_industry, component_mapping, 
+             style_settings, is_default, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data['template_name'],
+            data.get('description', ''),
+            data.get('target_role', ''),
+            data.get('target_industry', ''),
+            json.dumps(data.get('component_mapping', {})),
+            json.dumps(data.get('style_settings', {})),
+            data.get('is_default', False),
+            datetime.now().isoformat(),
+            datetime.now().isoformat()
+        ))
+        
+        template_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'id': template_id, 'message': 'Template created successfully'}), 201
+        
+    except Exception as e:
+        logger.error(f"Error creating template: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/templates/import-url', methods=['POST'])
+def import_template_from_url():
+    """Import a resume template from a URL"""
+    try:
+        data = request.json
+        if not data or 'url' not in data:
+            return jsonify({'error': 'No URL provided'}), 400
+        
+        url = data['url']
+        template_name = data.get('template_name', f"Template from {urlparse(url).netloc}")
+        
+        # Download the template
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        
+        # Save the template content
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO resume_templates 
+            (template_name, description, target_role, target_industry, component_mapping, 
+             style_settings, is_default, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            template_name,
+            f"Imported from {url}",
+            data.get('target_role', ''),
+            data.get('target_industry', ''),
+            json.dumps({'source_url': url, 'content': response.text}),
+            json.dumps({'imported': True}),
+            False,
+            datetime.now().isoformat(),
+            datetime.now().isoformat()
+        ))
+        
+        template_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'id': template_id, 
+            'message': 'Template imported successfully',
+            'template_name': template_name
+        }), 201
+        
+    except requests.RequestException as e:
+        logger.error(f"Error downloading template: {e}")
+        return jsonify({'error': f'Failed to download template: {str(e)}'}), 400
+    except Exception as e:
+        logger.error(f"Error importing template: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# AUTO-CREATE PROJECTS FROM WORK ORDERS
+
+@app.route('/api/projects/auto-create-from-workorders', methods=['POST'])
+def auto_create_projects_from_work_orders():
+    """Auto-create projects by grouping work orders from the same company"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get work orders grouped by company
+        cursor.execute("""
+            SELECT company_name, COUNT(*) as order_count, 
+                   MIN(fn_work_order_id) as first_order_id,
+                   GROUP_CONCAT(id) as work_order_ids
+            FROM work_orders 
+            WHERE company_name IS NOT NULL 
+            GROUP BY company_name 
+            HAVING COUNT(*) >= 2
+            ORDER BY COUNT(*) DESC
+        """)
+        
+        company_groups = cursor.fetchall()
+        created_projects = 0
+        
+        for group in company_groups:
+            company_name = group['company_name']
+            work_order_ids = [int(id) for id in group['work_order_ids'].split(',')]
+            
+            # Check if project already exists for this company
+            cursor.execute("SELECT id FROM work_order_projects WHERE project_name LIKE ?", (f"%{company_name}%",))
+            existing_project = cursor.fetchone()
+            
+            if not existing_project:
+                # Create new project
+                cursor.execute("""
+                    INSERT INTO work_order_projects (project_name, project_description, client_name, 
+                                                   total_work_orders, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    f"{company_name} - Multiple Work Orders",
+                    f"Auto-generated project from {group['order_count']} work orders for {company_name}",
+                    company_name,
+                    group['order_count'],
+                    datetime.now().isoformat(),
+                    datetime.now().isoformat()
+                ))
+                
+                project_id = cursor.lastrowid
+                
+                # Associate work orders with the project
+                for work_order_id in work_order_ids:
+                    cursor.execute("""
+                        INSERT OR IGNORE INTO work_order_project_assignments (project_id, work_order_id)
+                        VALUES (?, ?)
+                    """, (project_id, work_order_id))
+                
+                created_projects += 1
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'message': f'Successfully created {created_projects} projects from work orders',
+            'created_count': created_projects
+        })
+        
+    except Exception as e:
+        logger.error(f"Error auto-creating projects: {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

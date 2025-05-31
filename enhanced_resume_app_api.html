@@ -543,6 +543,53 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
+        .work-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .work-order-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-row {
+            width: 100%;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        .detail-row strong {
+            color: #495057;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-completed, .status-paid {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-in-progress {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .status-not-started {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
         .work-order-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -1149,15 +1196,40 @@
                 return;
             }
             
-            const ordersHtml = orders.map(order => `
-                <div class="work-order-card">
-                    <h4>${order.title}</h4>
-                    <p><strong>${order.company_name}</strong></p>
-                    <p>${order.work_category} | ${order.service_date}</p>
-                    <p>Pay: $${order.pay_amount || 0} | Rating: ${order.wo_rating || 'N/A'}</p>
-                    <p>${order.location || 'No location'}</p>
-                </div>
-            `).join('');
+            const ordersHtml = orders.map(order => {
+                const location = [order.city, order.state].filter(Boolean).join(', ') || 'Location not specified';
+                const payAmount = order.pay_amount ? `$${order.pay_amount}` : 'Pay not specified';
+                const serviceDate = order.service_date || 'Date not specified';
+                const companyName = order.company_name || 'Company not specified';
+                
+                return `
+                    <div class="work-order-card">
+                        <div class="work-order-header">
+                            <h4>${order.title || 'No title'}</h4>
+                        </div>
+                        
+                        <div class="work-order-details">
+                            <div class="detail-row">
+                                <strong>Company:</strong> ${companyName}
+                            </div>
+                            <div class="detail-row">
+                                <strong>📍 Location:</strong> ${location}
+                            </div>
+                            <div class="detail-row">
+                                <strong>💰 Pay:</strong> ${payAmount}
+                            </div>
+                            <div class="detail-row">
+                                <strong>📅 Service Date:</strong> ${serviceDate}
+                            </div>
+                            <div class="detail-row">
+                                <strong>Status:</strong> <span class="status-badge status-${(order.status || '').toLowerCase()}">${order.status || 'Unknown'}</span>
+                            </div>
+                            ${order.work_category ? `<div class="detail-row"><strong>Category:</strong> ${order.work_category}</div>` : ''}
+                            ${order.location_address ? `<div class="detail-row"><strong>Address:</strong> ${order.location_address}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
             grid.innerHTML = ordersHtml;
         }

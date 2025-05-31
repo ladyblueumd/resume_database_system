@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Refresh Work Orders Database
-Clears old data and imports fresh 5/31/2025 FieldNation report
+Refresh Work Orders Database with Location Data
+Clears old data and imports fresh FieldNation data with full location information
 """
 
 import sqlite3
@@ -27,272 +27,236 @@ def clear_old_data():
     
     # Clear related tables first (foreign key constraints)
     cursor.execute("DELETE FROM work_order_project_assignments")
-    cursor.execute("DELETE FROM work_order_projects") 
+    cursor.execute("DELETE FROM work_order_projects")
     cursor.execute("DELETE FROM work_orders")
     
-    # Reset auto-increment counters
-    cursor.execute("DELETE FROM sqlite_sequence WHERE name='work_orders'")
-    cursor.execute("DELETE FROM sqlite_sequence WHERE name='work_order_projects'")
-    cursor.execute("DELETE FROM sqlite_sequence WHERE name='work_order_project_assignments'")
-    
     conn.commit()
-    
-    # Verify clearing
-    cursor.execute("SELECT COUNT(*) FROM work_orders")
-    work_orders_count = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM work_order_projects")
-    projects_count = cursor.fetchone()[0]
-    
     conn.close()
     
-    print(f"✅ Cleared {work_orders_count} work orders and {projects_count} projects")
-    return True
+    print("✅ Old data cleared successfully")
 
-def categorize_work_type(work_type: str, buyer: str = "") -> Dict[str, str]:
-    """Categorize work order based on type and buyer"""
-    work_type_lower = work_type.lower() if work_type else ""
-    buyer_lower = buyer.lower() if buyer else ""
+def update_database_schema():
+    """Update database schema to include location fields"""
+    print("🔧 Updating database schema for location data...")
     
-    # Map work types to categories
-    category_map = {
-        'networking': 'networking',
-        'printer': 'printers', 
-        'windows device': 'desktop',
-        'point of sale': 'retail',
-        'pots': 'telephony',
-        'voip-sip': 'telephony',
-        'general tasks': 'general',
-        'other trades': 'general',
-        'low voltage testing': 'networking',
-        'low voltage runs': 'networking',
-        'kiosk': 'retail',
-        'merchandising': 'retail',
-        'general alarm': 'security',
-        'server/storage': 'server'
-    }
+    conn = get_db_connection()
+    cursor = conn.cursor()
     
-    category = category_map.get(work_type_lower, 'general')
+    # Check if location columns exist and add them if they don't
+    cursor.execute("PRAGMA table_info(work_orders)")
+    columns = [col[1] for col in cursor.fetchall()]
     
-    # Determine client type from buyer
-    client_type = 'enterprise'
-    if any(word in buyer_lower for word in ['retail', 'restaurant', 'store']):
-        client_type = 'retail'
-    elif any(word in buyer_lower for word in ['caption', 'medical', 'healthcare']):
-        client_type = 'healthcare'
-    elif any(word in buyer_lower for word in ['bank', 'financial']):
-        client_type = 'financial'
+    location_columns = ['city', 'state', 'zip_code', 'location_address']
     
-    return {
-        'work_category': category,
-        'client_type': client_type
-    }
+    for col in location_columns:
+        if col not in columns:
+            cursor.execute(f"ALTER TABLE work_orders ADD COLUMN {col} TEXT")
+            print(f"   ✅ Added column: {col}")
+    
+    conn.commit()
+    conn.close()
+    
+    print("✅ Database schema updated")
 
-def extract_technologies_and_skills(work_type: str, buyer: str = "") -> Dict[str, List[str]]:
-    """Extract technologies and skills from work type and buyer"""
-    work_type_lower = work_type.lower() if work_type else ""
-    buyer_lower = buyer.lower() if buyer else ""
+def import_fieldnation_data():
+    """Import fresh FieldNation data with location information"""
+    print("📥 Importing FieldNation data with locations...")
     
-    # Technology mapping
-    technologies = []
-    if 'windows' in work_type_lower:
-        technologies.extend(['Windows', 'Desktop Support'])
-    if 'networking' in work_type_lower:
-        technologies.extend(['Network Equipment', 'Cisco', 'LAN/WAN'])
-    if 'printer' in work_type_lower:
-        technologies.extend(['Printers', 'Print Servers'])
-    if 'point of sale' in work_type_lower or 'pos' in work_type_lower:
-        technologies.extend(['POS Systems', 'Retail Technology'])
-    if 'pots' in work_type_lower or 'voip' in work_type_lower:
-        technologies.extend(['VoIP', 'Telephony', 'PBX'])
-    if 'server' in work_type_lower:
-        technologies.extend(['Server Hardware', 'Storage Systems'])
+    # Use the comprehensive CSV with location data
+    csv_file = "spreadsheets/fn-full-52025.csv"
     
-    # Add buyer-specific technologies
-    if 'zones' in buyer_lower:
-        technologies.append('Zones Equipment')
-    if 'unisys' in buyer_lower:
-        technologies.append('Unisys Systems')
+    if not os.path.exists(csv_file):
+        print(f"❌ Error: {csv_file} not found")
+        return
     
-    # Skills mapping
-    skills = []
-    skill_map = {
-        'Hardware Installation': ['windows device', 'server', 'printer'],
-        'Network Configuration': ['networking', 'voip'],
-        'Troubleshooting': ['device', 'system', 'equipment'],
-        'Customer Service': ['onsite', 'field'],
-        'Technical Support': ['support', 'maintenance'],
-        'System Deployment': ['installation', 'setup']
-    }
+    # Read CSV with proper parsing
+    df = pd.read_csv(csv_file, low_memory=False)
     
-    for skill, keywords in skill_map.items():
-        if any(keyword in work_type_lower for keyword in keywords):
-            skills.append(skill)
-    
-    # Always include basic skills
-    skills.extend(['Technical Support', 'Customer Service'])
-    
-    return {
-        'technologies_used': list(set(technologies)),  # Remove duplicates
-        'skills_demonstrated': list(set(skills))
-    }
-
-def parse_pay_amount(pay_str: str) -> Optional[float]:
-    """Parse pay amount from string"""
-    if not pay_str or pd.isna(pay_str):
-        return None
-    
-    try:
-        # Remove currency symbols and convert to float
-        pay_clean = re.sub(r'[$,]', '', str(pay_str))
-        return float(pay_clean)
-    except (ValueError, TypeError):
-        return None
-
-def parse_date(date_str: str) -> Optional[str]:
-    """Parse service date from string (format: M/D/YYYY)"""
-    if not date_str or pd.isna(date_str):
-        return None
-    
-    try:
-        # Expected format: "5/28/2025"
-        dt = pd.to_datetime(date_str)
-        return dt.strftime('%Y-%m-%d')
-    except:
-        return None
-
-def import_new_fieldnation_csv(file_path: str) -> int:
-    """Import the new 5/31 FieldNation CSV"""
-    print(f"📊 Importing new FieldNation data from: {file_path}")
-    
-    if not os.path.exists(file_path):
-        print(f"❌ File not found: {file_path}")
-        return 0
-    
-    # Read CSV
-    df = pd.read_csv(file_path)
-    print(f"📋 Found {len(df)} work orders in CSV")
+    print(f"📊 Found {len(df)} work orders in CSV")
+    print(f"📍 Columns available: {list(df.columns)}")
     
     conn = get_db_connection()
     cursor = conn.cursor()
     
     imported_count = 0
-    errors = []
+    skipped_count = 0
     
-    for idx, row in df.iterrows():
+    for index, row in df.iterrows():
         try:
-            # Extract data from the new CSV format
-            fn_work_order_id = str(row['Work Order Id']).strip()
-            work_type = str(row['Type of Work']).strip()
-            paid_date = row['Paid']
-            total_pay = parse_pay_amount(row['Total Pay'])
-            hours_logged = row.get('Hours Logged', 0)
-            buyer = str(row['Buyer']).strip()
+            # Extract and clean data
+            fn_work_order_id = str(row.get('Id', '')).strip()
+            if not fn_work_order_id or fn_work_order_id == 'nan':
+                skipped_count += 1
+                continue
             
-            # Categorize the work
-            categories = categorize_work_type(work_type, buyer)
-            tech_skills = extract_technologies_and_skills(work_type, buyer)
+            # Basic work order data
+            title = str(row.get('Title', '')).strip()
+            work_type = str(row.get('Type of Work', '')).strip()
+            company_name = str(row.get('Company', '')).strip()
+            status = str(row.get('Status', '')).strip()
             
-            # Create a descriptive title
-            title = f"{work_type} - {buyer}"
+            # Location data
+            city = str(row.get('City', '')).strip()
+            state = str(row.get('State', '')).strip()
+            zip_code = str(row.get('Zip', '')).strip()
+            location_address = str(row.get('Location', '')).strip()
             
-            # Parse service date (using Paid date as service date)
-            service_date = parse_date(paid_date)
+            # Clean up 'nan' values
+            if city == 'nan': city = None
+            if state == 'nan': state = None
+            if zip_code == 'nan': zip_code = None
+            if location_address == 'nan': location_address = None
             
-            # Determine status - all records in this report are completed/paid
-            status = 'Paid'
+            # Parse pay amount
+            pay_str = str(row.get('Pay', '0')).strip()
+            pay_amount = 0.0
+            if pay_str and pay_str != 'nan':
+                # Remove currency symbols and commas
+                pay_clean = re.sub(r'[$,]', '', pay_str)
+                try:
+                    pay_amount = float(pay_clean)
+                except ValueError:
+                    pay_amount = 0.0
             
-            # Insert work order
+            # Parse service date
+            service_date_str = str(row.get('Service Date', '')).strip()
+            service_date = None
+            if service_date_str and service_date_str != 'nan':
+                try:
+                    # Parse date like "05-14-2025 17:00 EDT"
+                    date_part = service_date_str.split(' ')[0]
+                    service_date = datetime.strptime(date_part, '%m-%d-%Y').date()
+                except:
+                    service_date = None
+            
+            # Determine work category based on work type
+            work_category = categorize_work_type(work_type)
+            
+            # Insert work order with location data
             cursor.execute("""
                 INSERT INTO work_orders (
-                    fn_work_order_id, title, work_type, company_name, service_date,
-                    pay_amount, status, work_category, client_type,
-                    technologies_used, skills_demonstrated, 
-                    estimated_hours, include_in_resume, highlight_project,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    fn_work_order_id, title, work_type, work_category, 
+                    company_name, status, pay_amount, service_date,
+                    city, state, zip_code, location_address,
+                    created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                fn_work_order_id,
-                title,
-                work_type,
-                buyer,  # Using buyer as company name
-                service_date,
-                total_pay,
-                status,
-                categories['work_category'],
-                categories['client_type'],
-                json.dumps(tech_skills['technologies_used']),
-                json.dumps(tech_skills['skills_demonstrated']),
-                float(hours_logged) if hours_logged and not pd.isna(hours_logged) else None,
-                True,  # Include in resume by default
-                total_pay and total_pay > 300,  # Highlight high-value projects
-                datetime.now().isoformat(),
-                datetime.now().isoformat()
+                fn_work_order_id, title, work_type, work_category,
+                company_name, status, pay_amount, service_date,
+                city, state, zip_code, location_address,
+                datetime.now()
             ))
             
             imported_count += 1
             
+            if imported_count % 100 == 0:
+                print(f"   📥 Imported {imported_count} work orders...")
+                
         except Exception as e:
-            error_msg = f"Row {idx + 1}: {str(e)}"
-            errors.append(error_msg)
-            print(f"⚠️  {error_msg}")
+            print(f"   ⚠️  Error processing row {index}: {e}")
+            skipped_count += 1
+            continue
     
     conn.commit()
     conn.close()
     
-    print(f"✅ Successfully imported {imported_count} work orders")
-    if errors:
-        print(f"⚠️  {len(errors)} errors occurred during import")
+    print(f"✅ Import completed!")
+    print(f"   📊 Total imported: {imported_count}")
+    print(f"   ⚠️  Skipped: {skipped_count}")
     
     return imported_count
 
+def categorize_work_type(work_type: str) -> str:
+    """Categorize work type into broader categories"""
+    if not work_type:
+        return "other"
+    
+    work_type_lower = work_type.lower()
+    
+    if any(keyword in work_type_lower for keyword in ['desktop', 'windows', 'pc', 'computer', 'laptop']):
+        return "desktop"
+    elif any(keyword in work_type_lower for keyword in ['printer', 'print']):
+        return "printer"
+    elif any(keyword in work_type_lower for keyword in ['server', 'storage']):
+        return "server"
+    elif any(keyword in work_type_lower for keyword in ['network', 'switch', 'router']):
+        return "networking"
+    elif any(keyword in work_type_lower for keyword in ['pos', 'point of sale', 'register']):
+        return "pos"
+    elif any(keyword in work_type_lower for keyword in ['phone', 'voip', 'pots']):
+        return "telephony"
+    elif any(keyword in work_type_lower for keyword in ['kiosk']):
+        return "kiosk"
+    elif any(keyword in work_type_lower for keyword in ['audio', 'visual', 'av']):
+        return "av"
+    else:
+        return "general"
+
+def print_location_stats():
+    """Print statistics about location data"""
+    print("\n📍 Location Statistics:")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # States
+    cursor.execute("SELECT state, COUNT(*) as count FROM work_orders WHERE state IS NOT NULL GROUP BY state ORDER BY count DESC")
+    states = cursor.fetchall()
+    print(f"   🗺️  States: {len(states)} unique states")
+    for state in states[:10]:  # Top 10
+        print(f"      {state['state']}: {state['count']} work orders")
+    
+    # Cities
+    cursor.execute("SELECT city, state, COUNT(*) as count FROM work_orders WHERE city IS NOT NULL GROUP BY city, state ORDER BY count DESC LIMIT 10")
+    cities = cursor.fetchall()
+    print(f"   🏙️  Top 10 Cities:")
+    for city in cities:
+        print(f"      {city['city']}, {city['state']}: {city['count']} work orders")
+    
+    # Location data completeness
+    cursor.execute("SELECT COUNT(*) as total FROM work_orders")
+    total = cursor.fetchone()['total']
+    
+    cursor.execute("SELECT COUNT(*) as with_city FROM work_orders WHERE city IS NOT NULL")
+    with_city = cursor.fetchone()['with_city']
+    
+    cursor.execute("SELECT COUNT(*) as with_state FROM work_orders WHERE state IS NOT NULL")
+    with_state = cursor.fetchone()['with_state']
+    
+    cursor.execute("SELECT COUNT(*) as with_zip FROM work_orders WHERE zip_code IS NOT NULL")
+    with_zip = cursor.fetchone()['with_zip']
+    
+    print(f"   📊 Location Data Completeness:")
+    print(f"      Total work orders: {total}")
+    if total > 0:
+        print(f"      With city: {with_city} ({with_city/total*100:.1f}%)")
+        print(f"      With state: {with_state} ({with_state/total*100:.1f}%)")
+        print(f"      With zip code: {with_zip} ({with_zip/total*100:.1f}%)")
+    else:
+        print(f"      No work orders found in database")
+    
+    conn.close()
+
 def main():
-    """Main execution function"""
-    print("🔄 Refreshing FieldNation Work Orders Database")
-    print("=" * 50)
+    """Main function to refresh work orders with location data"""
+    print("🔄 Starting Work Orders Database Refresh with Location Data")
+    print("=" * 60)
     
     # Step 1: Clear old data
-    if clear_old_data():
-        print()
-        
-        # Step 2: Import new data
-        csv_file = "spreadsheets/Work Order Report 2025-05-31.csv"
-        imported_count = import_new_fieldnation_csv(csv_file)
-        
-        if imported_count > 0:
-            print()
-            print("📈 Generating statistics...")
-            
-            # Step 3: Show statistics
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT COUNT(*) FROM work_orders")
-            total_orders = cursor.fetchone()[0]
-            
-            cursor.execute("SELECT COUNT(DISTINCT company_name) FROM work_orders")
-            unique_companies = cursor.fetchone()[0]
-            
-            cursor.execute("SELECT SUM(pay_amount) FROM work_orders WHERE pay_amount IS NOT NULL")
-            total_earnings = cursor.fetchone()[0] or 0
-            
-            cursor.execute("SELECT COUNT(*) FROM work_orders WHERE pay_amount > 300")
-            high_value_orders = cursor.fetchone()[0]
-            
-            conn.close()
-            
-            print(f"📊 Final Statistics:")
-            print(f"   • Total Work Orders: {total_orders}")
-            print(f"   • Unique Companies: {unique_companies}")
-            print(f"   • Total Earnings: ${total_earnings:,.2f}")
-            print(f"   • High-Value Orders (>$300): {high_value_orders}")
-            print()
-            print("✅ Database refresh complete!")
-            print("💡 You can now run the auto-create projects feature to group these work orders.")
-        else:
-            print("❌ No work orders were imported.")
-    else:
-        print("❌ Failed to clear old data.")
+    clear_old_data()
+    
+    # Step 2: Update schema
+    update_database_schema()
+    
+    # Step 3: Import new data
+    imported_count = import_fieldnation_data()
+    
+    # Step 4: Show location statistics
+    print_location_stats()
+    
+    print("\n🎉 Database refresh completed successfully!")
+    print(f"   📊 Total work orders: {imported_count}")
+    print("   📍 Location data included: city, state, zip code, address")
 
 if __name__ == "__main__":
     main() 
