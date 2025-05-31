@@ -335,6 +335,77 @@
         .table tr:hover {
             background: #f5f5f5;
         }
+
+        .work-orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .work-order-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .work-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .work-order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .work-order-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-row {
+            width: 100%;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        .detail-row strong {
+            color: #495057;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-in-progress {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .status-not-started {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+        }
     </style>
 </head>
 <body>
@@ -890,24 +961,52 @@
                 const response = await fetch('/api/work-orders?limit=50');
                 const workOrders = await response.json();
                 
-                let html = '<table class="table"><thead><tr><th>ID</th><th>Company</th><th>Description</th><th>Date</th><th>Pay</th><th>Actions</th></tr></thead><tbody>';
+                let html = '<div class="work-orders-grid">';
                 
                 workOrders.forEach(order => {
+                    const location = [order.city, order.state].filter(Boolean).join(', ') || 'Location not specified';
+                    const payAmount = order.pay_amount ? `$${order.pay_amount}` : 'Pay not specified';
+                    const serviceDate = order.service_date || 'Date not specified';
+                    const companyName = order.company_name || 'Company not specified';
+                    
                     html += `
-                        <tr>
-                            <td>${order.work_order_id}</td>
-                            <td>${order.client_company || 'N/A'}</td>
-                            <td>${(order.title || '').substring(0, 50)}...</td>
-                            <td>${order.service_date || 'N/A'}</td>
-                            <td>$${order.pay_amount || 0}</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" onclick="deleteWorkOrder(${order.id})">Delete</button>
-                            </td>
-                        </tr>
+                        <div class="work-order-card" data-id="${order.id}">
+                            <div class="work-order-header">
+                                <h4>${order.title || 'No title'}</h4>
+                                <div class="work-order-actions">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteWorkOrder(${order.id})" title="Delete work order">×</button>
+                                </div>
+                            </div>
+                            
+                            <div class="work-order-details">
+                                <div class="detail-row">
+                                    <strong>Company:</strong> ${companyName}
+                                </div>
+                                <div class="detail-row">
+                                    <strong>📍 Location:</strong> ${location}
+                                </div>
+                                <div class="detail-row">
+                                    <strong>💰 Pay:</strong> ${payAmount}
+                                </div>
+                                <div class="detail-row">
+                                    <strong>📅 Service Date:</strong> ${serviceDate}
+                                </div>
+                                <div class="detail-row">
+                                    <strong>Status:</strong> <span class="status-badge status-${(order.status || '').toLowerCase()}">${order.status || 'Unknown'}</span>
+                                </div>
+                                ${order.work_category ? `<div class="detail-row"><strong>Category:</strong> ${order.work_category}</div>` : ''}
+                                ${order.location_address ? `<div class="detail-row"><strong>Address:</strong> ${order.location_address}</div>` : ''}
+                            </div>
+                        </div>
                     `;
                 });
                 
-                html += '</tbody></table>';
+                html += '</div>';
+                
+                if (workOrders.length === 0) {
+                    html = '<div class="no-data"><p>No work orders found</p></div>';
+                }
+                
                 document.getElementById('workOrdersList').innerHTML = html;
             } catch (error) {
                 console.error('Error:', error);
