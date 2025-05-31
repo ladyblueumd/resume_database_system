@@ -117,11 +117,18 @@
             margin-bottom: 8px;
         }
         .component-preview {
-            font-size: 12px;
             color: #666;
-            max-height: 60px;
-            overflow: hidden;
-            margin-bottom: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            max-height: none;
+            overflow: visible;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
         }
         .component-meta {
             display: flex;
@@ -283,6 +290,267 @@
                 overflow-x: auto;
             }
         }
+
+        /* Resume Importer Styles */
+        .resume-display-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            user-select: text;
+            cursor: text;
+        }
+
+        .resume-display-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .resume-display-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .resume-display-area::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .resume-display-area::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        .resume-display-controls {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #2f5597;
+            background-color: #f8f9ff;
+        }
+
+        .import-method {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2f5597;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #2f5597;
+            text-decoration: none;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .modal-actions {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Component Action Buttons */
+        .component-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            z-index: 10;
+            position: relative;
+        }
+
+        .component-actions button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .component-actions .edit-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .component-actions .edit-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+        }
+
+        .component-actions .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .component-actions .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220,53,69,0.3);
+        }
+
+        /* Sub-tabs styles */
+        .sub-tabs {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .sub-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            margin-right: 2px;
+            font-size: 14px;
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+
+        .sub-tab:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .sub-tab.active {
+            background-color: white;
+            color: #2f5597;
+            font-weight: 500;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+
+        .sub-tab-content {
+            display: none;
+        }
+
+        .sub-tab-content.active {
+            display: block;
+        }
+
+        /* Resume and template card styles */
+        .resume-card, .template-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .resume-card:hover, .template-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #2f5597;
+        }
+
+        .resume-meta, .template-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .file-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
@@ -301,7 +569,8 @@
             <div class="tab" data-tab="component-library">📚 Component Library</div>
             <div class="tab" data-tab="employment-history">💼 Employment History</div>
             <div class="tab" data-tab="resume-builder">🔨 Resume Builder</div>
-            <div class="tab" data-tab="data-import">📥 Data Import</div>
+            <div class="tab" data-tab="importer">📥 Resume Importer</div>
+            <div class="tab" data-tab="resume-library">📁 Resume Library</div>
             <div class="tab" data-tab="settings">⚙️ Settings</div>
         </div>
         
@@ -341,7 +610,7 @@
             <button onclick="switchTab('job-matcher')">🎯 Analyze New Job</button>
             <button onclick="switchTab('component-library')">📚 Browse Components</button>
             <button onclick="switchTab('resume-builder')">🔨 Build Resume</button>
-            <button onclick="switchTab('data-import')">📥 Import Data</button>
+            <button onclick="switchTab('importer')">📥 Import Resume</button>
         </div>
         
         <!-- Job Matcher Tab -->
@@ -460,28 +729,116 @@
             </div>
         </div>
         
-        <!-- Data Import Tab -->
-        <div class="tab-content" id="data-import">
-            <h2>📥 Data Import & Extraction</h2>
-            
+        <!-- Resume Importer Tab -->
+        <div class="tab-content" id="importer">
+            <!-- Resume Importer Section -->
             <div class="search-interface">
-                <h3>Extract Components from Existing Resumes</h3>
-                <p>Upload or select existing resume files to automatically extract reusable components.</p>
+                <h2>📥 Resume Importer</h2>
+                <p>Upload your resume to extract the text, then manually select and create components from the displayed content.</p>
                 
-                <input type="file" id="resume-upload" multiple accept=".pdf,.doc,.docx,.txt" style="margin-bottom: 15px;">
-                <button onclick="extractFromFiles()" class="success">🤖 AI Extract Components</button>
+                <div class="resume-import-methods">
+                    <!-- File Upload Method -->
+                    <div class="import-method">
+                        <h3>📎 Upload Resume File</h3>
+                        <div class="upload-area" onclick="document.getElementById('resume-file-input').click()">
+                            <p>📁 Click here to select a resume file</p>
+                            <p style="font-size: 0.9rem; color: #666;">Supports: .txt, .doc, .docx, .pdf, .html</p>
+                        </div>
+                        <input type="file" id="resume-file-input" accept=".txt,.doc,.docx,.pdf,.html" style="display: none;" onchange="uploadAndDisplayResume()">
+                        
+                        <div id="file-upload-status" style="margin-top: 1rem;"></div>
+                    </div>
+                    
+                    <!-- Text Input Method -->
+                    <div class="import-method">
+                        <h3>📝 Paste Resume Text</h3>
+                        <textarea id="resume-text-input" placeholder="Paste your resume text here..." rows="8" style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;"></textarea>
+                        <button class="success" onclick="displayPastedText()" style="margin-top: 1rem;">📄 Display Text</button>
+                    </div>
+                </div>
                 
-                <h3>Bulk Import</h3>
-                <textarea id="bulk-import-text" rows="8" placeholder="Paste resume text content here for AI extraction..."></textarea>
-                <button onclick="bulkExtractComponents()" class="success">🔍 Extract from Text</button>
-                
-                <h3>Import from Template App</h3>
-                <button onclick="importFromTemplateApp()" class="secondary">📋 Import Current Template Data</button>
+                <!-- Resume Display Area -->
+                <div id="resume-display-section" style="display: none;">
+                    <h3>📄 Resume Content</h3>
+                    <p>Select any text below and click "Create Component" to add it to your library:</p>
+                    
+                    <div class="resume-display-controls">
+                        <button class="success" onclick="createComponentFromSelection()">➕ Create Component from Selection</button>
+                        <button class="secondary" onclick="clearResumeDisplay()">🗑️ Clear Display</button>
+                    </div>
+                    
+                    <div id="resume-display-area" class="resume-display-area">
+                        <!-- Resume text will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resume Library Tab -->
+        <div class="tab-content" id="resume-library">
+            <h2>📁 Resume Library</h2>
+            
+            <!-- Sub-tabs for Resume Library -->
+            <div class="sub-tabs" style="border-bottom: 1px solid #ddd; margin-bottom: 20px;">
+                <div class="sub-tab active" data-subtab="uploaded-resumes" onclick="switchResumeSubTab('uploaded-resumes')">📄 Uploaded Resumes</div>
+                <div class="sub-tab" data-subtab="templates" onclick="switchResumeSubTab('templates')">📋 Templates</div>
             </div>
             
-            <div id="extraction-results" style="display: none;">
-                <h3>📊 Extraction Results</h3>
-                <div id="extracted-components"></div>
+            <!-- Uploaded Resumes Section -->
+            <div class="sub-tab-content active" id="uploaded-resumes">
+                <div class="search-interface">
+                    <h3>Uploaded Resume Documents</h3>
+                    <p>View and manage all your uploaded resume files with full text content.</p>
+                    
+                    <div class="form-row">
+                        <div>
+                            <input type="text" id="resume-search" placeholder="Search by title, filename, or content...">
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label>
+                                <input type="checkbox" id="include-archived"> Include archived
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="searchUploadedResumes()" class="success">🔍 Search</button>
+                    <button onclick="loadUploadedResumes()" class="secondary">🔄 Refresh</button>
+                </div>
+                
+                <div class="stats-panel" style="margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-uploaded-resumes">0</div>
+                        <div class="stat-label">Total Resumes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-extracted-components">0</div>
+                        <div class="stat-label">Components Extracted</div>
+                    </div>
+                </div>
+                
+                <div class="component-grid" id="uploaded-resumes-grid">
+                    <!-- Uploaded resumes will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Templates Section -->
+            <div class="sub-tab-content" id="templates">
+                <div class="search-interface">
+                    <h3>Resume Templates</h3>
+                    <p>Manage your resume templates for different roles and industries.</p>
+                    
+                    <div class="form-row">
+                        <div>
+                            <input type="text" id="template-search" placeholder="Search templates by name or role...">
+                        </div>
+                    </div>
+                    <button onclick="searchTemplates()" class="success">🔍 Search</button>
+                    <button onclick="showAddTemplateModal()" class="success">➕ Add Template</button>
+                    <button onclick="loadTemplates()" class="secondary">🔄 Refresh</button>
+                </div>
+                
+                <div class="component-grid" id="templates-grid">
+                    <!-- Templates will be populated here -->
+                </div>
             </div>
         </div>
         
@@ -545,6 +902,9 @@
                         <option value="certifications">Certifications</option>
                         <option value="education">Education</option>
                         <option value="accomplishments">Accomplishments</option>
+                        <option value="client_contract">Client/Contract</option>
+                        <option value="summary_mission">Summary/Mission</option>
+                        <option value="blank_component">Blank Component</option>
                     </select>
                 </div>
                 <div>
@@ -623,6 +983,63 @@
             <div style="margin-top: 20px;">
                 <button onclick="saveEmployment()" class="success">💾 Save Employment</button>
                 <button onclick="closeModal('employment-modal')" class="secondary">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Creation Modal for Resume Importer -->
+    <div id="create-component-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Create Component from Selection</h2>
+                <span class="close" onclick="closeCreateComponentModal()">&times;</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="selected-text-preview">Selected Text:</label>
+                <textarea id="selected-text-preview" readonly style="background: #f8f9fa; color: #6c757d;" rows="8"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-section-type">Component Type:</label>
+                <select id="component-section-type">
+                    <option value="work_experience">💼 Work Experience</option>
+                    <option value="education">🎓 Education</option>
+                    <option value="technical_skills">🔧 Technical Skills</option>
+                    <option value="professional_skills">💻 Professional Skills</option>
+                    <option value="certifications">📜 Certifications</option>
+                    <option value="accomplishments">🏆 Accomplishments</option>
+                    <option value="professional_summary">📋 Professional Summary</option>
+                    <option value="projects">🚀 Projects</option>
+                    <option value="client_contract">🤝 Client/Contract</option>
+                    <option value="summary_mission">📝 Summary/Mission</option>
+                    <option value="blank_component">📄 Blank Component</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-title-input">Component Title:</label>
+                <input type="text" id="component-title-input" placeholder="Enter a descriptive title for this component">
+            </div>
+            
+            <div class="form-group">
+                <label for="component-content-input">Component Content:</label>
+                <textarea id="component-content-input" rows="10" placeholder="Edit the content as needed..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-keywords-input">Keywords (optional):</label>
+                <input type="text" id="component-keywords-input" placeholder="e.g. project management, leadership, technical support">
+            </div>
+            
+            <div class="form-group">
+                <label for="component-industry-input">Industry Tags (optional):</label>
+                <input type="text" id="component-industry-input" placeholder="e.g. healthcare, finance, technology">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="success" onclick="saveSelectedComponent()">💾 Save Component</button>
+                <button class="secondary" onclick="closeCreateComponentModal()">❌ Cancel</button>
             </div>
         </div>
     </div>
@@ -769,6 +1186,9 @@
                 case 'employment-history':
                     loadEmploymentHistory();
                     break;
+                case 'resume-library':
+                    loadUploadedResumes(); // Load uploaded resumes by default
+                    break;
             }
         }
         
@@ -863,251 +1283,331 @@
             loadDashboard();
         }
         
-        // Component Library functions
-        function loadComponentLibrary() {
-            displayComponents(db.components);
+        // Resume Importer functions
+        let currentResumeText = '';
+        let selectedText = '';
+
+        // Upload and display resume file
+        async function uploadAndDisplayResume() {
+            const fileInput = document.getElementById('resume-file-input');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('Please select a file first.', 'error');
+                return;
+            }
+            
+            showStatus('📤 Uploading and processing file...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload_resume_file', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentResumeText = result.text;
+                    displayResumeText(result.text, result.filename);
+                    showStatus(`✅ ${result.message}`, 'success');
+                } else {
+                    showStatus(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                showStatus('❌ Error uploading file. Please try again.', 'error');
+            }
         }
-        
-        function searchComponents() {
-            const query = document.getElementById('component-search').value;
-            const sectionFilter = document.getElementById('section-filter').value;
-            const results = db.searchComponents(query, sectionFilter);
-            displayComponents(results);
+
+        // Display pasted text
+        function displayPastedText() {
+            const textInput = document.getElementById('resume-text-input');
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                showStatus('Please paste some resume text first.', 'error');
+                return;
+            }
+            
+            currentResumeText = text;
+            displayResumeText(text, 'Pasted Text');
+            showStatus('✅ Resume text displayed successfully!', 'success');
         }
-        
+
+        // Display resume text in the preview area
+        function displayResumeText(text, filename) {
+            const displayArea = document.getElementById('resume-display-area');
+            const displaySection = document.getElementById('resume-display-section');
+            
+            displayArea.textContent = text;
+            displaySection.style.display = 'block';
+            
+            // Add selection event listener
+            displayArea.addEventListener('mouseup', handleTextSelection);
+        }
+
+        // Handle text selection
+        function handleTextSelection() {
+            const selection = window.getSelection();
+            selectedText = selection.toString().trim();
+            
+            if (selectedText.length > 10) {
+                showStatus(`Selected: "${selectedText.substring(0, 50)}${selectedText.length > 50 ? '...' : ''}"`, 'info');
+            }
+        }
+
+        // Create component from selected text
+        function createComponentFromSelection() {
+            if (!selectedText || selectedText.length < 10) {
+                showStatus('Please select some text first (minimum 10 characters).', 'error');
+                return;
+            }
+            
+            // Pre-fill the modal with selected text
+            document.getElementById('selected-text-preview').value = selectedText;
+            document.getElementById('component-content-input').value = selectedText;
+            
+            // Generate a suggested title
+            const suggestedTitle = selectedText.substring(0, 50).replace(/\n.*/, '') + (selectedText.length > 50 ? '...' : '');
+            document.getElementById('component-title-input').value = suggestedTitle;
+            
+            // Show the modal
+            document.getElementById('create-component-modal').style.display = 'block';
+        }
+
+        // Save component from selection
+        async function saveSelectedComponent() {
+            const componentData = {
+                section_type: document.getElementById('component-section-type').value,
+                title: document.getElementById('component-title-input').value.trim(),
+                content: document.getElementById('component-content-input').value.trim(),
+                keywords: document.getElementById('component-keywords-input').value.trim(),
+                industry_tags: document.getElementById('component-industry-input').value.trim()
+            };
+            
+            if (!componentData.title || !componentData.content) {
+                showStatus('Please provide both title and content.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/add_component', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(componentData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`✅ Component "${componentData.title}" created successfully!`, 'success');
+                    closeCreateComponentModal();
+                    loadComponentLibrary();
+                    loadDashboard();
+                } else {
+                    showStatus(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving component:', error);
+                showStatus('❌ Error saving component. Please try again.', 'error');
+            }
+        }
+
+        // Close create component modal
+        function closeCreateComponentModal() {
+            document.getElementById('create-component-modal').style.display = 'none';
+            
+            // Clear form
+            document.getElementById('component-title-input').value = '';
+            document.getElementById('component-content-input').value = '';
+            document.getElementById('component-keywords-input').value = '';
+            document.getElementById('component-industry-input').value = '';
+            document.getElementById('selected-text-preview').value = '';
+        }
+
+        // Clear resume display
+        function clearResumeDisplay() {
+            document.getElementById('resume-display-section').style.display = 'none';
+            document.getElementById('resume-display-area').textContent = '';
+            currentResumeText = '';
+            selectedText = '';
+            showStatus('Resume display cleared.', 'info');
+        }
+
+        // Status message function
+        function showStatus(message, type = 'info') {
+            let statusDiv = document.getElementById('status-messages');
+            if (!statusDiv) {
+                statusDiv = document.createElement('div');
+                statusDiv.id = 'status-messages';
+                statusDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    max-width: 400px;
+                    padding: 1rem;
+                    background: #f8f9ff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                document.body.appendChild(statusDiv);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (statusDiv.parentNode) {
+                        statusDiv.parentNode.removeChild(statusDiv);
+                    }
+                }, 5000);
+            }
+            
+            // Set styles based on type
+            const styles = {
+                info: { background: '#e3f2fd', border: '1px solid #2196f3', color: '#1976d2' },
+                success: { background: '#e8f5e8', border: '1px solid #4caf50', color: '#2e7d32' },
+                error: { background: '#ffebee', border: '1px solid #f44336', color: '#c62828' },
+                warning: { background: '#fff3cd', border: '1px solid #ffc107', color: '#856404' }
+            };
+            
+            const style = styles[type] || styles.info;
+            statusDiv.innerHTML = `<div style="background: ${style.background}; border: ${style.border}; color: ${style.color}; padding: 0.75rem; border-radius: 6px;">${message}</div>`;
+            
+            // Auto-clear success and info messages after 5 seconds
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    if (statusDiv && statusDiv.innerHTML) {
+                        statusDiv.innerHTML = '';
+                    }
+                }, 5000);
+            }
+        }
+
+        // Update component display to use API and include delete buttons
+        async function loadComponentLibrary() {
+            try {
+                const response = await fetch('/api/components');
+                const components = await response.json();
+                displayComponents(components);
+            } catch (error) {
+                console.error('Error loading components:', error);
+                showStatus('Error loading components', 'error');
+                // Fallback to local storage
+                displayComponents(db.components);
+            }
+        }
+
         function displayComponents(components) {
             const grid = document.getElementById('component-grid');
             grid.innerHTML = components.map(component => `
                 <div class="component-card" onclick="selectComponent('${component.id}')">
                     <div class="component-title">${component.title}</div>
-                    <div class="component-preview">${component.content.substring(0, 120)}...</div>
+                    <div class="component-preview">${component.content}</div>
                     <div class="component-meta">
-                        <span>${component.section_type}</span>
+                        <span>${component.section_type_name || component.section_type}</span>
                         <span>Used: ${component.usage_count || 0} times</span>
+                    </div>
+                    <div class="component-actions">
+                        <button class="edit-btn" onclick="event.stopPropagation(); editComponentDetails('${component.id}')">✏️ Edit</button>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteComponent('${component.id}', '${component.title}')">🗑️ Delete</button>
                     </div>
                 </div>
             `).join('') || '<p>No components found. Add some components to get started.</p>';
         }
-        
-        function selectComponent(componentId) {
-            const component = db.components.find(c => c.id === componentId);
-            if (component && !db.selectedComponents.find(c => c.id === componentId)) {
-                db.selectedComponents.push(component);
-                updateSelectedComponentsList();
+
+        // Delete component function
+        async function deleteComponent(componentId, componentTitle) {
+            const confirmed = confirm(`Are you sure you want to delete "${componentTitle}"?\n\nThis action cannot be undone.`);
+            
+            if (!confirmed) {
+                return;
             }
-        }
-        
-        function addComponentToResume(componentId) {
-            selectComponent(componentId);
-            switchTab('resume-builder');
-        }
-        
-        // Employment History functions
-        function loadEmploymentHistory() {
-            const list = document.getElementById('employment-list');
-            list.innerHTML = db.employment.map(emp => `
-                <div class="employment-entry">
-                    <h4>${emp.position_title} at ${emp.company_name}</h4>
-                    <p><strong>Duration:</strong> ${emp.start_date} - ${emp.end_date || 'Present'}</p>
-                    <p><strong>Location:</strong> ${emp.location}</p>
-                    <p><strong>Type:</strong> ${emp.employment_type}</p>
-                    ${emp.responsibilities ? `<p><strong>Responsibilities:</strong> ${emp.responsibilities}</p>` : ''}
-                    ${emp.achievements ? `<p><strong>Achievements:</strong> ${emp.achievements}</p>` : ''}
-                    ${emp.technologies ? `<p><strong>Technologies:</strong> ${emp.technologies}</p>` : ''}
-                </div>
-            `).join('') || '<p>No employment history added yet.</p>';
-        }
-        
-        // Resume Builder functions
-        function updateSelectedComponentsList() {
-            const list = document.getElementById('selected-components-list');
-            list.innerHTML = db.selectedComponents.map(component => `
-                <div class="selected-component">
-                    <button class="remove-component" onclick="removeComponent('${component.id}')">&times;</button>
-                    <strong>${component.title}</strong>
-                    <p>${component.content.substring(0, 100)}...</p>
-                </div>
-            `).join('') || '<p>No components selected yet.</p>';
-        }
-        
-        function removeComponent(componentId) {
-            db.selectedComponents = db.selectedComponents.filter(c => c.id !== componentId);
-            updateSelectedComponentsList();
-        }
-        
-        function generateResumePreview() {
-            const preview = document.getElementById('resume-preview');
-            const title = document.getElementById('resume-title').value || 'Untitled Resume';
             
-            const groupedComponents = {};
-            db.selectedComponents.forEach(component => {
-                if (!groupedComponents[component.section_type]) {
-                    groupedComponents[component.section_type] = [];
-                }
-                groupedComponents[component.section_type].push(component);
-            });
-            
-            let html = `<h1>${title}</h1>`;
-            
-            Object.keys(groupedComponents).forEach(sectionType => {
-                html += `<h2>${sectionType.replace('_', ' ').toUpperCase()}</h2>`;
-                groupedComponents[sectionType].forEach(component => {
-                    html += `<div style="margin-bottom: 15px;">
-                        <h4>${component.title}</h4>
-                        <p>${component.content}</p>
-                    </div>`;
+            try {
+                const response = await fetch(`/api/components/${componentId}`, {
+                    method: 'DELETE'
                 });
-            });
-            
-            preview.innerHTML = html;
-        }
-        
-        function exportResume() {
-            const title = document.getElementById('resume-title').value || 'Untitled Resume';
-            const preview = document.getElementById('resume-preview').innerHTML;
-            
-            // Create a new window for printing
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>${title}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        h1, h2 { color: #2f5597; }
-                    </style>
-                </head>
-                <body>
-                    ${preview}
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-        
-        // Modal functions
-        function showAddComponentModal() {
-            document.getElementById('component-modal').style.display = 'block';
-        }
-        
-        function showAddEmploymentModal() {
-            document.getElementById('employment-modal').style.display = 'block';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        function saveComponent() {
-            const component = {
-                section_type: document.getElementById('modal-section-type').value,
-                skill_level: document.getElementById('modal-skill-level').value,
-                title: document.getElementById('modal-title').value,
-                content: document.getElementById('modal-content').value,
-                keywords: document.getElementById('modal-keywords').value,
-                industry_tags: document.getElementById('modal-industry-tags').value
-            };
-            
-            if (!component.title.trim() || !component.content.trim()) {
-                alert('Please fill in title and content.');
-                return;
-            }
-            
-            db.addComponent(component);
-            closeModal('component-modal');
-            alert('Component saved successfully!');
-            
-            // Clear form
-            document.getElementById('modal-title').value = '';
-            document.getElementById('modal-content').value = '';
-            document.getElementById('modal-keywords').value = '';
-            document.getElementById('modal-industry-tags').value = '';
-            
-            loadComponentLibrary();
-            loadDashboard();
-        }
-        
-        function saveEmployment() {
-            const employment = {
-                company_name: document.getElementById('emp-company').value,
-                position_title: document.getElementById('emp-position').value,
-                start_date: document.getElementById('emp-start-date').value,
-                end_date: document.getElementById('emp-end-date').value,
-                location: document.getElementById('emp-location').value,
-                employment_type: document.getElementById('emp-type').value,
-                responsibilities: document.getElementById('emp-responsibilities').value,
-                achievements: document.getElementById('emp-achievements').value,
-                technologies: document.getElementById('emp-technologies').value
-            };
-            
-            if (!employment.company_name.trim() || !employment.position_title.trim()) {
-                alert('Please fill in company name and position title.');
-                return;
-            }
-            
-            db.addEmployment(employment);
-            closeModal('employment-modal');
-            alert('Employment history saved successfully!');
-            
-            // Clear form
-            Object.keys(employment).forEach(key => {
-                const element = document.getElementById('emp-' + key.replace('_', '-'));
-                if (element) element.value = '';
-            });
-            
-            loadEmploymentHistory();
-            loadDashboard();
-        }
-        
-        // Data Import functions
-        function extractFromFiles() {
-            const files = document.getElementById('resume-upload').files;
-            if (files.length === 0) {
-                alert('Please select files to extract from.');
-                return;
-            }
-            
-            // This would integrate with file reading and AI extraction
-            alert('File extraction feature would connect to AI service for component extraction.');
-        }
-        
-        function bulkExtractComponents() {
-            const text = document.getElementById('bulk-import-text').value;
-            if (!text.trim()) {
-                alert('Please paste resume text to extract from.');
-                return;
-            }
-            
-            // Simple extraction demo - would use AI in production
-            const lines = text.split('\n').filter(line => line.trim());
-            let extractedCount = 0;
-            
-            lines.forEach(line => {
-                if (line.length > 20 && line.length < 500) {
-                    const component = {
-                        section_type: 'professional_skills',
-                        title: `Extracted: ${line.substring(0, 30)}...`,
-                        content: line,
-                        keywords: '',
-                        industry_tags: '',
-                        skill_level: 'intermediate'
-                    };
-                    db.addComponent(component);
-                    extractedCount++;
+                
+                if (response.ok) {
+                    showStatus(`✅ Component "${componentTitle}" deleted successfully!`, 'success');
+                    loadComponentLibrary();
+                    loadDashboard();
+                } else {
+                    const error = await response.json();
+                    showStatus(`❌ Error deleting component: ${error.error}`, 'error');
                 }
-            });
-            
-            alert(`Extracted ${extractedCount} components from text.`);
-            loadComponentLibrary();
-            loadDashboard();
+            } catch (error) {
+                console.error('Error deleting component:', error);
+                showStatus('❌ Error deleting component. Please try again.', 'error');
+            }
         }
-        
-        function importFromTemplateApp() {
-            // This would import data from the existing template app
-            alert('This feature would import data from your existing resume template app.');
+
+        // Edit component function
+        async function editComponentDetails(componentId) {
+            try {
+                // First try to get component from API
+                const response = await fetch(`/api/components/${componentId}`);
+                let component;
+                
+                if (response.ok) {
+                    component = await response.json();
+                } else {
+                    // Fallback to local storage
+                    component = db.components.find(comp => comp.id == componentId);
+                }
+                
+                if (!component) {
+                    showStatus('Component not found.', 'error');
+                    return;
+                }
+                
+                // Pre-fill the component modal with existing data
+                document.getElementById('modal-section-type').value = component.section_type || 'professional_summary';
+                document.getElementById('modal-skill-level').value = component.skill_level || 'intermediate';
+                document.getElementById('modal-title').value = component.title || '';
+                document.getElementById('modal-content').value = component.content || '';
+                document.getElementById('modal-keywords').value = component.keywords || '';
+                document.getElementById('modal-industry-tags').value = component.industry_tags || '';
+                
+                // Store the ID for updating instead of creating new
+                window.editingComponentId = componentId;
+                
+                // Show the modal
+                document.getElementById('component-modal').style.display = 'block';
+                
+                showStatus('Editing component. Modify the details and save.', 'info');
+                
+            } catch (error) {
+                console.error('Error loading component for editing:', error);
+                showStatus('Error loading component for editing.', 'error');
+            }
         }
-        
+
+        // Update dashboard to use API
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                document.getElementById('total-components').textContent = stats.total_components || 0;
+                document.getElementById('total-jobs').textContent = stats.total_resumes || 0;
+                document.getElementById('total-resumes').textContent = stats.total_resumes || 0;
+                document.getElementById('total-employers').textContent = stats.total_employment || 0;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                // Fallback to local storage
+                document.getElementById('total-components').textContent = db.components.length;
+                document.getElementById('total-jobs').textContent = db.jobDescriptions.length;
+                document.getElementById('total-resumes').textContent = db.generatedResumes.length;
+                document.getElementById('total-employers').textContent = db.employment.length;
+            }
+        }
+
         // Settings functions
         function saveSettings() {
             alert('Settings saved successfully!');
@@ -1128,7 +1628,7 @@
             a.download = 'resume_database_backup.json';
             a.click();
         }
-        
+
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboard();
@@ -1186,6 +1686,527 @@
             };
             
             db.addEmployment(sampleEmployment);
+        }
+
+        // Modal functions
+        function showAddComponentModal() {
+            document.getElementById('component-modal').style.display = 'block';
+        }
+        
+        function showAddEmploymentModal() {
+            document.getElementById('employment-modal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Clear editing state when closing employment modal
+            if (modalId === 'employment-modal' && window.editingEmploymentId) {
+                delete window.editingEmploymentId;
+                
+                // Clear the form
+                const fields = ['emp-company', 'emp-position', 'emp-start-date', 'emp-end-date', 
+                               'emp-location', 'emp-type', 'emp-responsibilities', 'emp-achievements', 'emp-technologies'];
+                fields.forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (element) element.value = '';
+                });
+            }
+            
+            // Clear editing state when closing component modal
+            if (modalId === 'component-modal' && window.editingComponentId) {
+                delete window.editingComponentId;
+                
+                // Clear the form
+                const fields = ['modal-title', 'modal-content', 'modal-keywords', 'modal-industry-tags'];
+                fields.forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (element) element.value = '';
+                });
+                
+                // Reset selects to default
+                document.getElementById('modal-section-type').value = 'professional_summary';
+                document.getElementById('modal-skill-level').value = 'intermediate';
+            }
+        }
+
+        // Component and employment functions
+        function selectComponent(componentId) {
+            showStatus('Component selected', 'info');
+        }
+
+        function searchComponents() {
+            const query = document.getElementById('component-search').value;
+            const sectionFilter = document.getElementById('section-filter').value;
+            // Implementation would use API search
+            showStatus('Search functionality available', 'info');
+        }
+
+        async function saveComponent() {
+            const component = {
+                section_type: document.getElementById('modal-section-type').value,
+                title: document.getElementById('modal-title').value.trim(),
+                content: document.getElementById('modal-content').value.trim(),
+                keywords: document.getElementById('modal-keywords').value.trim(),
+                industry_tags: document.getElementById('modal-industry-tags').value.trim()
+            };
+            
+            if (!component.title || !component.content) {
+                showStatus('Please fill in title and content.', 'error');
+                return;
+            }
+            
+            try {
+                let response;
+                let result;
+                
+                // Check if we're editing an existing component
+                if (window.editingComponentId) {
+                    // Update existing component via API
+                    response = await fetch(`/api/components/${window.editingComponentId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(component)
+                    });
+                    
+                    if (response.ok) {
+                        result = await response.json();
+                        showStatus(`✅ Component "${component.title}" updated successfully!`, 'success');
+                    } else {
+                        // Fallback to local storage update
+                        const existingIndex = db.components.findIndex(comp => comp.id == window.editingComponentId);
+                        if (existingIndex !== -1) {
+                            component.id = window.editingComponentId;
+                            component.created_at = db.components[existingIndex].created_at;
+                            component.updated_at = new Date().toISOString();
+                            db.components[existingIndex] = component;
+                            db.saveComponents();
+                            showStatus(`✅ Component "${component.title}" updated successfully!`, 'success');
+                        } else {
+                            showStatus('Component not found for update.', 'error');
+                            return;
+                        }
+                    }
+                    
+                    // Clear the editing flag
+                    delete window.editingComponentId;
+                } else {
+                    // Create new component
+                    response = await fetch('/add_component', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(component)
+                    });
+                    
+                    result = await response.json();
+                    
+                    if (result.success) {
+                        showStatus(`✅ Component "${component.title}" saved successfully!`, 'success');
+                    } else {
+                        showStatus(`❌ Error: ${result.error}`, 'error');
+                        return;
+                    }
+                }
+                
+                closeModal('component-modal');
+                
+                // Clear form
+                document.getElementById('modal-title').value = '';
+                document.getElementById('modal-content').value = '';
+                document.getElementById('modal-keywords').value = '';
+                document.getElementById('modal-industry-tags').value = '';
+                
+                loadComponentLibrary();
+                loadDashboard();
+                
+            } catch (error) {
+                console.error('Error saving component:', error);
+                showStatus('❌ Error saving component. Please try again.', 'error');
+            }
+        }
+
+        async function saveEmployment() {
+            const employment = {
+                company_name: document.getElementById('emp-company').value,
+                position_title: document.getElementById('emp-position').value,
+                start_date: document.getElementById('emp-start-date').value,
+                end_date: document.getElementById('emp-end-date').value,
+                location: document.getElementById('emp-location').value,
+                employment_type: document.getElementById('emp-type').value,
+                responsibilities: document.getElementById('emp-responsibilities').value,
+                achievements: document.getElementById('emp-achievements').value,
+                technologies: document.getElementById('emp-technologies').value
+            };
+            
+            if (!employment.company_name.trim() || !employment.position_title.trim()) {
+                showStatus('Please fill in company name and position title.', 'error');
+                return;
+            }
+            
+            // Check if we're editing an existing entry
+            if (window.editingEmploymentId) {
+                // Update existing employment entry
+                const existingIndex = db.employment.findIndex(emp => emp.id === window.editingEmploymentId);
+                if (existingIndex !== -1) {
+                    // Keep the original ID and created_at
+                    employment.id = window.editingEmploymentId;
+                    employment.created_at = db.employment[existingIndex].created_at;
+                    employment.updated_at = new Date().toISOString();
+                    db.employment[existingIndex] = employment;
+                    showStatus('Employment history updated successfully!', 'success');
+                } else {
+                    showStatus('Employment entry not found for update.', 'error');
+                    return;
+                }
+                
+                // Clear the editing flag
+                delete window.editingEmploymentId;
+            } else {
+                // Create new employment entry
+                db.addEmployment(employment);
+                showStatus('Employment history saved successfully!', 'success');
+            }
+            
+            db.saveEmployment();
+            closeModal('employment-modal');
+            
+            // Clear form
+            Object.keys(employment).forEach(key => {
+                if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+                    const element = document.getElementById('emp-' + key.replace('_', '-'));
+                    if (element) element.value = '';
+                }
+            });
+            
+            loadEmploymentHistory();
+            loadDashboard();
+        }
+
+        function loadEmploymentHistory() {
+            const list = document.getElementById('employment-list');
+            list.innerHTML = db.employment.map(emp => `
+                <div class="employment-entry">
+                    <h4>${emp.position_title} at ${emp.company_name}</h4>
+                    <p><strong>Duration:</strong> ${emp.start_date} - ${emp.end_date || 'Present'}</p>
+                    <p><strong>Location:</strong> ${emp.location}</p>
+                    <p><strong>Type:</strong> ${emp.employment_type}</p>
+                    ${emp.responsibilities ? `<p><strong>Responsibilities:</strong> ${emp.responsibilities}</p>` : ''}
+                    ${emp.achievements ? `<p><strong>Achievements:</strong> ${emp.achievements}</p>` : ''}
+                    ${emp.technologies ? `<p><strong>Technologies:</strong> ${emp.technologies}</p>` : ''}
+                    <div class="component-actions" style="margin-top: 1rem;">
+                        <button class="edit-btn" onclick="editEmployment('${emp.id}')">✏️ Edit</button>
+                        <button class="delete-btn" onclick="deleteEmployment('${emp.id}', '${emp.position_title} at ${emp.company_name}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('') || '<p>No employment history added yet.</p>';
+        }
+
+        // Delete employment function
+        function deleteEmployment(employmentId, employmentTitle) {
+            const confirmed = confirm(`Are you sure you want to delete "${employmentTitle}"?\n\nThis action cannot be undone.`);
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            // Remove from local storage
+            db.employment = db.employment.filter(emp => emp.id !== employmentId);
+            db.saveEmployment();
+            
+            showStatus(`✅ Employment entry "${employmentTitle}" deleted successfully!`, 'success');
+            loadEmploymentHistory();
+            loadDashboard();
+        }
+
+        // Edit employment function
+        function editEmployment(employmentId) {
+            const employment = db.employment.find(emp => emp.id === employmentId);
+            
+            if (!employment) {
+                showStatus('Employment entry not found.', 'error');
+                return;
+            }
+            
+            // Pre-fill the employment modal with existing data
+            document.getElementById('emp-company').value = employment.company_name || '';
+            document.getElementById('emp-position').value = employment.position_title || '';
+            document.getElementById('emp-start-date').value = employment.start_date || '';
+            document.getElementById('emp-end-date').value = employment.end_date || '';
+            document.getElementById('emp-location').value = employment.location || '';
+            document.getElementById('emp-type').value = employment.employment_type || 'full-time';
+            document.getElementById('emp-responsibilities').value = employment.responsibilities || '';
+            document.getElementById('emp-achievements').value = employment.achievements || '';
+            document.getElementById('emp-technologies').value = employment.technologies || '';
+            
+            // Store the ID for updating instead of creating new
+            window.editingEmploymentId = employmentId;
+            
+            // Show the modal
+            document.getElementById('employment-modal').style.display = 'block';
+            
+            showStatus('Editing employment entry. Modify the details and save.', 'info');
+        }
+
+        // Export employment data function
+        function exportEmploymentData() {
+            if (db.employment.length === 0) {
+                showStatus('No employment history to export.', 'warning');
+                return;
+            }
+            
+            const data = {
+                employment_history: db.employment,
+                exported_at: new Date().toISOString(),
+                total_entries: db.employment.length
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `employment_history_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            showStatus('Employment history exported successfully!', 'success');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal, [id$="-modal"]');
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Resume Library Functions
+        function switchResumeSubTab(subtabName) {
+            // Remove active class from all sub-tabs and content
+            document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected sub-tab and content
+            document.querySelector(`[data-subtab="${subtabName}"]`).classList.add('active');
+            document.getElementById(subtabName).classList.add('active');
+            
+            // Load content based on sub-tab
+            if (subtabName === 'uploaded-resumes') {
+                loadUploadedResumes();
+            } else if (subtabName === 'templates') {
+                loadTemplates();
+            }
+        }
+
+        // Uploaded Resumes Functions
+        async function loadUploadedResumes() {
+            try {
+                const includeArchived = document.getElementById('include-archived').checked;
+                const response = await fetch(`/api/uploaded-resumes?include_archived=${includeArchived}`);
+                const resumes = await response.json();
+                
+                displayUploadedResumes(resumes);
+                updateResumeStats(resumes);
+                
+            } catch (error) {
+                console.error('Error loading uploaded resumes:', error);
+                showStatus('Error loading uploaded resumes', 'error');
+            }
+        }
+
+        function displayUploadedResumes(resumes) {
+            const grid = document.getElementById('uploaded-resumes-grid');
+            
+            if (!resumes || resumes.length === 0) {
+                grid.innerHTML = '<p>No uploaded resumes found. Upload a resume using the Resume Importer to get started.</p>';
+                return;
+            }
+            
+            grid.innerHTML = resumes.map(resume => `
+                <div class="resume-card">
+                    <div class="component-title">${resume.resume_title || resume.original_filename}</div>
+                    <div class="file-info">
+                        📁 ${resume.original_filename} (${formatFileSize(resume.file_size)})
+                        ${resume.file_type ? `• ${resume.file_type.toUpperCase()}` : ''}
+                    </div>
+                    <div class="component-preview" style="max-height: 100px; overflow: hidden;">
+                        ${resume.full_text_content.substring(0, 200)}${resume.full_text_content.length > 200 ? '...' : ''}
+                    </div>
+                    ${resume.tags && resume.tags.length > 0 ? `
+                        <div class="tags">
+                            ${resume.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="resume-meta">
+                        <span>📅 ${new Date(resume.created_at).toLocaleDateString()}</span>
+                        <span>🧩 ${resume.components_extracted || 0} components</span>
+                    </div>
+                    <div class="component-actions">
+                        <button class="edit-btn" onclick="viewResumeDetails('${resume.id}')">👁️ View</button>
+                        <button class="edit-btn" onclick="editResumeDetails('${resume.id}')">✏️ Edit</button>
+                        <button class="delete-btn" onclick="deleteUploadedResume('${resume.id}', '${resume.resume_title || resume.original_filename}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function searchUploadedResumes() {
+            const query = document.getElementById('resume-search').value;
+            const includeArchived = document.getElementById('include-archived').checked;
+            
+            try {
+                const response = await fetch(`/api/uploaded-resumes?q=${encodeURIComponent(query)}&include_archived=${includeArchived}`);
+                const resumes = await response.json();
+                displayUploadedResumes(resumes);
+                updateResumeStats(resumes);
+            } catch (error) {
+                console.error('Error searching resumes:', error);
+                showStatus('Error searching resumes', 'error');
+            }
+        }
+
+        async function deleteUploadedResume(resumeId, resumeTitle) {
+            const confirmed = confirm(`Are you sure you want to delete "${resumeTitle}"?\n\nThis action cannot be undone.`);
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/uploaded-resumes/${resumeId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showStatus(`✅ Resume "${resumeTitle}" deleted successfully!`, 'success');
+                    loadUploadedResumes();
+                } else {
+                    const error = await response.json();
+                    showStatus(`❌ Error deleting resume: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting resume:', error);
+                showStatus('❌ Error deleting resume. Please try again.', 'error');
+            }
+        }
+
+        function updateResumeStats(resumes) {
+            document.getElementById('total-uploaded-resumes').textContent = resumes.length;
+            const totalComponents = resumes.reduce((sum, resume) => sum + (resume.components_extracted || 0), 0);
+            document.getElementById('total-extracted-components').textContent = totalComponents;
+        }
+
+        // Templates Functions
+        async function loadTemplates() {
+            try {
+                const response = await fetch('/api/templates');
+                const templates = await response.json();
+                displayTemplates(templates);
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                showStatus('Error loading templates', 'error');
+            }
+        }
+
+        function displayTemplates(templates) {
+            const grid = document.getElementById('templates-grid');
+            
+            if (!templates || templates.length === 0) {
+                grid.innerHTML = '<p>No templates found. Create your first template to get started.</p>';
+                return;
+            }
+            
+            grid.innerHTML = templates.map(template => `
+                <div class="template-card">
+                    <div class="component-title">${template.template_name} ${template.is_default ? '⭐' : ''}</div>
+                    <div class="component-preview" style="max-height: 80px; overflow: hidden;">
+                        ${template.description || 'No description provided'}
+                    </div>
+                    <div class="file-info">
+                        ${template.target_role ? `🎯 ${template.target_role}` : ''} 
+                        ${template.target_industry ? `• 🏢 ${template.target_industry}` : ''}
+                    </div>
+                    <div class="template-meta">
+                        <span>📅 ${new Date(template.created_at).toLocaleDateString()}</span>
+                        <span>📊 Used ${template.usage_count || 0} times</span>
+                    </div>
+                    <div class="component-actions">
+                        <button class="edit-btn" onclick="viewTemplateDetails('${template.id}')">👁️ View</button>
+                        <button class="edit-btn" onclick="editTemplateDetails('${template.id}')">✏️ Edit</button>
+                        ${!template.is_default ? `<button class="delete-btn" onclick="deleteTemplate('${template.id}', '${template.template_name}')">🗑️ Delete</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function searchTemplates() {
+            const query = document.getElementById('template-search').value;
+            try {
+                const response = await fetch(`/api/templates?q=${encodeURIComponent(query)}`);
+                const templates = await response.json();
+                displayTemplates(templates);
+            } catch (error) {
+                console.error('Error searching templates:', error);
+                showStatus('Error searching templates', 'error');
+            }
+        }
+
+        async function deleteTemplate(templateId, templateName) {
+            const confirmed = confirm(`Are you sure you want to delete template "${templateName}"?\n\nThis action cannot be undone.`);
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/templates/${templateId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showStatus(`✅ Template "${templateName}" deleted successfully!`, 'success');
+                    loadTemplates();
+                } else {
+                    const error = await response.json();
+                    showStatus(`❌ Error deleting template: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting template:', error);
+                showStatus('❌ Error deleting template. Please try again.', 'error');
+            }
+        }
+
+        // Helper Functions
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function viewResumeDetails(resumeId) {
+            showStatus('Resume details view coming soon!', 'info');
+        }
+
+        function editResumeDetails(resumeId) {
+            showStatus('Resume editing coming soon!', 'info');
+        }
+
+        function viewTemplateDetails(templateId) {
+            showStatus('Template details view coming soon!', 'info');
+        }
+
+        function editTemplateDetails(templateId) {
+            showStatus('Template editing coming soon!', 'info');
+        }
+
+        function showAddTemplateModal() {
+            showStatus('Template creation modal coming soon!', 'info');
         }
     </script>
 </body>

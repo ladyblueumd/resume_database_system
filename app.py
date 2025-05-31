@@ -459,6 +459,33 @@ def create_component():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/components/<int:component_id>', methods=['GET'])
+def get_component(component_id):
+    """Get a specific resume component"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT rc.*, st.name as section_type_name
+            FROM resume_components rc
+            JOIN section_types st ON rc.section_type_id = st.id
+            WHERE rc.id = ?
+        """, (component_id,))
+        
+        component = cursor.fetchone()
+        conn.close()
+        
+        if not component:
+            return jsonify({'error': 'Component not found'}), 404
+        
+        return jsonify(dict_from_row(component))
+        
+    except Exception as e:
+        logger.error(f"Error fetching component: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/components/<int:component_id>', methods=['PUT'])
 def update_component(component_id):
     """Update a resume component"""
@@ -467,18 +494,56 @@ def update_component(component_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Update component
-        cursor.execute("""
-            UPDATE resume_components 
-            SET title = ?, content = ?, keywords = ?, updated_at = ?
-            WHERE id = ?
-        """, (
-            data['title'],
-            data['content'],
-            data.get('keywords', ''),
-            datetime.now().isoformat(),
-            component_id
-        ))
+        # Get section_type_id if section_type is provided
+        section_type_id = None
+        if 'section_type' in data:
+            cursor.execute("SELECT id FROM section_types WHERE name = ?", (data['section_type'],))
+            result = cursor.fetchone()
+            if result:
+                section_type_id = result[0]
+            else:
+                # If section type doesn't exist, create it
+                cursor.execute("INSERT INTO section_types (name) VALUES (?)", (data['section_type'],))
+                section_type_id = cursor.lastrowid
+        
+        # Update component - build query dynamically based on provided fields
+        update_fields = []
+        update_values = []
+        
+        if 'title' in data:
+            update_fields.append("title = ?")
+            update_values.append(data['title'])
+            
+        if 'content' in data:
+            update_fields.append("content = ?")
+            update_values.append(data['content'])
+            
+        if 'keywords' in data:
+            update_fields.append("keywords = ?")
+            update_values.append(data.get('keywords', ''))
+            
+        if 'industry_tags' in data:
+            update_fields.append("industry_tags = ?")
+            update_values.append(data.get('industry_tags', ''))
+            
+        if section_type_id:
+            update_fields.append("section_type_id = ?")
+            update_values.append(section_type_id)
+        
+        # Always update the timestamp
+        update_fields.append("updated_at = ?")
+        update_values.append(datetime.now().isoformat())
+        
+        # Add component_id for WHERE clause
+        update_values.append(component_id)
+        
+        if update_fields:
+            query = f"UPDATE resume_components SET {', '.join(update_fields)} WHERE id = ?"
+            cursor.execute(query, update_values)
+            
+            if cursor.rowcount == 0:
+                conn.close()
+                return jsonify({'error': 'Component not found'}), 404
         
         conn.commit()
         conn.close()
@@ -2126,17 +2191,59 @@ def upload_resume_file():
                     'error': 'Could not extract text from file. The file may be empty or corrupted.'
                 })
             
+            # Save the full resume to database
+            try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                
+                # Get file size
+                file_size = os.path.getsize(temp_path)
+                file_type = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+                
+                # Generate a title from filename
+                resume_title = filename.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ').title()
+                
+                # Parse the text into structured data
+                parsed_components = parse_resume_text(extracted_text)
+                
+                cursor.execute("""
+                    INSERT INTO uploaded_resumes 
+                    (filename, original_filename, file_type, file_size, resume_title, 
+                     full_text_content, structured_data, upload_source)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    filename,
+                    file.filename,
+                    file_type,
+                    file_size,
+                    resume_title,
+                    extracted_text,
+                    json.dumps(parsed_components),
+                    'manual_upload'
+                ))
+                
+                resume_id = cursor.lastrowid
+                conn.commit()
+                conn.close()
+                
+                logger.info(f"Saved uploaded resume with ID {resume_id}")
+                
+            except Exception as db_error:
+                logger.warning(f"Could not save resume to database: {db_error}")
+                # Continue anyway - the text extraction worked
+            
             # Clean up temporary file
             try:
                 os.remove(temp_path)
             except:
-                pass  # Ignore cleanup errors
+                pass  # Don't fail if file cleanup fails
             
             return jsonify({
                 'success': True,
                 'text': extracted_text,
-                'filename': filename,
-                'message': f'Successfully extracted text from {filename}'
+                'filename': file.filename,
+                'message': f'Successfully extracted text from {file.filename}',
+                'resume_id': resume_id if 'resume_id' in locals() else None
             })
             
         except Exception as e:
@@ -2207,6 +2314,300 @@ def add_component():
     except Exception as e:
         logger.error(f"Error adding component: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# UPLOADED RESUMES API ENDPOINTS
+
+@app.route('/api/uploaded-resumes', methods=['GET'])
+def get_uploaded_resumes():
+    """Get all uploaded resumes"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        include_archived = request.args.get('include_archived', 'false').lower() == 'true'
+        search_query = request.args.get('q', '')
+        limit = request.args.get('limit', 50, type=int)
+        
+        query = "SELECT * FROM uploaded_resumes WHERE 1=1"
+        params = []
+        
+        if not include_archived:
+            query += " AND is_archived = FALSE"
+        
+        if search_query:
+            query += " AND (resume_title LIKE ? OR original_filename LIKE ? OR notes LIKE ?)"
+            search_pattern = f'%{search_query}%'
+            params.extend([search_pattern, search_pattern, search_pattern])
+        
+        query += " ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        resumes = [dict_from_row(row) for row in cursor.fetchall()]
+        
+        # Parse JSON fields
+        for resume in resumes:
+            if resume.get('tags'):
+                resume['tags'] = json.loads(resume['tags'])
+            if resume.get('structured_data'):
+                resume['structured_data'] = json.loads(resume['structured_data'])
+        
+        conn.close()
+        return jsonify(resumes)
+        
+    except Exception as e:
+        logger.error(f"Error fetching uploaded resumes: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/uploaded-resumes', methods=['POST'])
+def save_uploaded_resume():
+    """Save an uploaded resume to the database"""
+    try:
+        data = request.json
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO uploaded_resumes 
+            (filename, original_filename, file_type, file_size, resume_title, 
+             full_text_content, structured_data, upload_source, tags, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('filename', ''),
+            data.get('original_filename', ''),
+            data.get('file_type', ''),
+            data.get('file_size', 0),
+            data.get('resume_title', ''),
+            data.get('full_text_content', ''),
+            json.dumps(data.get('structured_data', {})),
+            data.get('upload_source', 'manual'),
+            json.dumps(data.get('tags', [])),
+            data.get('notes', '')
+        ))
+        
+        resume_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'id': resume_id,
+            'message': 'Resume saved successfully'
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error saving uploaded resume: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/uploaded-resumes/<int:resume_id>', methods=['GET'])
+def get_uploaded_resume(resume_id):
+    """Get a specific uploaded resume"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM uploaded_resumes WHERE id = ?", (resume_id,))
+        resume = cursor.fetchone()
+        
+        if not resume:
+            return jsonify({'error': 'Resume not found'}), 404
+        
+        resume_dict = dict_from_row(resume)
+        
+        # Parse JSON fields
+        if resume_dict.get('tags'):
+            resume_dict['tags'] = json.loads(resume_dict['tags'])
+        if resume_dict.get('structured_data'):
+            resume_dict['structured_data'] = json.loads(resume_dict['structured_data'])
+        
+        # Update last accessed
+        cursor.execute("UPDATE uploaded_resumes SET last_accessed = ? WHERE id = ?", 
+                      (datetime.now().isoformat(), resume_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify(resume_dict)
+        
+    except Exception as e:
+        logger.error(f"Error fetching uploaded resume: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/uploaded-resumes/<int:resume_id>', methods=['PUT'])
+def update_uploaded_resume(resume_id):
+    """Update an uploaded resume"""
+    try:
+        data = request.json
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if resume exists
+        cursor.execute("SELECT id FROM uploaded_resumes WHERE id = ?", (resume_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Resume not found'}), 404
+        
+        # Update fields
+        update_fields = []
+        params = []
+        
+        for field in ['resume_title', 'notes', 'is_archived']:
+            if field in data:
+                update_fields.append(f"{field} = ?")
+                params.append(data[field])
+        
+        if 'tags' in data:
+            update_fields.append("tags = ?")
+            params.append(json.dumps(data['tags']))
+        
+        if update_fields:
+            params.append(datetime.now().isoformat())
+            params.append(resume_id)
+            
+            query = f"UPDATE uploaded_resumes SET {', '.join(update_fields)}, updated_at = ? WHERE id = ?"
+            cursor.execute(query, params)
+            conn.commit()
+        
+        conn.close()
+        return jsonify({'message': 'Resume updated successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error updating uploaded resume: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/uploaded-resumes/<int:resume_id>', methods=['DELETE'])
+def delete_uploaded_resume(resume_id):
+    """Delete an uploaded resume"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if resume exists
+        cursor.execute("SELECT id FROM uploaded_resumes WHERE id = ?", (resume_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Resume not found'}), 404
+        
+        # Delete resume
+        cursor.execute("DELETE FROM uploaded_resumes WHERE id = ?", (resume_id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Resume deleted successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error deleting uploaded resume: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# TEMPLATES API ENDPOINTS
+
+@app.route('/api/templates/<int:template_id>', methods=['GET'])
+def get_template(template_id):
+    """Get a specific template"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM resume_templates WHERE id = ?", (template_id,))
+        template = cursor.fetchone()
+        
+        if not template:
+            return jsonify({'error': 'Template not found'}), 404
+        
+        template_dict = dict_from_row(template)
+        
+        # Parse JSON fields
+        if template_dict.get('component_mapping'):
+            template_dict['component_mapping'] = json.loads(template_dict['component_mapping'])
+        if template_dict.get('style_settings'):
+            template_dict['style_settings'] = json.loads(template_dict['style_settings'])
+        
+        conn.close()
+        return jsonify(template_dict)
+        
+    except Exception as e:
+        logger.error(f"Error fetching template: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/templates/<int:template_id>', methods=['PUT'])
+def update_template(template_id):
+    """Update a template"""
+    try:
+        data = request.json
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if template exists
+        cursor.execute("SELECT id FROM resume_templates WHERE id = ?", (template_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Template not found'}), 404
+        
+        # Update fields
+        update_fields = []
+        params = []
+        
+        for field in ['template_name', 'description', 'target_role', 'target_industry', 'is_default']:
+            if field in data:
+                update_fields.append(f"{field} = ?")
+                params.append(data[field])
+        
+        # Handle JSON fields
+        if 'component_mapping' in data:
+            update_fields.append("component_mapping = ?")
+            params.append(json.dumps(data['component_mapping']))
+        
+        if 'style_settings' in data:
+            update_fields.append("style_settings = ?")
+            params.append(json.dumps(data['style_settings']))
+        
+        if update_fields:
+            params.append(datetime.now().isoformat())
+            params.append(template_id)
+            
+            query = f"UPDATE resume_templates SET {', '.join(update_fields)}, updated_at = ? WHERE id = ?"
+            cursor.execute(query, params)
+            conn.commit()
+        
+        conn.close()
+        return jsonify({'message': 'Template updated successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error updating template: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/templates/<int:template_id>', methods=['DELETE'])
+def delete_template(template_id):
+    """Delete a template"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if template exists
+        cursor.execute("SELECT id FROM resume_templates WHERE id = ?", (template_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Template not found'}), 404
+        
+        # Check if template is marked as default
+        cursor.execute("SELECT is_default FROM resume_templates WHERE id = ?", (template_id,))
+        template = cursor.fetchone()
+        if template and template['is_default']:
+            return jsonify({'error': 'Cannot delete default template'}), 400
+        
+        # Delete template
+        cursor.execute("DELETE FROM resume_templates WHERE id = ?", (template_id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Template deleted successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error deleting template: {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

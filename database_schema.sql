@@ -112,6 +112,26 @@ CREATE TABLE resume_templates (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Uploaded Resume Documents
+CREATE TABLE uploaded_resumes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    original_filename TEXT NOT NULL,
+    file_type TEXT, -- pdf, docx, txt, etc.
+    file_size INTEGER, -- in bytes
+    resume_title TEXT,
+    full_text_content TEXT NOT NULL, -- Extracted text content
+    structured_data TEXT, -- JSON of parsed sections/components
+    upload_source TEXT DEFAULT 'manual', -- manual, email, api, etc.
+    tags TEXT, -- JSON array of user-defined tags
+    notes TEXT,
+    is_archived BOOLEAN DEFAULT FALSE,
+    components_extracted INTEGER DEFAULT 0, -- Count of components created from this resume
+    last_accessed DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Generated Resumes
 CREATE TABLE generated_resumes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -218,6 +238,8 @@ CREATE INDEX idx_resumes_job ON generated_resumes(job_description_id);
 CREATE INDEX idx_skills_category ON skills(category_id);
 CREATE INDEX idx_usage_component ON component_usage(component_id);
 CREATE INDEX idx_matches_job ON keyword_matches(job_description_id);
+CREATE INDEX idx_uploaded_resumes_filename ON uploaded_resumes(filename);
+CREATE INDEX idx_uploaded_resumes_created ON uploaded_resumes(created_at);
 
 -- Create views for common queries
 CREATE VIEW resume_component_summary AS
