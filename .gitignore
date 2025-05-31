@@ -1,3 +1,9 @@
+# Git LFS (Large File Storage) Configuration
+# The following file types are tracked by Git LFS (see .gitattributes):
+# - ML Models: *.bin, *.pkl, *.pt, *.h5, *.onnx, *.model
+# - Archives: *.zip
+# These files will be stored efficiently and won't bloat the repository
+
 # Python
 __pycache__/
 *.py[cod]
