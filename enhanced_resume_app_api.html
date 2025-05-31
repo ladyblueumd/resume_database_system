@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Database System - API Connected</title>
+    <style>
+        :root {
+            --primary-color: #2f5597;
+            --secondary-color: #5b9bd5;
+            --accent-color: #4472c4;
+            --success-color: #70ad47;
+            --warning-color: #ed7d31;
+            --danger-color: #c55a11;
+            --light-bg: #f5f5f5;
+            --dark-text: #2c3e50;
+            --border-color: #ddd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            background-color: var(--light-bg);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        /* Tab Navigation */
+        .tabs {
+            background: white;
+            border-bottom: 3px solid var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .tab-list {
+            display: flex;
+            flex-wrap: wrap;
+            list-style: none;
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: var(--dark-text);
+            position: relative;
+        }
+        
+        .tab:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background-color: rgba(47, 85, 151, 0.1);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 2rem 0;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 0.8rem;
+            font-size: 1.4rem;
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+        
+        /* Form Styles */
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+        
+        /* Button Styles */
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button.secondary {
+            background-color: #6c757d;
+        }
+        
+        button.success {
+            background-color: var(--success-color);
+        }
+        
+        button.danger {
+            background-color: var(--danger-color);
+        }
+        
+        /* Component Grid */
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .component-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .component-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+        
+        .component-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .component-preview {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .component-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #999;
+        }
+        
+        .component-meta span {
+            background: var(--light-bg);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+        }
+        
+        /* Job Analysis Results */
+        .analysis-results {
+            margin-top: 2rem;
+        }
+        
+        .keyword-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .keyword-tag {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .suggestion-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .suggestion-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .match-score {
+            float: right;
+            background: var(--success-color);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        /* Employment Entry */
+        .employment-entry {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .employment-entry h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Selected Components */
+        .selected-component {
+            background: var(--light-bg);
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            border: 2px solid var(--border-color);
+        }
+        
+        .remove-component {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding: 0;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Utility Classes */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .mt-2 { margin-top: 2rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        
+        /* AI Status */
+        #ai-status {
+            background: #e3f2fd;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        
+        /* Resume Preview */
+        #resume-preview {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+            margin-top: 2rem;
+        }
+        
+        #resume-preview h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        #resume-preview h2 {
+            color: var(--secondary-color);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        #resume-preview h4 {
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Project and Work Order Styles */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .project-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+            border-color: var(--primary-color);
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .project-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+            padding: 16px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .project-metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .work-orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .work-order-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .work-order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .work-order-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .match-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .suggestion-item {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .item-type-badge {
+            background: var(--accent-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>📄 Resume Database System</h1>
+            <p>AI-Powered Resume Component Management</p>
+        </div>
+    </header>
+    
+    <nav class="tabs">
+        <div class="container">
+            <ul class="tab-list">
+                <li class="tab active" data-tab="dashboard">📊 Dashboard</li>
+                <li class="tab" data-tab="job-matcher">🎯 Job Matcher</li>
+                <li class="tab" data-tab="component-library">📚 Component Library</li>
+                <li class="tab" data-tab="work-orders">🔧 Work Orders</li>
+                <li class="tab" data-tab="projects">📁 Projects</li>
+                <li class="tab" data-tab="enhanced-job-matcher">🎯 Enhanced Matcher</li>
+                <li class="tab" data-tab="employment-history">💼 Employment History</li>
+                <li class="tab" data-tab="resume-builder">📝 Resume Builder</li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📚 Total Components</h3>
+                    <div class="stat-number" id="total-components">-</div>
+                    <p>Resume sections stored</p>
+                </div>
+                <div class="stat-card">
+                    <h3>🎯 Job Descriptions</h3>
+                    <div class="stat-number" id="total-jobs">-</div>
+                    <p>Analyzed positions</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📄 Generated Resumes</h3>
+                    <div class="stat-number" id="total-resumes">-</div>
+                    <p>Custom resumes created</p>
+                </div>
+                <div class="stat-card">
+                    <h3>💼 Employment Records</h3>
+                    <div class="stat-number" id="total-employers">-</div>
+                    <p>Work history entries</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>📈 Component Distribution</h2>
+                <div id="component-distribution"></div>
+            </div>
+        </div>
+        
+        <!-- Job Matcher Tab -->
+        <div id="job-matcher" class="tab-content">
+            <div class="card">
+                <h2>🎯 Job Description Analyzer</h2>
+                <p>Paste a job description to find matching resume components using AI analysis.</p>
+                
+                <div class="form-row mt-2">
+                    <div>
+                        <label for="company-name">Company Name:</label>
+                        <input type="text" id="company-name" placeholder="e.g., Tech Corp">
+                    </div>
+                    <div>
+                        <label for="position-title">Position Title:</label>
+                        <input type="text" id="position-title" placeholder="e.g., Desktop Support Specialist">
+                    </div>
+                </div>
+                
+                <label for="job-description-input">Job Description:</label>
+                <textarea id="job-description-input" placeholder="Paste the complete job description here..." rows="10"></textarea>
+                
+                <div id="ai-status">🤖 Ready to analyze job descriptions</div>
+                
+                <button onclick="analyzeJobDescription()" class="success">🔍 Analyze Job Description</button>
+                <button onclick="saveJobDescription()" class="secondary">💾 Save Job Description</button>
+            </div>
+            
+            <div id="job-analysis-results" class="analysis-results" style="display: none;">
+                <div class="card">
+                    <div id="extracted-keywords"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>📋 Recommended Components</h3>
+                    <div id="component-suggestions"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Component Library Tab -->
+        <div id="component-library" class="tab-content">
+            <div class="card">
+                <h2>📚 Resume Component Library</h2>
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="component-search" placeholder="Search components..." onkeyup="searchComponents()">
+                    </div>
+                    <div>
+                        <select id="section-filter" onchange="searchComponents()">
+                            <option value="">All Sections</option>
+                            <option value="professional_summary">Professional Summary</option>
+                            <option value="technical_skills">Technical Skills</option>
+                            <option value="professional_skills">Professional Skills</option>
+                            <option value="work_experience">Work Experience</option>
+                            <option value="education">Education</option>
+                            <option value="certifications">Certifications</option>
+                            <option value="projects">Projects</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="showAddComponentModal()" class="success mt-2">➕ Add New Component</button>
+            </div>
+            
+            <div id="component-grid" class="component-grid">
+                <!-- Components will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Employment History Tab -->
+        <div id="employment-history" class="tab-content">
+            <div class="card">
+                <h2>💼 Employment History</h2>
+                <button onclick="showAddEmploymentModal()" class="success">➕ Add Employment Record</button>
+            </div>
+            
+            <div id="employment-list">
+                <!-- Employment entries will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Resume Builder Tab -->
+        <div id="resume-builder" class="tab-content">
+            <div class="card">
+                <h2>📝 Resume Builder</h2>
+                <label for="resume-title">Resume Title:</label>
+                <input type="text" id="resume-title" placeholder="e.g., Desktop Support Specialist Resume">
+                
+                <h3 class="mt-2">Selected Components</h3>
+                <div id="selected-components-list">
+                    <p>No components selected yet. Search and select components from the library.</p>
+                </div>
+                
+                <button onclick="generateResumePreview()" class="success mt-2">👁️ Preview Resume</button>
+                <button onclick="exportResume()" class="secondary">📥 Export Resume</button>
+                <button onclick="saveResume()" class="primary">💾 Save Resume</button>
+            </div>
+            
+            <div id="resume-preview"></div>
+        </div>
+
+        <!-- Work Orders Tab -->
+        <div id="work-orders" class="tab-content">
+            <div class="card">
+                <h2>🔧 FieldNation Work Orders</h2>
+                <p>Manage and analyze your FieldNation work order history for resume building.</p>
+                
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="work-order-search" placeholder="Search by company or description..." onkeyup="searchWorkOrders()">
+                    </div>
+                    <div>
+                        <select id="category-filter" onchange="filterWorkOrders()">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="work-order-stats" id="work-order-stats">
+                    <!-- Work order statistics will be loaded here -->
+                </div>
+            </div>
+            
+            <div id="work-orders-grid" class="work-orders-grid">
+                <!-- Work orders will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="projects" class="tab-content">
+            <div class="card">
+                <h2>📁 Work Order Projects</h2>
+                <p>Group your work orders into meaningful projects for resume presentation.</p>
+                
+                <div class="project-stats" id="project-stats">
+                    <!-- Project stats will be populated here -->
+                </div>
+                
+                <div class="form-row">
+                    <button onclick="showCreateProjectModal()" class="success">➕ Create Project</button>
+                    <button onclick="showAutoCreateModal()" class="secondary">🤖 Auto-Create Projects</button>
+                    <button onclick="showAssignWorkOrdersModal()" class="primary">🔗 Assign Work Orders</button>
+                    <button onclick="loadProjects()">🔄 Refresh</button>
+                </div>
+            </div>
+            
+            <div class="projects-grid" id="projects-grid">
+                <!-- Projects will be populated here -->
+            </div>
+        </div>
+
+        <!-- Enhanced Job Matcher Tab -->
+        <div id="enhanced-job-matcher" class="tab-content">
+            <div class="card">
+                <h2>🎯 Enhanced Job Description Matcher</h2>
+                <p>Advanced matching that includes work orders and projects alongside resume components.</p>
+                
+                <div class="form-row mt-2">
+                    <div>
+                        <label for="enhanced-company-name">Company Name:</label>
+                        <input type="text" id="enhanced-company-name" placeholder="e.g., Tech Corp">
+                    </div>
+                    <div>
+                        <label for="enhanced-position-title">Position Title:</label>
+                        <input type="text" id="enhanced-position-title" placeholder="e.g., IT Support Specialist">
+                    </div>
+                </div>
+                
+                <label for="enhanced-job-description">Job Description:</label>
+                <textarea id="enhanced-job-description" placeholder="Paste the complete job description here..." rows="12"></textarea>
+                
+                <div id="enhanced-ai-status">🤖 Ready to analyze job descriptions with work order matching</div>
+                
+                <button onclick="enhancedAnalyzeJobDescription()" class="success">🔍 Enhanced Analysis</button>
+                <button onclick="generateTargetedResume()" class="secondary">📄 Generate Targeted Resume</button>
+            </div>
+            
+            <div id="enhanced-analysis-results" class="analysis-results" style="display: none;">
+                <div class="card">
+                    <div id="enhanced-extracted-keywords"></div>
+                </div>
+                
+                <div class="match-sections">
+                    <div class="card">
+                        <h3>📝 Resume Components</h3>
+                        <div id="enhanced-component-suggestions"></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🔧 Relevant Work Orders</h3>
+                        <div id="enhanced-work-order-suggestions"></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>📁 Matching Projects</h3>
+                        <div id="enhanced-project-suggestions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Component Modal -->
+    <div id="component-modal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Component</h2>
+            <label for="modal-section-type">Section Type:</label>
+            <select id="modal-section-type">
+                <option value="professional_summary">Professional Summary</option>
+                <option value="technical_skills">Technical Skills</option>
+                <option value="professional_skills">Professional Skills</option>
+                <option value="work_experience">Work Experience</option>
+                <option value="education">Education</option>
+                <option value="certifications">Certifications</option>
+                <option value="projects">Projects</option>
+            </select>
+            
+            <label for="modal-skill-level">Skill Level:</label>
+            <select id="modal-skill-level">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+                <option value="expert">Expert</option>
+            </select>
+            
+            <label for="modal-title">Title:</label>
+            <input type="text" id="modal-title" placeholder="e.g., Windows Server Administration">
+            
+            <label for="modal-content">Content:</label>
+            <textarea id="modal-content" rows="5" placeholder="Detailed description of the skill, experience, or qualification..."></textarea>
+            
+            <label for="modal-keywords">Keywords (comma-separated):</label>
+            <input type="text" id="modal-keywords" placeholder="e.g., windows, server, active directory">
+            
+            <label for="modal-industry-tags">Industry Tags (comma-separated):</label>
+            <input type="text" id="modal-industry-tags" placeholder="e.g., healthcare, finance, technology">
+            
+            <div style="margin-top: 20px;">
+                <button onclick="saveComponent()" class="success">💾 Save Component</button>
+                <button onclick="closeModal('component-modal')" class="secondary">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Employment Modal -->
+    <div id="employment-modal" class="modal">
+        <div class="modal-content">
+            <h2>Add Employment Record</h2>
+            <label for="emp-company">Company Name:</label>
+            <input type="text" id="emp-company" placeholder="e.g., Tech Corp">
+            
+            <label for="emp-position">Position Title:</label>
+            <input type="text" id="emp-position" placeholder="e.g., Senior Desktop Support Technician">
+            
+            <div class="form-row">
+                <div>
+                    <label for="emp-start-date">Start Date:</label>
+                    <input type="date" id="emp-start-date">
+                </div>
+                <div>
+                    <label for="emp-end-date">End Date (leave empty if current):</label>
+                    <input type="date" id="emp-end-date">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div>
+                    <label for="emp-location">Location:</label>
+                    <input type="text" id="emp-location" placeholder="City, State">
+                </div>
+                <div>
+                    <label for="emp-type">Employment Type:</label>
+                    <select id="emp-type">
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="contract">Contract</option>
+                        <option value="freelance">Freelance</option>
+                        <option value="internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+            <label for="emp-responsibilities">Key Responsibilities (one per line):</label>
+            <textarea id="emp-responsibilities" rows="4" placeholder="• Managed IT infrastructure&#10;• Provided technical support&#10;• Led deployment projects"></textarea>
+            <label for="emp-achievements">Key Achievements (one per line):</label>
+            <textarea id="emp-achievements" rows="3" placeholder="• Reduced downtime by 50%&#10;• Improved customer satisfaction&#10;• Led successful migration"></textarea>
+            <label for="emp-technologies">Technologies Used (comma-separated):</label>
+            <input type="text" id="emp-technologies" placeholder="Windows, Active Directory, ServiceNow">
+            
+            <div style="margin-top: 20px;">
+                <button onclick="saveEmployment()" class="success">💾 Save Employment</button>
+                <button onclick="closeModal('employment-modal')" class="secondary">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div id="create-project-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <h2>➕ Create New Project</h2>
+            <div class="form-row">
+                <div>
+                    <label for="project-name">Project Name*:</label>
+                    <input type="text" id="project-name" required placeholder="e.g., PIVITAL Desktop Deployment Q2 2024">
+                </div>
+                <div>
+                    <label for="client-name">Client Name:</label>
+                    <input type="text" id="client-name" placeholder="e.g., PIVITAL">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div>
+                    <label for="project-type">Project Type:</label>
+                    <select id="project-type">
+                        <option value="support">Technical Support</option>
+                        <option value="deployment">Deployment</option>
+                        <option value="migration">Migration</option>
+                        <option value="infrastructure">Infrastructure</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="training">Training</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="client-type">Client Type:</label>
+                    <select id="client-type">
+                        <option value="enterprise">Enterprise</option>
+                        <option value="retail">Retail</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="financial">Financial</option>
+                        <option value="education">Education</option>
+                    </select>
+                </div>
+            </div>
+            
+            <label for="project-description">Project Description:</label>
+            <textarea id="project-description" rows="3" placeholder="Brief description of the project scope and objectives..."></textarea>
+            
+            <label for="my-role">My Role:</label>
+            <input type="text" id="my-role" placeholder="e.g., Lead Technical Specialist, Desktop Support Engineer">
+            
+            <div style="margin-top: 20px;">
+                <button onclick="createProject()" class="success">Create Project</button>
+                <button onclick="closeModal('create-project-modal')" class="secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-Create Projects Modal -->
+    <div id="auto-create-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>🤖 Auto-Create Projects</h2>
+            <p>Automatically group work orders into projects based on patterns.</p>
+            
+            <label for="grouping-criteria">Grouping Criteria:</label>
+            <select id="grouping-criteria">
+                <option value="company_and_timeframe">Company + Time Period (Quarterly)</option>
+                <option value="technology">Technology Type</option>
+                <option value="location">Geographic Location</option>
+            </select>
+            
+            <div style="margin-top: 20px;">
+                <button onclick="executeAutoCreate()" class="success">Create Projects</button>
+                <button onclick="closeModal('auto-create-modal')" class="secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Work Orders Modal -->
+    <div id="assign-work-orders-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <h2>🔗 Assign Work Orders to Project</h2>
+            <div class="form-row">
+                <div>
+                    <label for="target-project">Select Project:</label>
+                    <select id="target-project">
+                        <option value="">Choose a project...</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="role-in-project">Role in Project:</label>
+                    <select id="role-in-project">
+                        <option value="Primary">Primary</option>
+                        <option value="Supporting">Supporting</option>
+                        <option value="Documentation">Documentation</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="unassigned-work-orders" id="unassigned-work-orders" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 1rem; margin-top: 1rem;">
+                <!-- Unassigned work orders will be loaded here -->
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button onclick="assignSelectedWorkOrders()" class="success">Assign Selected</button>
+                <button onclick="closeModal('assign-work-orders-modal')" class="secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5001/api';
+        let selectedComponents = [];
+        
+        // Projects and Work Orders Functions
+        let selectedWorkOrders = [];
+        let allProjects = [];
+        let selectedItems = [];
+
+        // Update tab switching to include new tabs
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Load content based on tab
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'component-library':
+                    loadComponentLibrary();
+                    break;
+                case 'employment-history':
+                    loadEmploymentHistory();
+                    break;
+                case 'work-orders':
+                    loadWorkOrders();
+                    break;
+                case 'projects':
+                    loadProjects();
+                    break;
+                case 'enhanced-job-matcher':
+                    // Enhanced matcher doesn't need initial loading
+                    break;
+            }
+        }
+
+        async function loadWorkOrders() {
+            try {
+                const [ordersResponse, statsResponse, categoriesResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/work-orders`),
+                    fetch(`${API_BASE_URL}/work-orders/stats`),
+                    fetch(`${API_BASE_URL}/work-orders/categories`)
+                ]);
+                
+                const orders = await ordersResponse.json();
+                const stats = await statsResponse.json();
+                const categories = await categoriesResponse.json();
+                
+                displayWorkOrderStats(stats);
+                displayWorkOrders(orders);
+                populateCategoryFilter(categories.categories);
+                
+            } catch (error) {
+                console.error('Error loading work orders:', error);
+            }
+        }
+
+        function displayWorkOrderStats(stats) {
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.total_orders}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.unique_companies}</div>
+                    <div class="stat-label">Companies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$${stats.total_earnings.toLocaleString()}</div>
+                    <div class="stat-label">Total Earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.unassigned_orders}</div>
+                    <div class="stat-label">Unassigned</div>
+                </div>
+            `;
+            document.getElementById('work-order-stats').innerHTML = statsHtml;
+        }
+
+        function displayWorkOrders(orders) {
+            const grid = document.getElementById('work-orders-grid');
+            
+            if (orders.length === 0) {
+                grid.innerHTML = '<div class="no-results">No work orders found.</div>';
+                return;
+            }
+            
+            const ordersHtml = orders.map(order => `
+                <div class="work-order-card">
+                    <h4>${order.title}</h4>
+                    <p><strong>${order.company_name}</strong></p>
+                    <p>${order.work_category} | ${order.service_date}</p>
+                    <p>Pay: $${order.pay_amount || 0} | Rating: ${order.wo_rating || 'N/A'}</p>
+                    <p>${order.location || 'No location'}</p>
+                </div>
+            `).join('');
+            
+            grid.innerHTML = ordersHtml;
+        }
+
+        function populateCategoryFilter(categories) {
+            const filter = document.getElementById('category-filter');
+            filter.innerHTML = '<option value="">All Categories</option>';
+            categories.forEach(cat => {
+                filter.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/projects`);
+                allProjects = await response.json();
+                displayProjects(allProjects);
+                loadProjectStats();
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        async function loadProjectStats() {
+            try {
+                const projects = allProjects;
+                const totalProjects = projects.length;
+                const activeProjects = projects.filter(p => p.include_in_resume).length;
+                const totalWorkOrders = projects.reduce((sum, p) => sum + (p.work_order_count || 0), 0);
+                const totalValue = projects.reduce((sum, p) => sum + (p.calculated_earnings || 0), 0);
+                
+                const statsHtml = `
+                    <div class="stat-card">
+                        <div class="stat-value">${totalProjects}</div>
+                        <div class="stat-label">Total Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${activeProjects}</div>
+                        <div class="stat-label">Resume Ready</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${totalWorkOrders}</div>
+                        <div class="stat-label">Work Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$${totalValue.toLocaleString()}</div>
+                        <div class="stat-label">Total Value</div>
+                    </div>
+                `;
+                
+                document.getElementById('project-stats').innerHTML = statsHtml;
+                
+            } catch (error) {
+                console.error('Error loading project stats:', error);
+            }
+        }
+
+        function displayProjects(projects) {
+            const grid = document.getElementById('projects-grid');
+            
+            if (projects.length === 0) {
+                grid.innerHTML = '<div class="no-results">No projects found. Create your first project to get started!</div>';
+                return;
+            }
+            
+            const projectsHtml = projects.map(project => {
+                const workOrderCount = project.work_order_count || 0;
+                const earnings = project.calculated_earnings || 0;
+                
+                return `
+                    <div class="project-card" data-id="${project.id}">
+                        <div class="project-title">${project.project_name}</div>
+                        <p><strong>Client:</strong> ${project.client_name || 'No client specified'}</p>
+                        
+                        <div class="project-metrics">
+                            <div class="project-metric">
+                                <div class="metric-value">${workOrderCount}</div>
+                                <div class="metric-label">Work Orders</div>
+                            </div>
+                            <div class="project-metric">
+                                <div class="metric-value">$${earnings.toLocaleString()}</div>
+                                <div class="metric-label">Earnings</div>
+                            </div>
+                            <div class="project-metric">
+                                <div class="metric-value">${project.duration_weeks || '—'}</div>
+                                <div class="metric-label">Weeks</div>
+                            </div>
+                        </div>
+                        
+                        <p>${project.project_description || project.project_summary || 'No description available'}</p>
+                        
+                        <div style="margin-top: 16px;">
+                            <button class="success" onclick="editProject(${project.id})" style="margin-right: 8px;">✏️ Edit</button>
+                            <button class="secondary" onclick="viewProjectDetails(${project.id})">📋 View</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            grid.innerHTML = projectsHtml;
+        }
+
+        // Enhanced Job Matching Functions
+        async function enhancedAnalyzeJobDescription() {
+            const jobText = document.getElementById('enhanced-job-description').value;
+            const companyName = document.getElementById('enhanced-company-name').value;
+            const positionTitle = document.getElementById('enhanced-position-title').value;
+            
+            if (!jobText.trim()) {
+                alert('Please paste a job description to analyze.');
+                return;
+            }
+            
+            document.getElementById('enhanced-ai-status').innerHTML = '🔄 Performing enhanced analysis with work orders and projects...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/job-matcher/enhanced`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job_description: jobText
+                    })
+                });
+                
+                const analysis = await response.json();
+                displayEnhancedAnalysis(analysis);
+                
+                document.getElementById('enhanced-ai-status').innerHTML = `✅ Enhanced analysis complete! Found ${analysis.component_matches.length} components, ${analysis.work_order_matches.length} work orders, and ${analysis.project_matches.length} projects.`;
+            } catch (error) {
+                console.error('Error in enhanced analysis:', error);
+                document.getElementById('enhanced-ai-status').innerHTML = '❌ Error performing enhanced analysis.';
+            }
+        }
+
+        function displayEnhancedAnalysis(analysis) {
+            document.getElementById('enhanced-analysis-results').style.display = 'block';
+            
+            // Display keywords
+            const keywordsHtml = analysis.keywords.map(keyword => 
+                `<span class="keyword-tag">${keyword}</span>`
+            ).join('');
+            document.getElementById('enhanced-extracted-keywords').innerHTML = `
+                <h4>🔍 Extracted Keywords (${analysis.keywords.length}):</h4>
+                <div class="keyword-list">${keywordsHtml}</div>
+            `;
+            
+            // Display component matches
+            const componentSuggestions = analysis.component_matches.map(match => `
+                <div class="suggestion-item" onclick="toggleSelection(this, 'component', ${match.item.id})">
+                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                    <strong>${match.item.title}</strong>
+                    <p>${match.item.content.substring(0, 150)}...</p>
+                    <small>Section: ${match.item.section_type_name} | Keywords: ${match.matched_keywords.join(', ')}</small>
+                </div>
+            `).join('');
+            document.getElementById('enhanced-component-suggestions').innerHTML = componentSuggestions || '<p>No matching components found.</p>';
+            
+            // Display work order matches
+            const workOrderSuggestions = analysis.work_order_matches.map(match => `
+                <div class="suggestion-item" onclick="toggleSelection(this, 'work_order', ${match.item.item_id})">
+                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                    <span class="item-type-badge">Work Order</span>
+                    <strong>${match.item.title}</strong>
+                    <p>${match.item.client_name} | ${match.item.category}</p>
+                    <small>Value: ${match.item.value_metric} | Keywords: ${match.matched_keywords.join(', ')}</small>
+                </div>
+            `).join('');
+            document.getElementById('enhanced-work-order-suggestions').innerHTML = workOrderSuggestions || '<p>No matching work orders found.</p>';
+            
+            // Display project matches
+            const projectSuggestions = analysis.project_matches.map(match => `
+                <div class="suggestion-item" onclick="toggleSelection(this, 'project', ${match.item.item_id})">
+                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                    <span class="item-type-badge">Project</span>
+                    <strong>${match.item.title}</strong>
+                    <p>${match.item.client_name} | ${match.item.category}</p>
+                    <small>Value: ${match.item.value_metric} | Keywords: ${match.matched_keywords.join(', ')}</small>
+                </div>
+            `).join('');
+            document.getElementById('enhanced-project-suggestions').innerHTML = projectSuggestions || '<p>No matching projects found.</p>';
+        }
+
+        function toggleSelection(element, type, id) {
+            element.classList.toggle('selected');
+            
+            const item = { type, id };
+            const index = selectedItems.findIndex(i => i.type === type && i.id === id);
+            
+            if (index >= 0) {
+                selectedItems.splice(index, 1);
+            } else {
+                selectedItems.push(item);
+            }
+        }
+
+        // Modal functions for projects
+        function showCreateProjectModal() {
+            document.getElementById('create-project-modal').style.display = 'block';
+        }
+
+        function showAutoCreateModal() {
+            document.getElementById('auto-create-modal').style.display = 'block';
+        }
+
+        function showAssignWorkOrdersModal() {
+            document.getElementById('assign-work-orders-modal').style.display = 'block';
+        }
+
+        async function createProject() {
+            const formData = {
+                project_name: document.getElementById('project-name').value,
+                client_name: document.getElementById('client-name').value,
+                project_type: document.getElementById('project-type').value,
+                client_type: document.getElementById('client-type').value,
+                project_description: document.getElementById('project-description').value,
+                my_role: document.getElementById('my-role').value
+            };
+            
+            if (!formData.project_name.trim()) {
+                alert('Please enter a project name.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/projects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    alert('Project created successfully!');
+                    closeModal('create-project-modal');
+                    loadProjects();
+                    
+                    // Clear form
+                    document.getElementById('project-name').value = '';
+                    document.getElementById('client-name').value = '';
+                    document.getElementById('project-description').value = '';
+                    document.getElementById('my-role').value = '';
+                } else {
+                    throw new Error('Failed to create project');
+                }
+                
+            } catch (error) {
+                console.error('Error creating project:', error);
+                alert('Error creating project');
+            }
+        }
+
+        async function executeAutoCreate() {
+            const criteria = document.getElementById('grouping-criteria').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/projects/auto-create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ criteria })
+                });
+                
+                const result = await response.json();
+                alert(`Created ${result.projects.length} projects automatically!`);
+                closeModal('auto-create-modal');
+                loadProjects();
+                
+            } catch (error) {
+                console.error('Error auto-creating projects:', error);
+                alert('Error auto-creating projects');
+            }
+        }
+
+        function editProject(projectId) {
+            alert(`Edit project ${projectId} - functionality coming soon!`);
+        }
+
+        function viewProjectDetails(projectId) {
+            alert(`View project ${projectId} details - functionality coming soon!`);
+        }
+
+        function assignSelectedWorkOrders() {
+            alert('Assign work orders - functionality coming soon!');
+        }
+
+        function generateTargetedResume() {
+            if (selectedItems.length === 0) {
+                alert('Please select some components, work orders, or projects first.');
+                return;
+            }
+            
+            alert(`Generating resume with ${selectedItems.length} selected items...`);
+        }
+
+        function searchWorkOrders() {
+            // Implement search functionality
+            console.log('Search work orders');
+        }
+
+        function filterWorkOrders() {
+            // Implement filter functionality
+            console.log('Filter work orders');
+        }
+        
+        // Event listeners for tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+        
+        // Dashboard functions
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/stats`);
+                const stats = await response.json();
+                
+                document.getElementById('total-components').textContent = stats.total_components;
+                document.getElementById('total-jobs').textContent = stats.total_jobs;
+                document.getElementById('total-resumes').textContent = stats.total_resumes;
+                document.getElementById('total-employers').textContent = stats.total_employment;
+                
+                // Display component distribution
+                const distribution = document.getElementById('component-distribution');
+                distribution.innerHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">';
+                for (const [section, count] of Object.entries(stats.components_by_section)) {
+                    distribution.innerHTML += `
+                        <div style="padding: 1rem; background: #f0f0f0; border-radius: 5px;">
+                            <strong>${section.replace(/_/g, ' ').toUpperCase()}</strong>: ${count}
+                        </div>
+                    `;
+                }
+                distribution.innerHTML += '</div>';
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        // Job Matcher functions
+        async function analyzeJobDescription() {
+            const jobText = document.getElementById('job-description-input').value;
+            const companyName = document.getElementById('company-name').value;
+            const positionTitle = document.getElementById('position-title').value;
+            
+            if (!jobText.trim()) {
+                alert('Please paste a job description to analyze.');
+                return;
+            }
+            
+            // Update AI status
+            document.getElementById('ai-status').innerHTML = '🔄 Analyzing job description and finding matches...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/job-matcher`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job_description: jobText
+                    })
+                });
+                
+                const analysis = await response.json();
+                displayJobAnalysis(analysis);
+                
+                document.getElementById('ai-status').innerHTML = `✅ Analysis complete! Found ${analysis.matches.length} matching components.`;
+            } catch (error) {
+                console.error('Error analyzing job:', error);
+                document.getElementById('ai-status').innerHTML = '❌ Error analyzing job description.';
+            }
+        }
+        
+        function displayJobAnalysis(analysis) {
+            // Show results section
+            document.getElementById('job-analysis-results').style.display = 'block';
+            
+            // Display extracted keywords
+            const keywordsHtml = analysis.keywords.map(keyword => 
+                `<span class="keyword-tag">${keyword}</span>`
+            ).join('');
+            document.getElementById('extracted-keywords').innerHTML = `
+                <h4>🔍 Extracted Keywords (${analysis.keywords.length}):</h4>
+                <div class="keyword-list">${keywordsHtml}</div>
+            `;
+            
+            // Display component suggestions
+            const suggestionsHtml = analysis.matches.map(match => `
+                <div class="suggestion-item" onclick="addComponentToResume('${match.component.id}')">
+                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                    <strong>${match.component.title}</strong>
+                    <p>${match.component.content.substring(0, 150)}...</p>
+                    <small>Section: ${match.component.section_type_name} | Score: ${match.score.toFixed(2)}</small>
+                </div>
+            `).join('');
+            
+            document.getElementById('component-suggestions').innerHTML = suggestionsHtml || '<p>No matching components found. Consider adding more components to your library.</p>';
+        }
+        
+        async function saveJobDescription() {
+            const jobText = document.getElementById('job-description-input').value;
+            const companyName = document.getElementById('company-name').value;
+            const positionTitle = document.getElementById('position-title').value;
+            
+            if (!jobText.trim() || !companyName.trim() || !positionTitle.trim()) {
+                alert('Please fill in job description, company name, and position title.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/job-descriptions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_name: companyName,
+                        position_title: positionTitle,
+                        job_description: jobText
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Job description saved successfully!');
+                    loadDashboard();
+                }
+            } catch (error) {
+                console.error('Error saving job description:', error);
+                alert('Error saving job description.');
+            }
+        }
+        
+        // Component Library functions
+        async function loadComponentLibrary() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/components`);
+                const components = await response.json();
+                displayComponents(components);
+            } catch (error) {
+                console.error('Error loading components:', error);
+            }
+        }
+        
+        async function searchComponents() {
+            const query = document.getElementById('component-search').value;
+            const sectionFilter = document.getElementById('section-filter').value;
+            
+            let url = `${API_BASE_URL}/components?`;
+            if (query) url += `q=${encodeURIComponent(query)}&`;
+            if (sectionFilter) url += `section_type=${encodeURIComponent(sectionFilter)}&`;
+            
+            try {
+                const response = await fetch(url);
+                const components = await response.json();
+                displayComponents(components);
+            } catch (error) {
+                console.error('Error searching components:', error);
+            }
+        }
+        
+        function displayComponents(components) {
+            const grid = document.getElementById('component-grid');
+            grid.innerHTML = components.map(component => `
+                <div class="component-card" onclick="selectComponent('${component.id}')">
+                    <div class="component-title">${component.title}</div>
+                    <div class="component-preview">${component.content.substring(0, 120)}...</div>
+                    <div class="component-meta">
+                        <span>${component.section_type_name}</span>
+                        <span>Used: ${component.usage_count || 0} times</span>
+                    </div>
+                </div>
+            `).join('') || '<p>No components found. Add some components to get started.</p>';
+        }
+        
+        async function selectComponent(componentId) {
+            try {
+                // Track usage
+                await fetch(`${API_BASE_URL}/components/${componentId}/usage`, {
+                    method: 'POST'
+                });
+                
+                // Get component details
+                const response = await fetch(`${API_BASE_URL}/components?limit=1`);
+                const components = await response.json();
+                const component = components.find(c => c.id === componentId);
+                
+                if (component && !selectedComponents.find(c => c.id === componentId)) {
+                    selectedComponents.push(component);
+                    updateSelectedComponentsList();
+                }
+            } catch (error) {
+                console.error('Error selecting component:', error);
+            }
+        }
+        
+        function addComponentToResume(componentId) {
+            selectComponent(componentId);
+            switchTab('resume-builder');
+        }
+        
+        // Employment History functions
+        async function loadEmploymentHistory() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/employment`);
+                const employment = await response.json();
+                
+                const list = document.getElementById('employment-list');
+                list.innerHTML = employment.map(emp => `
+                    <div class="employment-entry">
+                        <h4>${emp.position_title} at ${emp.company_name}</h4>
+                        <p><strong>Duration:</strong> ${emp.start_date} - ${emp.end_date || 'Present'}</p>
+                        <p><strong>Location:</strong> ${emp.location}</p>
+                        <p><strong>Type:</strong> ${emp.employment_type}</p>
+                        ${emp.responsibilities ? `<p><strong>Responsibilities:</strong> ${JSON.parse(emp.responsibilities).join(', ')}</p>` : ''}
+                        ${emp.achievements ? `<p><strong>Achievements:</strong> ${JSON.parse(emp.achievements).join(', ')}</p>` : ''}
+                        ${emp.technologies_used ? `<p><strong>Technologies:</strong> ${JSON.parse(emp.technologies_used).join(', ')}</p>` : ''}
+                    </div>
+                `).join('') || '<p>No employment history added yet.</p>';
+            } catch (error) {
+                console.error('Error loading employment history:', error);
+            }
+        }
+        
+        // Resume Builder functions
+        function updateSelectedComponentsList() {
+            const list = document.getElementById('selected-components-list');
+            list.innerHTML = selectedComponents.map(component => `
+                <div class="selected-component">
+                    <button class="remove-component" onclick="removeComponent('${component.id}')">&times;</button>
+                    <strong>${component.title}</strong>
+                    <p>${component.content.substring(0, 100)}...</p>
+                </div>
+            `).join('') || '<p>No components selected yet.</p>';
+        }
+        
+        function removeComponent(componentId) {
+            selectedComponents = selectedComponents.filter(c => c.id !== componentId);
+            updateSelectedComponentsList();
+        }
+        
+        function generateResumePreview() {
+            const preview = document.getElementById('resume-preview');
+            const title = document.getElementById('resume-title').value || 'Untitled Resume';
+            
+            const groupedComponents = {};
+            selectedComponents.forEach(component => {
+                if (!groupedComponents[component.section_type_name]) {
+                    groupedComponents[component.section_type_name] = [];
+                }
+                groupedComponents[component.section_type_name].push(component);
+            });
+            
+            let html = `<h1>${title}</h1>`;
+            
+            Object.keys(groupedComponents).forEach(sectionType => {
+                html += `<h2>${sectionType.replace(/_/g, ' ').toUpperCase()}</h2>`;
+                groupedComponents[sectionType].forEach(component => {
+                    html += `<div style="margin-bottom: 15px;">
+                        <h4>${component.title}</h4>
+                        <p>${component.content}</p>
+                    </div>`;
+                });
+            });
+            
+            preview.innerHTML = html;
+        }
+        
+        function exportResume() {
+            const title = document.getElementById('resume-title').value || 'Untitled Resume';
+            const preview = document.getElementById('resume-preview').innerHTML;
+            
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1, h2 { color: #2f5597; }
+                    </style>
+                </head>
+                <body>
+                    ${preview}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        async function saveResume() {
+            const title = document.getElementById('resume-title').value || 'Untitled Resume';
+            const componentIds = selectedComponents.map(c => c.id);
+            
+            if (componentIds.length === 0) {
+                alert('Please select components for your resume.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/resumes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        component_ids: componentIds
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Resume saved successfully!');
+                    loadDashboard();
+                }
+            } catch (error) {
+                console.error('Error saving resume:', error);
+                alert('Error saving resume.');
+            }
+        }
+        
+        // Modal functions
+        function showAddComponentModal() {
+            document.getElementById('component-modal').style.display = 'block';
+        }
+        
+        function showAddEmploymentModal() {
+            document.getElementById('employment-modal').style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        async function saveComponent() {
+            const component = {
+                section_type: document.getElementById('modal-section-type').value,
+                skill_level: document.getElementById('modal-skill-level').value,
+                title: document.getElementById('modal-title').value,
+                content: document.getElementById('modal-content').value,
+                keywords: document.getElementById('modal-keywords').value,
+                industry_tags: document.getElementById('modal-industry-tags').value
+            };
+            
+            if (!component.title.trim() || !component.content.trim()) {
+                alert('Please fill in title and content.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/components`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(component)
+                });
+                
+                if (response.ok) {
+                    closeModal('component-modal');
+                    alert('Component saved successfully!');
+                    
+                    // Clear form
+                    document.getElementById('modal-title').value = '';
+                    document.getElementById('modal-content').value = '';
+                    document.getElementById('modal-keywords').value = '';
+                    document.getElementById('modal-industry-tags').value = '';
+                    
+                    loadComponentLibrary();
+                    loadDashboard();
+                }
+            } catch (error) {
+                console.error('Error saving component:', error);
+                alert('Error saving component.');
+            }
+        }
+        
+        async function saveEmployment() {
+            const employment = {
+                company_name: document.getElementById('emp-company').value,
+                position_title: document.getElementById('emp-position').value,
+                start_date: document.getElementById('emp-start-date').value,
+                end_date: document.getElementById('emp-end-date').value,
+                location: document.getElementById('emp-location').value,
+                employment_type: document.getElementById('emp-type').value,
+                responsibilities: document.getElementById('emp-responsibilities').value.split('\n').filter(l => l.trim()),
+                achievements: document.getElementById('emp-achievements').value.split('\n').filter(l => l.trim()),
+                technologies_used: document.getElementById('emp-technologies').value.split(',').map(t => t.trim()).filter(t => t)
+            };
+            
+            if (!employment.company_name.trim() || !employment.position_title.trim()) {
+                alert('Please fill in company name and position title.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/employment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(employment)
+                });
+                
+                if (response.ok) {
+                    closeModal('employment-modal');
+                    alert('Employment history saved successfully!');
+                    
+                    // Clear form
+                    document.getElementById('emp-company').value = '';
+                    document.getElementById('emp-position').value = '';
+                    document.getElementById('emp-start-date').value = '';
+                    document.getElementById('emp-end-date').value = '';
+                    document.getElementById('emp-location').value = '';
+                    document.getElementById('emp-responsibilities').value = '';
+                    document.getElementById('emp-achievements').value = '';
+                    document.getElementById('emp-technologies').value = '';
+                    
+                    loadEmploymentHistory();
+                    loadDashboard();
+                }
+            } catch (error) {
+                console.error('Error saving employment:', error);
+                alert('Error saving employment.');
+            }
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>

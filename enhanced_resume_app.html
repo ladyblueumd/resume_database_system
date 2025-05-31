@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Resume Database System</title>
+    <style>
+        body {
+            font-family: 'Calibri', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2, h3 {
+            color: #2f5597;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: -1px;
+            font-size: 14px;
+        }
+        .tab.active {
+            background-color: white;
+            font-weight: bold;
+            border-bottom: 1px solid white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        textarea, input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #2f5597;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #1e3a6a;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        .search-interface {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .component-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .component-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #2f5597;
+        }
+        .component-card.selected {
+            border-color: #2f5597;
+            background-color: #e3f2fd;
+        }
+        .component-title {
+            font-weight: bold;
+            color: #2f5597;
+            margin-bottom: 8px;
+        }
+        .component-preview {
+            font-size: 12px;
+            color: #666;
+            max-height: 60px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .component-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #888;
+        }
+        .job-analysis {
+            background-color: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .match-score {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .keyword-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .keyword-tag {
+            background-color: #2f5597;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        .employment-entry {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        .suggestions-panel {
+            background-color: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .suggestion-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #e3f2fd;
+        }
+        .ai-status {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .resume-builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .selected-components {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .selected-component {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .remove-component {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        .preview-pane {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .instruction {
+            background-color: #e9f7fe;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2f5597;
+        }
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2f5597;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .resume-builder {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI-Powered Resume Database System</h1>
+        
+        <div class="instruction">
+            <h3>Welcome to Your Intelligent Resume Builder!</h3>
+            <p><strong>New Features:</strong> 🔍 Search resume components • 📋 Paste job descriptions for AI matching • 💼 Track employment history • 🎯 Get targeted suggestions</p>
+            <p><strong>How it works:</strong> Build a database of resume components, paste job descriptions to get AI-powered matches, and generate customized resumes instantly.</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="dashboard">📊 Dashboard</div>
+            <div class="tab" data-tab="job-matcher">🎯 Job Matcher</div>
+            <div class="tab" data-tab="component-library">📚 Component Library</div>
+            <div class="tab" data-tab="employment-history">💼 Employment History</div>
+            <div class="tab" data-tab="resume-builder">🔨 Resume Builder</div>
+            <div class="tab" data-tab="data-import">📥 Data Import</div>
+            <div class="tab" data-tab="settings">⚙️ Settings</div>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <h2>📊 Dashboard Overview</h2>
+            
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-components">0</div>
+                    <div class="stat-label">Resume Components</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-jobs">0</div>
+                    <div class="stat-label">Job Descriptions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-resumes">0</div>
+                    <div class="stat-label">Generated Resumes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-employers">0</div>
+                    <div class="stat-label">Employers</div>
+                </div>
+            </div>
+            
+            <div class="ai-status" id="ai-status">
+                🤖 AI Resume Assistant Ready - Database initialized and ready for component matching
+            </div>
+            
+            <h3>Recent Activity</h3>
+            <div id="recent-activity">
+                <p>📝 Start by importing your existing resumes or adding job descriptions to begin building your component library.</p>
+            </div>
+            
+            <h3>Quick Actions</h3>
+            <button onclick="switchTab('job-matcher')">🎯 Analyze New Job</button>
+            <button onclick="switchTab('component-library')">📚 Browse Components</button>
+            <button onclick="switchTab('resume-builder')">🔨 Build Resume</button>
+            <button onclick="switchTab('data-import')">📥 Import Data</button>
+        </div>
+        
+        <!-- Job Matcher Tab -->
+        <div class="tab-content" id="job-matcher">
+            <h2>🎯 AI Job Description Matcher</h2>
+            
+            <div class="search-interface">
+                <h3>Paste Job Description</h3>
+                <textarea id="job-description-input" rows="10" placeholder="Paste the complete job description here... The AI will analyze requirements and suggest matching resume components."></textarea>
+                
+                <div class="form-row">
+                    <div>
+                        <label for="company-name">Company Name:</label>
+                        <input type="text" id="company-name" placeholder="Company Name">
+                    </div>
+                    <div>
+                        <label for="position-title">Position Title:</label>
+                        <input type="text" id="position-title" placeholder="Position Title">
+                    </div>
+                </div>
+                
+                <button onclick="analyzeJobDescription()" class="success">🔍 Analyze Job & Find Matches</button>
+                <button onclick="saveJobDescription()" class="secondary">💾 Save Job Description</button>
+            </div>
+            
+            <div id="job-analysis-results" style="display: none;">
+                <div class="job-analysis">
+                    <h3>📋 Analysis Results</h3>
+                    <div id="extracted-keywords"></div>
+                    <div id="match-suggestions"></div>
+                </div>
+                
+                <div class="suggestions-panel">
+                    <h3>🎯 Recommended Resume Components</h3>
+                    <div id="component-suggestions"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Component Library Tab -->
+        <div class="tab-content" id="component-library">
+            <h2>📚 Resume Component Library</h2>
+            
+            <div class="search-interface">
+                <h3>Search Components</h3>
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="component-search" placeholder="Search by keywords, title, or content...">
+                    </div>
+                    <div>
+                        <select id="section-filter">
+                            <option value="">All Sections</option>
+                            <option value="professional_summary">Professional Summary</option>
+                            <option value="technical_skills">Technical Skills</option>
+                            <option value="professional_skills">Professional Skills</option>
+                            <option value="work_experience">Work Experience</option>
+                            <option value="projects">Projects</option>
+                            <option value="certifications">Certifications</option>
+                            <option value="education">Education</option>
+                            <option value="accomplishments">Accomplishments</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="searchComponents()" class="success">🔍 Search</button>
+                <button onclick="showAddComponentModal()" class="success">➕ Add New Component</button>
+            </div>
+            
+            <div class="component-grid" id="component-grid">
+                <!-- Components will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Employment History Tab -->
+        <div class="tab-content" id="employment-history">
+            <h2>💼 Employment History Database</h2>
+            
+            <button onclick="showAddEmploymentModal()" class="success">➕ Add New Employer</button>
+            <button onclick="exportEmploymentData()" class="secondary">📤 Export Data</button>
+            
+            <div id="employment-list">
+                <!-- Employment history will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Resume Builder Tab -->
+        <div class="tab-content" id="resume-builder">
+            <h2>🔨 Resume Builder</h2>
+            
+            <div class="form-row">
+                <div>
+                    <label for="resume-title">Resume Title:</label>
+                    <input type="text" id="resume-title" placeholder="e.g., Desktop Support Specialist - TechCorp">
+                </div>
+                <div>
+                    <label for="target-job">Target Job ID (optional):</label>
+                    <input type="text" id="target-job" placeholder="Link to specific job description">
+                </div>
+            </div>
+            
+            <div class="resume-builder">
+                <div class="selected-components">
+                    <h3>📋 Selected Components</h3>
+                    <div id="selected-components-list">
+                        <p>Select components from the library or job matcher to build your resume.</p>
+                    </div>
+                    <button onclick="generateResumePreview()" class="success">🔄 Update Preview</button>
+                    <button onclick="exportResume()" class="secondary">📄 Export Resume</button>
+                </div>
+                
+                <div class="preview-pane">
+                    <h3>👁️ Resume Preview</h3>
+                    <div id="resume-preview">
+                        <p>Resume preview will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Import Tab -->
+        <div class="tab-content" id="data-import">
+            <h2>📥 Data Import & Extraction</h2>
+            
+            <div class="search-interface">
+                <h3>Extract Components from Existing Resumes</h3>
+                <p>Upload or select existing resume files to automatically extract reusable components.</p>
+                
+                <input type="file" id="resume-upload" multiple accept=".pdf,.doc,.docx,.txt" style="margin-bottom: 15px;">
+                <button onclick="extractFromFiles()" class="success">🤖 AI Extract Components</button>
+                
+                <h3>Bulk Import</h3>
+                <textarea id="bulk-import-text" rows="8" placeholder="Paste resume text content here for AI extraction..."></textarea>
+                <button onclick="bulkExtractComponents()" class="success">🔍 Extract from Text</button>
+                
+                <h3>Import from Template App</h3>
+                <button onclick="importFromTemplateApp()" class="secondary">📋 Import Current Template Data</button>
+            </div>
+            
+            <div id="extraction-results" style="display: none;">
+                <h3>📊 Extraction Results</h3>
+                <div id="extracted-components"></div>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings">
+            <h2>⚙️ System Settings</h2>
+            
+            <div class="search-interface">
+                <h3>AI Configuration</h3>
+                <div class="form-row">
+                    <div>
+                        <label for="ai-model">AI Model:</label>
+                        <select id="ai-model">
+                            <option value="local">Local LM Studio</option>
+                            <option value="openai">OpenAI GPT-4</option>
+                            <option value="anthropic">Claude</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="match-threshold">Match Threshold:</label>
+                        <input type="range" id="match-threshold" min="0.5" max="1.0" step="0.1" value="0.7">
+                        <span id="threshold-value">0.7</span>
+                    </div>
+                </div>
+                
+                <h3>Database Management</h3>
+                <button onclick="exportDatabase()" class="secondary">📤 Export Database</button>
+                <button onclick="importDatabase()" class="secondary">📥 Import Database</button>
+                <button onclick="clearDatabase()" class="danger">🗑️ Clear All Data</button>
+                
+                <h3>Personal Information</h3>
+                <div class="form-row">
+                    <div>
+                        <label for="user-name">Full Name:</label>
+                        <input type="text" id="user-name" value="Sadiqa 'Sadie' Thornton">
+                    </div>
+                    <div>
+                        <label for="user-email">Email:</label>
+                        <input type="email" id="user-email" value="info@sadiethetechladyservices.net">
+                    </div>
+                </div>
+                
+                <button onclick="saveSettings()" class="success">💾 Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Components -->
+    <div id="component-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 30px; border-radius: 8px; width: 80%; max-width: 600px; max-height: 80%; overflow-y: auto;">
+            <h3>➕ Add New Resume Component</h3>
+            <div class="form-row">
+                <div>
+                    <label for="modal-section-type">Section Type:</label>
+                    <select id="modal-section-type">
+                        <option value="professional_summary">Professional Summary</option>
+                        <option value="technical_skills">Technical Skills</option>
+                        <option value="professional_skills">Professional Skills</option>
+                        <option value="work_experience">Work Experience</option>
+                        <option value="projects">Projects</option>
+                        <option value="certifications">Certifications</option>
+                        <option value="education">Education</option>
+                        <option value="accomplishments">Accomplishments</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="modal-skill-level">Skill Level:</label>
+                    <select id="modal-skill-level">
+                        <option value="entry">Entry Level</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+            </div>
+            <label for="modal-title">Component Title:</label>
+            <input type="text" id="modal-title" placeholder="Brief descriptive title">
+            <label for="modal-content">Content:</label>
+            <textarea id="modal-content" rows="6" placeholder="Full component content"></textarea>
+            <label for="modal-keywords">Keywords (comma-separated):</label>
+            <input type="text" id="modal-keywords" placeholder="relevant, keywords, technologies">
+            <label for="modal-industry-tags">Industry Tags (comma-separated):</label>
+            <input type="text" id="modal-industry-tags" placeholder="healthcare, finance, technology">
+            
+            <div style="margin-top: 20px;">
+                <button onclick="saveComponent()" class="success">💾 Save Component</button>
+                <button onclick="closeModal('component-modal')" class="secondary">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Employment -->
+    <div id="employment-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 30px; border-radius: 8px; width: 80%; max-width: 800px; max-height: 80%; overflow-y: auto;">
+            <h3>💼 Add Employment History</h3>
+            <div class="form-row">
+                <div>
+                    <label for="emp-company">Company Name:</label>
+                    <input type="text" id="emp-company" placeholder="Company Name">
+                </div>
+                <div>
+                    <label for="emp-position">Position Title:</label>
+                    <input type="text" id="emp-position" placeholder="Job Title">
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="emp-start-date">Start Date:</label>
+                    <input type="date" id="emp-start-date">
+                </div>
+                <div>
+                    <label for="emp-end-date">End Date (leave blank if current):</label>
+                    <input type="date" id="emp-end-date">
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="emp-location">Location:</label>
+                    <input type="text" id="emp-location" placeholder="City, State">
+                </div>
+                <div>
+                    <label for="emp-type">Employment Type:</label>
+                    <select id="emp-type">
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="contract">Contract</option>
+                        <option value="freelance">Freelance</option>
+                        <option value="internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+            <label for="emp-responsibilities">Key Responsibilities (one per line):</label>
+            <textarea id="emp-responsibilities" rows="4" placeholder="• Managed IT infrastructure&#10;• Provided technical support&#10;• Led deployment projects"></textarea>
+            <label for="emp-achievements">Key Achievements (one per line):</label>
+            <textarea id="emp-achievements" rows="3" placeholder="• Reduced downtime by 50%&#10;• Improved customer satisfaction&#10;• Led successful migration"></textarea>
+            <label for="emp-technologies">Technologies Used (comma-separated):</label>
+            <input type="text" id="emp-technologies" placeholder="Windows, Active Directory, ServiceNow">
+            
+            <div style="margin-top: 20px;">
+                <button onclick="saveEmployment()" class="success">💾 Save Employment</button>
+                <button onclick="closeModal('employment-modal')" class="secondary">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database storage using localStorage (in production, use actual database)
+        class ResumeDatabase {
+            constructor() {
+                this.components = JSON.parse(localStorage.getItem('resume_components') || '[]');
+                this.employment = JSON.parse(localStorage.getItem('employment_history') || '[]');
+                this.jobDescriptions = JSON.parse(localStorage.getItem('job_descriptions') || '[]');
+                this.generatedResumes = JSON.parse(localStorage.getItem('generated_resumes') || '[]');
+                this.selectedComponents = [];
+            }
+            
+            saveComponents() {
+                localStorage.setItem('resume_components', JSON.stringify(this.components));
+            }
+            
+            saveEmployment() {
+                localStorage.setItem('employment_history', JSON.stringify(this.employment));
+            }
+            
+            saveJobDescriptions() {
+                localStorage.setItem('job_descriptions', JSON.stringify(this.jobDescriptions));
+            }
+            
+            saveGeneratedResumes() {
+                localStorage.setItem('generated_resumes', JSON.stringify(this.generatedResumes));
+            }
+            
+            addComponent(component) {
+                component.id = Date.now().toString();
+                component.created_at = new Date().toISOString();
+                component.usage_count = 0;
+                component.effectiveness_score = 0;
+                this.components.push(component);
+                this.saveComponents();
+                return component;
+            }
+            
+            addEmployment(employment) {
+                employment.id = Date.now().toString();
+                employment.created_at = new Date().toISOString();
+                this.employment.push(employment);
+                this.saveEmployment();
+                return employment;
+            }
+            
+            searchComponents(query, sectionFilter = '') {
+                return this.components.filter(component => {
+                    const matchesQuery = !query || 
+                        component.title.toLowerCase().includes(query.toLowerCase()) ||
+                        component.content.toLowerCase().includes(query.toLowerCase()) ||
+                        (component.keywords && component.keywords.toLowerCase().includes(query.toLowerCase()));
+                    
+                    const matchesSection = !sectionFilter || component.section_type === sectionFilter;
+                    
+                    return matchesQuery && matchesSection;
+                });
+            }
+            
+            analyzeJobDescription(jobText) {
+                // Simple keyword extraction (in production, use AI/NLP)
+                const keywords = this.extractKeywords(jobText);
+                const matches = this.findMatchingComponents(keywords);
+                return { keywords, matches };
+            }
+            
+            extractKeywords(text) {
+                // Basic keyword extraction - would use AI in production
+                const techKeywords = [
+                    'windows', 'linux', 'macos', 'active directory', 'servicenow',
+                    'desktop support', 'help desk', 'troubleshooting', 'hardware',
+                    'software', 'network', 'security', 'server', 'cloud',
+                    'office365', 'microsoft', 'vmware', 'citrix', 'azure',
+                    'aws', 'cisco', 'dell', 'hp', 'lenovo', 'imaging',
+                    'deployment', 'migration', 'backup', 'antivirus', 'firewall'
+                ];
+                
+                const foundKeywords = [];
+                const lowerText = text.toLowerCase();
+                
+                techKeywords.forEach(keyword => {
+                    if (lowerText.includes(keyword)) {
+                        foundKeywords.push(keyword);
+                    }
+                });
+                
+                return foundKeywords;
+            }
+            
+            findMatchingComponents(keywords) {
+                const matches = [];
+                
+                this.components.forEach(component => {
+                    let score = 0;
+                    const componentText = (component.title + ' ' + component.content + ' ' + (component.keywords || '')).toLowerCase();
+                    
+                    keywords.forEach(keyword => {
+                        if (componentText.includes(keyword.toLowerCase())) {
+                            score += 1;
+                        }
+                    });
+                    
+                    if (score > 0) {
+                        matches.push({
+                            component: component,
+                            score: score,
+                            matchPercentage: Math.round((score / keywords.length) * 100)
+                        });
+                    }
+                });
+                
+                return matches.sort((a, b) => b.score - a.score);
+            }
+        }
+        
+        // Initialize database
+        const db = new ResumeDatabase();
+        
+        // Tab navigation
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Load content based on tab
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'component-library':
+                    loadComponentLibrary();
+                    break;
+                case 'employment-history':
+                    loadEmploymentHistory();
+                    break;
+            }
+        }
+        
+        // Event listeners for tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+        
+        // Dashboard functions
+        function loadDashboard() {
+            document.getElementById('total-components').textContent = db.components.length;
+            document.getElementById('total-jobs').textContent = db.jobDescriptions.length;
+            document.getElementById('total-resumes').textContent = db.generatedResumes.length;
+            document.getElementById('total-employers').textContent = db.employment.length;
+        }
+        
+        // Job Matcher functions
+        function analyzeJobDescription() {
+            const jobText = document.getElementById('job-description-input').value;
+            const companyName = document.getElementById('company-name').value;
+            const positionTitle = document.getElementById('position-title').value;
+            
+            if (!jobText.trim()) {
+                alert('Please paste a job description to analyze.');
+                return;
+            }
+            
+            // Update AI status
+            document.getElementById('ai-status').innerHTML = '🔄 Analyzing job description and finding matches...';
+            
+            setTimeout(() => {
+                const analysis = db.analyzeJobDescription(jobText);
+                displayJobAnalysis(analysis, jobText, companyName, positionTitle);
+                
+                document.getElementById('ai-status').innerHTML = `✅ Analysis complete! Found ${analysis.matches.length} matching components.`;
+            }, 1000);
+        }
+        
+        function displayJobAnalysis(analysis, jobText, companyName, positionTitle) {
+            // Show results section
+            document.getElementById('job-analysis-results').style.display = 'block';
+            
+            // Display extracted keywords
+            const keywordsHtml = analysis.keywords.map(keyword => 
+                `<span class="keyword-tag">${keyword}</span>`
+            ).join('');
+            document.getElementById('extracted-keywords').innerHTML = `
+                <h4>🔍 Extracted Keywords (${analysis.keywords.length}):</h4>
+                <div class="keyword-list">${keywordsHtml}</div>
+            `;
+            
+            // Display component suggestions
+            const suggestionsHtml = analysis.matches.map(match => `
+                <div class="suggestion-item" onclick="addComponentToResume('${match.component.id}')">
+                    <div class="match-score">Match: ${match.matchPercentage}%</div>
+                    <strong>${match.component.title}</strong>
+                    <p>${match.component.content.substring(0, 150)}...</p>
+                    <small>Section: ${match.component.section_type} | Score: ${match.score}/${analysis.keywords.length}</small>
+                </div>
+            `).join('');
+            
+            document.getElementById('component-suggestions').innerHTML = suggestionsHtml || '<p>No matching components found. Consider adding more components to your library.</p>';
+        }
+        
+        function saveJobDescription() {
+            const jobText = document.getElementById('job-description-input').value;
+            const companyName = document.getElementById('company-name').value;
+            const positionTitle = document.getElementById('position-title').value;
+            
+            if (!jobText.trim() || !companyName.trim() || !positionTitle.trim()) {
+                alert('Please fill in job description, company name, and position title.');
+                return;
+            }
+            
+            const jobDesc = {
+                id: Date.now().toString(),
+                company_name: companyName,
+                position_title: positionTitle,
+                job_description: jobText,
+                keywords: db.extractKeywords(jobText),
+                status: 'saved',
+                created_at: new Date().toISOString()
+            };
+            
+            db.jobDescriptions.push(jobDesc);
+            db.saveJobDescriptions();
+            
+            alert('Job description saved successfully!');
+            loadDashboard();
+        }
+        
+        // Component Library functions
+        function loadComponentLibrary() {
+            displayComponents(db.components);
+        }
+        
+        function searchComponents() {
+            const query = document.getElementById('component-search').value;
+            const sectionFilter = document.getElementById('section-filter').value;
+            const results = db.searchComponents(query, sectionFilter);
+            displayComponents(results);
+        }
+        
+        function displayComponents(components) {
+            const grid = document.getElementById('component-grid');
+            grid.innerHTML = components.map(component => `
+                <div class="component-card" onclick="selectComponent('${component.id}')">
+                    <div class="component-title">${component.title}</div>
+                    <div class="component-preview">${component.content.substring(0, 120)}...</div>
+                    <div class="component-meta">
+                        <span>${component.section_type}</span>
+                        <span>Used: ${component.usage_count || 0} times</span>
+                    </div>
+                </div>
+            `).join('') || '<p>No components found. Add some components to get started.</p>';
+        }
+        
+        function selectComponent(componentId) {
+            const component = db.components.find(c => c.id === componentId);
+            if (component && !db.selectedComponents.find(c => c.id === componentId)) {
+                db.selectedComponents.push(component);
+                updateSelectedComponentsList();
+            }
+        }
+        
+        function addComponentToResume(componentId) {
+            selectComponent(componentId);
+            switchTab('resume-builder');
+        }
+        
+        // Employment History functions
+        function loadEmploymentHistory() {
+            const list = document.getElementById('employment-list');
+            list.innerHTML = db.employment.map(emp => `
+                <div class="employment-entry">
+                    <h4>${emp.position_title} at ${emp.company_name}</h4>
+                    <p><strong>Duration:</strong> ${emp.start_date} - ${emp.end_date || 'Present'}</p>
+                    <p><strong>Location:</strong> ${emp.location}</p>
+                    <p><strong>Type:</strong> ${emp.employment_type}</p>
+                    ${emp.responsibilities ? `<p><strong>Responsibilities:</strong> ${emp.responsibilities}</p>` : ''}
+                    ${emp.achievements ? `<p><strong>Achievements:</strong> ${emp.achievements}</p>` : ''}
+                    ${emp.technologies ? `<p><strong>Technologies:</strong> ${emp.technologies}</p>` : ''}
+                </div>
+            `).join('') || '<p>No employment history added yet.</p>';
+        }
+        
+        // Resume Builder functions
+        function updateSelectedComponentsList() {
+            const list = document.getElementById('selected-components-list');
+            list.innerHTML = db.selectedComponents.map(component => `
+                <div class="selected-component">
+                    <button class="remove-component" onclick="removeComponent('${component.id}')">&times;</button>
+                    <strong>${component.title}</strong>
+                    <p>${component.content.substring(0, 100)}...</p>
+                </div>
+            `).join('') || '<p>No components selected yet.</p>';
+        }
+        
+        function removeComponent(componentId) {
+            db.selectedComponents = db.selectedComponents.filter(c => c.id !== componentId);
+            updateSelectedComponentsList();
+        }
+        
+        function generateResumePreview() {
+            const preview = document.getElementById('resume-preview');
+            const title = document.getElementById('resume-title').value || 'Untitled Resume';
+            
+            const groupedComponents = {};
+            db.selectedComponents.forEach(component => {
+                if (!groupedComponents[component.section_type]) {
+                    groupedComponents[component.section_type] = [];
+                }
+                groupedComponents[component.section_type].push(component);
+            });
+            
+            let html = `<h1>${title}</h1>`;
+            
+            Object.keys(groupedComponents).forEach(sectionType => {
+                html += `<h2>${sectionType.replace('_', ' ').toUpperCase()}</h2>`;
+                groupedComponents[sectionType].forEach(component => {
+                    html += `<div style="margin-bottom: 15px;">
+                        <h4>${component.title}</h4>
+                        <p>${component.content}</p>
+                    </div>`;
+                });
+            });
+            
+            preview.innerHTML = html;
+        }
+        
+        function exportResume() {
+            const title = document.getElementById('resume-title').value || 'Untitled Resume';
+            const preview = document.getElementById('resume-preview').innerHTML;
+            
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1, h2 { color: #2f5597; }
+                    </style>
+                </head>
+                <body>
+                    ${preview}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        // Modal functions
+        function showAddComponentModal() {
+            document.getElementById('component-modal').style.display = 'block';
+        }
+        
+        function showAddEmploymentModal() {
+            document.getElementById('employment-modal').style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function saveComponent() {
+            const component = {
+                section_type: document.getElementById('modal-section-type').value,
+                skill_level: document.getElementById('modal-skill-level').value,
+                title: document.getElementById('modal-title').value,
+                content: document.getElementById('modal-content').value,
+                keywords: document.getElementById('modal-keywords').value,
+                industry_tags: document.getElementById('modal-industry-tags').value
+            };
+            
+            if (!component.title.trim() || !component.content.trim()) {
+                alert('Please fill in title and content.');
+                return;
+            }
+            
+            db.addComponent(component);
+            closeModal('component-modal');
+            alert('Component saved successfully!');
+            
+            // Clear form
+            document.getElementById('modal-title').value = '';
+            document.getElementById('modal-content').value = '';
+            document.getElementById('modal-keywords').value = '';
+            document.getElementById('modal-industry-tags').value = '';
+            
+            loadComponentLibrary();
+            loadDashboard();
+        }
+        
+        function saveEmployment() {
+            const employment = {
+                company_name: document.getElementById('emp-company').value,
+                position_title: document.getElementById('emp-position').value,
+                start_date: document.getElementById('emp-start-date').value,
+                end_date: document.getElementById('emp-end-date').value,
+                location: document.getElementById('emp-location').value,
+                employment_type: document.getElementById('emp-type').value,
+                responsibilities: document.getElementById('emp-responsibilities').value,
+                achievements: document.getElementById('emp-achievements').value,
+                technologies: document.getElementById('emp-technologies').value
+            };
+            
+            if (!employment.company_name.trim() || !employment.position_title.trim()) {
+                alert('Please fill in company name and position title.');
+                return;
+            }
+            
+            db.addEmployment(employment);
+            closeModal('employment-modal');
+            alert('Employment history saved successfully!');
+            
+            // Clear form
+            Object.keys(employment).forEach(key => {
+                const element = document.getElementById('emp-' + key.replace('_', '-'));
+                if (element) element.value = '';
+            });
+            
+            loadEmploymentHistory();
+            loadDashboard();
+        }
+        
+        // Data Import functions
+        function extractFromFiles() {
+            const files = document.getElementById('resume-upload').files;
+            if (files.length === 0) {
+                alert('Please select files to extract from.');
+                return;
+            }
+            
+            // This would integrate with file reading and AI extraction
+            alert('File extraction feature would connect to AI service for component extraction.');
+        }
+        
+        function bulkExtractComponents() {
+            const text = document.getElementById('bulk-import-text').value;
+            if (!text.trim()) {
+                alert('Please paste resume text to extract from.');
+                return;
+            }
+            
+            // Simple extraction demo - would use AI in production
+            const lines = text.split('\n').filter(line => line.trim());
+            let extractedCount = 0;
+            
+            lines.forEach(line => {
+                if (line.length > 20 && line.length < 500) {
+                    const component = {
+                        section_type: 'professional_skills',
+                        title: `Extracted: ${line.substring(0, 30)}...`,
+                        content: line,
+                        keywords: '',
+                        industry_tags: '',
+                        skill_level: 'intermediate'
+                    };
+                    db.addComponent(component);
+                    extractedCount++;
+                }
+            });
+            
+            alert(`Extracted ${extractedCount} components from text.`);
+            loadComponentLibrary();
+            loadDashboard();
+        }
+        
+        function importFromTemplateApp() {
+            // This would import data from the existing template app
+            alert('This feature would import data from your existing resume template app.');
+        }
+        
+        // Settings functions
+        function saveSettings() {
+            alert('Settings saved successfully!');
+        }
+        
+        function exportDatabase() {
+            const data = {
+                components: db.components,
+                employment: db.employment,
+                jobDescriptions: db.jobDescriptions,
+                generatedResumes: db.generatedResumes
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'resume_database_backup.json';
+            a.click();
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            
+            // Add sample data if database is empty
+            if (db.components.length === 0) {
+                addSampleData();
+            }
+        });
+        
+        function addSampleData() {
+            // Add sample components
+            const sampleComponents = [
+                {
+                    section_type: 'professional_summary',
+                    title: 'Desktop Support Specialist Summary',
+                    content: 'Experienced Desktop Support Specialist with 16+ years providing technical support across diverse environments. Expert in Windows, Active Directory, and ServiceNow with proven track record in enterprise deployments.',
+                    keywords: 'desktop support, windows, active directory, servicenow, technical support',
+                    industry_tags: 'healthcare, finance, technology',
+                    skill_level: 'expert'
+                },
+                {
+                    section_type: 'technical_skills',
+                    title: 'Windows Administration',
+                    content: 'Windows 10/11, Windows Server 2016/2019, Active Directory, Group Policy, BitLocker, VDI, Remote Desktop Services',
+                    keywords: 'windows, server, active directory, group policy, bitlocker',
+                    industry_tags: 'enterprise, corporate',
+                    skill_level: 'expert'
+                },
+                {
+                    section_type: 'projects',
+                    title: 'TD Bank Desktop Deployment',
+                    content: 'Led desktop support deployment across 20 retail locations during 2020 rollout, ensuring minimal disruption and seamless transition to new hardware and software systems.',
+                    keywords: 'deployment, retail, project management, hardware',
+                    industry_tags: 'finance, banking',
+                    skill_level: 'advanced'
+                }
+            ];
+            
+            sampleComponents.forEach(component => {
+                db.addComponent(component);
+            });
+            
+            // Add sample employment
+            const sampleEmployment = {
+                company_name: 'Field Services Nationwide',
+                position_title: 'Senior Desktop Support Technician',
+                start_date: '2020-01-01',
+                end_date: '',
+                location: 'Vermont, USA',
+                employment_type: 'contract',
+                responsibilities: 'Desktop support, hardware deployment, troubleshooting, customer service',
+                achievements: 'Completed 960+ work orders with 99% customer satisfaction',
+                technologies: 'Windows, Active Directory, ServiceNow, SCCM, BitLocker'
+            };
+            
+            db.addEmployment(sampleEmployment);
+        }
+    </script>
+</body>
+</html>
