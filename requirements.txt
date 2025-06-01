@@ -5,6 +5,10 @@ python-docx==0.8.11
 PyPDF2==3.0.1
 pandas==2.0.3
 
+# Document generation and PDF export
+reportlab==4.0.4
+# weasyprint==61.2  # Removed due to system dependency issues
+
 # Web scraping and text processing (for job description analysis)
 beautifulsoup4==4.12.2
 requests==2.31.0

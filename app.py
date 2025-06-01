@@ -4,7 +4,7 @@ Flask Backend API for Resume Database System
 Provides REST endpoints for frontend to interact with SQLite database
 """
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, make_response
 from flask_cors import CORS
 import sqlite3
 import json
@@ -24,6 +24,18 @@ from werkzeug.utils import secure_filename
 import docx
 import PyPDF2
 import subprocess
+
+# Additional imports for document export
+from docx import Document
+from docx.shared import Inches, Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.oxml.shared import OxmlElement, qn
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.units import inch
+import io
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -358,6 +370,172 @@ def extract_text_from_file(filepath: str, filename: str) -> str:
     except Exception as e:
         logger.error(f"Error extracting text from {filename}: {e}")
         return None
+
+
+# DOCUMENT EXPORT HELPER FUNCTIONS
+
+def create_docx_resume(resume_data):
+    """Create a DOCX resume from resume data"""
+    doc = Document()
+    
+    # Set document margins
+    sections = doc.sections
+    for section in sections:
+        section.top_margin = Inches(1)
+        section.bottom_margin = Inches(1)
+        section.left_margin = Inches(1)
+        section.right_margin = Inches(1)
+    
+    # Header section
+    header = doc.add_paragraph()
+    header.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # Name
+    name_run = header.add_run(resume_data.get('name', 'Professional Resume'))
+    name_run.font.size = Pt(18)
+    name_run.bold = True
+    header.add_run('\n')
+    
+    # Contact info
+    contact_run = header.add_run(resume_data.get('contact', ''))
+    contact_run.font.size = Pt(12)
+    
+    # Add line separator
+    doc.add_paragraph('_' * 80)
+    
+    # Process sections
+    for section_name, items in resume_data.get('sections', {}).items():
+        if not items:
+            continue
+            
+        # Section heading
+        section_heading = doc.add_paragraph()
+        section_run = section_heading.add_run(section_name.replace('_', ' ').title())
+        section_run.font.size = Pt(14)
+        section_run.bold = True
+        
+        # Section items
+        for item in items:
+            item_para = doc.add_paragraph()
+            
+            # Item title (bold)
+            title_run = item_para.add_run(item.get('title', ''))
+            title_run.bold = True
+            title_run.font.size = Pt(12)
+            
+            # Item content
+            item_para.add_run('\n' + item.get('content', ''))
+            
+            # Add spacing
+            doc.add_paragraph()
+    
+    return doc
+
+
+def create_pdf_resume(resume_data):
+    """Create a PDF resume from resume data using ReportLab"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, 
+                           rightMargin=72, leftMargin=72, 
+                           topMargin=72, bottomMargin=18)
+    
+    # Define styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        spaceAfter=30,
+        alignment=1  # Center alignment
+    )
+    
+    section_style = ParagraphStyle(
+        'SectionHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        spaceBefore=12,
+        spaceAfter=6,
+        textColor='#2f5597'
+    )
+    
+    item_title_style = ParagraphStyle(
+        'ItemTitle',
+        parent=styles['Normal'],
+        fontSize=12,
+        spaceAfter=6,
+        leftIndent=0,
+        fontName='Helvetica-Bold'
+    )
+    
+    content_style = ParagraphStyle(
+        'Content',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=12,
+        leftIndent=20
+    )
+    
+    # Build story
+    story = []
+    
+    # Title
+    title = Paragraph(resume_data.get('name', 'Professional Resume'), title_style)
+    story.append(title)
+    
+    # Contact info
+    if resume_data.get('contact'):
+        contact = Paragraph(resume_data['contact'], styles['Normal'])
+        story.append(contact)
+        story.append(Spacer(1, 12))
+    
+    # Separator line
+    story.append(Spacer(1, 12))
+    
+    # Process sections
+    for section_name, items in resume_data.get('sections', {}).items():
+        if not items:
+            continue
+            
+        # Section heading
+        section_title = section_name.replace('_', ' ').title()
+        story.append(Paragraph(section_title, section_style))
+        
+        # Section items
+        for item in items:
+            # Item title
+            if item.get('title'):
+                story.append(Paragraph(item['title'], item_title_style))
+            
+            # Item content
+            if item.get('content'):
+                content = item['content'].replace('\n', '<br/>')
+                story.append(Paragraph(content, content_style))
+    
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
+
+def format_resume_data_for_export(cart_items, resume_title, contact_info=""):
+    """Format cart items into structured resume data for export"""
+    # Group components by section type
+    sections = {}
+    for item in cart_items:
+        section_type = item.get('section_type_name', item.get('section_type', 'general'))
+        if section_type not in sections:
+            sections[section_type] = []
+        
+        sections[section_type].append({
+            'title': item.get('title', ''),
+            'content': item.get('content', '')
+        })
+    
+    return {
+        'name': resume_title,
+        'contact': contact_info,
+        'sections': sections
+    }
 
 
 # API Routes
@@ -2608,6 +2786,86 @@ def delete_template(template_id):
     except Exception as e:
         logger.error(f"Error deleting template: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+# RESUME EXPORT ENDPOINTS
+
+@app.route('/api/export/docx', methods=['POST'])
+def export_resume_docx():
+    """Export resume as DOCX file"""
+    try:
+        data = request.json
+        if not data or 'components' not in data:
+            return jsonify({'error': 'No components provided'}), 400
+        
+        components = data['components']
+        resume_title = data.get('title', 'Professional Resume')
+        contact_info = data.get('contact', '')
+        
+        if not components:
+            return jsonify({'error': 'No components to export'}), 400
+        
+        # Format data for export
+        resume_data = format_resume_data_for_export(components, resume_title, contact_info)
+        
+        # Create DOCX document
+        doc = create_docx_resume(resume_data)
+        
+        # Save to temporary file
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp_file:
+            doc.save(tmp_file.name)
+            
+            # Read file content
+            with open(tmp_file.name, 'rb') as f:
+                docx_content = f.read()
+            
+            # Clean up temporary file
+            os.unlink(tmp_file.name)
+        
+        # Return file as response
+        response = make_response(docx_content)
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        response.headers['Content-Disposition'] = f'attachment; filename="{resume_title.replace(" ", "_")}.docx"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error exporting DOCX: {e}")
+        return jsonify({'error': f'Failed to export DOCX: {str(e)}'}), 500
+
+
+@app.route('/api/export/pdf', methods=['POST'])
+def export_resume_pdf():
+    """Export resume as PDF file"""
+    try:
+        data = request.json
+        if not data or 'components' not in data:
+            return jsonify({'error': 'No components provided'}), 400
+        
+        components = data['components']
+        resume_title = data.get('title', 'Professional Resume')
+        contact_info = data.get('contact', '')
+        
+        if not components:
+            return jsonify({'error': 'No components to export'}), 400
+        
+        # Format data for export
+        resume_data = format_resume_data_for_export(components, resume_title, contact_info)
+        
+        # Create PDF document
+        pdf_buffer = create_pdf_resume(resume_data)
+        
+        # Return file as response
+        response = make_response(pdf_buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="{resume_title.replace(" ", "_")}.pdf"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error exporting PDF: {e}")
+        return jsonify({'error': f'Failed to export PDF: {str(e)}'}), 500
 
 
 if __name__ == '__main__':

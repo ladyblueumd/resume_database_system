@@ -735,6 +735,16 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .export-options button {
+            white-space: nowrap;
+        }
 
         .resume-preview {
             background-color: #fff;
@@ -751,13 +761,21 @@
             text-align: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #2f5597;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
         }
 
         .resume-header h1 {
-            margin: 0;
+            margin: 0 0 8px 0;
             color: #2f5597;
             font-size: 24px;
+            font-weight: bold;
+        }
+
+        .resume-header .header-line {
+            margin: 4px 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.3;
         }
 
         .resume-header p {
@@ -765,6 +783,9 @@
             color: #666;
             font-size: 14px;
         }
+
+
+
 
         .resume-content {
             min-height: 300px;
@@ -1368,6 +1389,39 @@
             justify-content: center;
             gap: 10px;
         }
+
+        /* Personal Information Specific Styling */
+        .personal-info-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        
+        .personal-info-section h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #2f5597;
+            border-bottom: 2px solid #2f5597;
+            padding-bottom: 8px;
+        }
+        
+        .personal-info-section label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .personal-info-section input {
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .personal-info-section input:focus {
+            border-color: #2f5597;
+            box-shadow: 0 0 0 3px rgba(47, 85, 151, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -1887,13 +1941,20 @@
                     <h3>📄 Resume Canvas</h3>
                     <div class="canvas-controls">
                         <button onclick="generateResumePreview()" class="success">🔄 Update Preview</button>
-                        <button onclick="exportResume()" class="secondary">📄 Export Resume</button>
+                        <div class="export-options">
+                            <button onclick="exportResume()" class="secondary">📄 Export HTML</button>
+                            <button onclick="exportResumeDocx()" class="secondary">📝 Export DOCX</button>
+                            <button onclick="exportResumePdf()" class="secondary">📕 Export PDF</button>
+                        </div>
                         <button onclick="saveResumeTemplate()" class="secondary">💾 Save Template</button>
                     </div>
                     <div class="resume-preview" id="resume-preview">
                         <div class="resume-header">
                             <h1 id="resume-name">Sadiqa 'Sadie' Thornton</h1>
-                            <p id="resume-contact">info@sadiethetechladyservices.net</p>
+                            <p id="resume-email" class="header-line">info@sadiethetechladyservices.net</p>
+                            <p id="resume-phone" class="header-line" style="display: none;"></p>
+                            <p id="resume-linkedin" class="header-line" style="display: none;"></p>
+                            <p id="resume-location" class="header-line" style="display: none;"></p>
                         </div>
                         <div class="resume-content" id="resume-content">
                             <p class="empty-canvas">Select components from the library and add them to your cart, then checkout to build your resume.</p>
@@ -2044,19 +2105,41 @@
                 <button onclick="clearDatabase()" class="danger">🗑️ Clear All Data</button>
                 
                 <h3>Personal Information</h3>
-                <div class="form-row">
-                    <div>
-                        <label for="user-name">Full Name:</label>
-                        <input type="text" id="user-name" value="Sadiqa 'Sadie' Thornton">
+                <div class="personal-info-section">
+                    <div class="form-row">
+                        <div>
+                            <label for="user-name">Full Name:</label>
+                            <input type="text" id="user-name" value="Sadiqa 'Sadie' Thornton" placeholder="Enter your full name">
+                        </div>
+                        <div>
+                            <label for="user-email">Email:</label>
+                            <input type="email" id="user-email" value="info@sadiethetechladyservices.net" placeholder="your.email@example.com">
+                        </div>
                     </div>
-                    <div>
-                        <label for="user-email">Email:</label>
-                        <input type="email" id="user-email" value="info@sadiethetechladyservices.net">
+                    <div class="form-row">
+                        <div>
+                            <label for="user-phone">Phone Number:</label>
+                            <input type="tel" id="user-phone" value="" placeholder="(555) 123-4567">
+                        </div>
+                        <div>
+                            <label for="user-linkedin">LinkedIn Profile URL:</label>
+                            <input type="url" id="user-linkedin" value="" placeholder="https://linkedin.com/in/yourprofile">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="user-city">City:</label>
+                            <input type="text" id="user-city" value="" placeholder="Enter your city">
+                        </div>
+                        <div>
+                            <label for="user-state">State:</label>
+                            <input type="text" id="user-state" value="" placeholder="Enter your state">
+                        </div>
                     </div>
                 </div>
-                
-                <button onclick="saveSettings()" class="success">💾 Save Settings</button>
             </div>
+            
+            <button onclick="saveSettings()" class="success">💾 Save Settings</button>
         </div>
     </div>
 
@@ -2371,6 +2454,10 @@
                     break;
                 case 'resume-builder':
                     initializeResumeBuilder();
+                    // Update resume header when switching to resume builder
+                    if (typeof updateResumeHeader === 'function') {
+                        updateResumeHeader();
+                    }
                     break;
             }
         }
@@ -2810,7 +2897,92 @@
 
         // Settings functions
         function saveSettings() {
-            alert('Settings saved successfully!');
+            // Collect all personal information fields
+            const personalInfo = {
+                fullName: document.getElementById('user-name').value,
+                email: document.getElementById('user-email').value,
+                phone: document.getElementById('user-phone').value,
+                linkedin: document.getElementById('user-linkedin').value,
+                city: document.getElementById('user-city').value,
+                state: document.getElementById('user-state').value,
+                aiModel: document.getElementById('ai-model').value,
+                matchThreshold: document.getElementById('match-threshold').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('user_personal_info', JSON.stringify(personalInfo));
+            
+            // Also save individual settings for compatibility
+            localStorage.setItem('ai_model', personalInfo.aiModel);
+            localStorage.setItem('match_threshold', personalInfo.matchThreshold);
+            
+            console.log('Saved personal information:', personalInfo);
+            
+            // Update resume header with new information
+            if (typeof updateResumeHeader === 'function') {
+                updateResumeHeader();
+            }
+            
+            showStatus('Settings saved successfully!', 'success');
+        }
+        
+        // Load settings on page load
+        function loadSettings() {
+            try {
+                const savedInfo = localStorage.getItem('user_personal_info');
+                if (savedInfo) {
+                    const personalInfo = JSON.parse(savedInfo);
+                    
+                    // Populate all fields if they exist
+                    if (personalInfo.fullName) document.getElementById('user-name').value = personalInfo.fullName;
+                    if (personalInfo.email) document.getElementById('user-email').value = personalInfo.email;
+                    if (personalInfo.phone) document.getElementById('user-phone').value = personalInfo.phone;
+                    if (personalInfo.linkedin) document.getElementById('user-linkedin').value = personalInfo.linkedin;
+                    if (personalInfo.city) document.getElementById('user-city').value = personalInfo.city;
+                    if (personalInfo.state) document.getElementById('user-state').value = personalInfo.state;
+                    if (personalInfo.aiModel) document.getElementById('ai-model').value = personalInfo.aiModel;
+                    if (personalInfo.matchThreshold) {
+                        document.getElementById('match-threshold').value = personalInfo.matchThreshold;
+                        document.getElementById('threshold-value').textContent = personalInfo.matchThreshold;
+                    }
+                }
+                
+                // Load individual settings for compatibility
+                const aiModel = localStorage.getItem('ai_model');
+                const matchThreshold = localStorage.getItem('match_threshold');
+                
+                if (aiModel && !savedInfo) document.getElementById('ai-model').value = aiModel;
+                if (matchThreshold && !savedInfo) {
+                    document.getElementById('match-threshold').value = matchThreshold;
+                    document.getElementById('threshold-value').textContent = matchThreshold;
+                }
+                
+                // Update resume header with loaded information
+                if (typeof updateResumeHeader === 'function') {
+                    updateResumeHeader();
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+        
+        // Helper function to get current personal info for resume exports
+        function getCurrentPersonalInfo() {
+            return {
+                fullName: document.getElementById('user-name').value || '',
+                email: document.getElementById('user-email').value || '',
+                phone: document.getElementById('user-phone').value || '',
+                linkedin: document.getElementById('user-linkedin').value || '',
+                city: document.getElementById('user-city').value || '',
+                state: document.getElementById('user-state').value || '',
+                location: `${document.getElementById('user-city').value || ''}, ${document.getElementById('user-state').value || ''}`.replace(/^,\s*|,\s*$/g, ''),
+                contactInfo: [
+                    document.getElementById('user-email').value || '',
+                    document.getElementById('user-phone').value || '',
+                    document.getElementById('user-linkedin').value || '',
+                    `${document.getElementById('user-city').value || ''}, ${document.getElementById('user-state').value || ''}`.replace(/^,\s*|,\s*$/g, '')
+                ].filter(info => info.trim() !== '').join(' | ')
+            };
         }
         
         function exportDatabase() {
@@ -2832,6 +3004,7 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboard();
+            loadSettings(); // Load personal information and settings
             
             // Add sample data if database is empty
             if (db.components.length === 0) {
@@ -4495,6 +4668,9 @@
             const resumeTitleElement = document.getElementById('resume-title');
             const resumeTitle = resumeTitleElement ? resumeTitleElement.value : 'Professional Resume';
             
+            // Update resume header with current personal information
+            updateResumeHeader();
+            
             if (cart.length === 0) {
                 resumeContent.innerHTML = '<p class="empty-canvas">Select components from the library and add them to your cart, then checkout to build your resume.</p>';
                 return;
@@ -4577,10 +4753,72 @@
             }
         }
 
+        // Update resume header with current personal information
+        function updateResumeHeader() {
+            const personalInfo = getCurrentPersonalInfo();
+            
+            // Update name
+            const nameElement = document.getElementById('resume-name');
+            if (nameElement && personalInfo.fullName) {
+                nameElement.textContent = personalInfo.fullName;
+            }
+            
+            // Update contact information
+            const emailElement = document.getElementById('resume-email');
+            const phoneElement = document.getElementById('resume-phone');
+            const linkedinElement = document.getElementById('resume-linkedin');
+            const locationElement = document.getElementById('resume-location');
+            
+            // Show/hide and update email
+            if (emailElement) {
+                if (personalInfo.email) {
+                    emailElement.textContent = personalInfo.email;
+                    emailElement.style.display = 'block';
+                } else {
+                    emailElement.style.display = 'none';
+                }
+            }
+            
+            // Show/hide and update phone
+            if (phoneElement) {
+                if (personalInfo.phone) {
+                    phoneElement.textContent = personalInfo.phone;
+                    phoneElement.style.display = 'block';
+                } else {
+                    phoneElement.style.display = 'none';
+                }
+            }
+            
+            // Show/hide and update LinkedIn
+            if (linkedinElement) {
+                if (personalInfo.linkedin) {
+                    linkedinElement.textContent = personalInfo.linkedin;
+                    linkedinElement.style.display = 'block';
+                } else {
+                    linkedinElement.style.display = 'none';
+                }
+            }
+            
+            // Show/hide and update location
+            if (locationElement) {
+                if (personalInfo.location && personalInfo.location !== ',') {
+                    locationElement.textContent = personalInfo.location;
+                    locationElement.style.display = 'block';
+                } else {
+                    locationElement.style.display = 'none';
+                }
+            }
+        }
+
         // Export resume as text/HTML
         function exportResume() {
             const resumePreview = document.getElementById('resume-preview');
-            const resumeTitle = document.getElementById('resume-title').value || 'Resume';
+            const resumeTitleElement = document.getElementById('resume-title');
+            const resumeTitle = resumeTitleElement ? resumeTitleElement.value || 'Resume' : 'Resume';
+            
+            // Get personal information from settings
+            const personalInfo = getCurrentPersonalInfo();
+            const fileName = personalInfo.fullName || resumeTitle;
             
             if (cart.length === 0) {
                 showStatus('No components to export. Build your resume first.', 'warning');
@@ -4592,7 +4830,7 @@
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>${resumeTitle}</title>
+                    <title>${fileName}</title>
                     <style>
                         body { font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.4; }
                         .resume-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #2f5597; padding-bottom: 10px; }
@@ -4616,11 +4854,113 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${resumeTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
+            a.download = `${fileName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
             a.click();
             URL.revokeObjectURL(url);
             
             showStatus('Resume exported successfully!', 'success');
+        }
+
+        // Export resume as DOCX
+        async function exportResumeDocx() {
+            const resumeTitleElement = document.getElementById('resume-title');
+            const resumeTitle = resumeTitleElement ? resumeTitleElement.value || 'Resume' : 'Resume';
+            
+            // Get personal information from settings
+            const personalInfo = getCurrentPersonalInfo();
+            const contactInfo = personalInfo.contactInfo || '';
+            
+            if (cart.length === 0) {
+                showStatus('No components to export. Build your resume first.', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/export/docx', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        components: cart,
+                        title: personalInfo.fullName || resumeTitle,
+                        contact: contactInfo
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Export failed');
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${(personalInfo.fullName || resumeTitle).replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showStatus('DOCX resume exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting DOCX:', error);
+                showStatus(`Error exporting DOCX: ${error.message}`, 'error');
+            }
+        }
+
+        // Export resume as PDF
+        async function exportResumePdf() {
+            const resumeTitleElement = document.getElementById('resume-title');
+            const resumeTitle = resumeTitleElement ? resumeTitleElement.value || 'Resume' : 'Resume';
+            
+            // Get personal information from settings
+            const personalInfo = getCurrentPersonalInfo();
+            const contactInfo = personalInfo.contactInfo || '';
+            
+            if (cart.length === 0) {
+                showStatus('No components to export. Build your resume first.', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/export/pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        components: cart,
+                        title: personalInfo.fullName || resumeTitle,
+                        contact: contactInfo
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Export failed');
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${(personalInfo.fullName || resumeTitle).replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showStatus('PDF resume exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                showStatus(`Error exporting PDF: ${error.message}`, 'error');
+            }
         }
 
         // Save resume as template
