@@ -847,6 +847,119 @@
                 margin-bottom: 5px;
             }
         }
+
+        /* Enhanced Component Library Filter Styles */
+        .search-interface label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .search-interface select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .search-interface select:focus {
+            border-color: #2f5597;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(47, 85, 151, 0.2);
+        }
+
+        #filter-results-count {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            text-align: right;
+            padding: 8px 0;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 8px 12px;
+        }
+
+        .filter-active {
+            background-color: #e3f2fd !important;
+            border-color: #2f5597 !important;
+            font-weight: bold !important;
+        }
+
+        .bulk-actions {
+            display: none;
+            background-color: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .bulk-actions.show {
+            display: block;
+        }
+
+        .component-card.selected-for-bulk {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+
+        .component-card .bulk-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+
+        /* Component grid enhancements */
+        .component-grid {
+            position: relative;
+        }
+
+        .no-components-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-style: italic;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+
+        .filter-summary {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .filter-tag {
+            display: inline-block;
+            background-color: #2f5597;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-right: 5px;
+            margin-bottom: 3px;
+        }
+
+        .clear-filter {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 1px 6px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 10px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -951,13 +1064,25 @@
             <h2>📚 Resume Component Library</h2>
             
             <div class="search-interface">
-                <h3>Search Components</h3>
+                <h3>🔍 Search & Filter Components</h3>
+                
+                <!-- Search Row -->
                 <div class="form-row">
                     <div>
+                        <label for="component-search">Search Keywords:</label>
                         <input type="text" id="component-search" placeholder="Search by keywords, title, or content...">
                     </div>
                     <div>
-                        <select id="section-filter">
+                        <button onclick="searchComponents()" class="success">🔍 Search</button>
+                        <button onclick="clearSearchAndFilters()" class="secondary">🗑️ Clear All</button>
+                    </div>
+                </div>
+                
+                <!-- Filter Row -->
+                <div class="form-row">
+                    <div>
+                        <label for="section-filter">Section Type:</label>
+                        <select id="section-filter" onchange="filterComponents()">
                             <option value="">All Sections</option>
                             <option value="professional_summary">Professional Summary</option>
                             <option value="technical_skills">Technical Skills</option>
@@ -967,15 +1092,83 @@
                             <option value="certifications">Certifications</option>
                             <option value="education">Education</option>
                             <option value="accomplishments">Accomplishments</option>
+                            <option value="client_contract">Client/Contract</option>
+                            <option value="summary_mission">Summary/Mission</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="skill-level-filter">Skill Level:</label>
+                        <select id="skill-level-filter" onchange="filterComponents()">
+                            <option value="">All Levels</option>
+                            <option value="entry">Entry Level</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="searchComponents()" class="success">🔍 Search</button>
-                <button onclick="showAddComponentModal()" class="success">➕ Add New Component</button>
+                
+                <!-- Additional Filters Row -->
+                <div class="form-row">
+                    <div>
+                        <label for="industry-filter">Industry:</label>
+                        <select id="industry-filter" onchange="filterComponents()">
+                            <option value="">All Industries</option>
+                            <option value="technology">Technology</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="finance">Finance</option>
+                            <option value="banking">Banking</option>
+                            <option value="education">Education</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="consulting">Consulting</option>
+                            <option value="government">Government</option>
+                            <option value="nonprofit">Non-Profit</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="usage-filter">Usage Count:</label>
+                        <select id="usage-filter" onchange="filterComponents()">
+                            <option value="">Any Usage</option>
+                            <option value="unused">Never Used (0)</option>
+                            <option value="low">Low Usage (1-3)</option>
+                            <option value="medium">Medium Usage (4-10)</option>
+                            <option value="high">High Usage (10+)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="form-row">
+                    <div>
+                        <button onclick="showAddComponentModal()" class="success">➕ Add New Component</button>
+                        <button onclick="showBulkActions()" class="secondary">📦 Bulk Actions</button>
+                    </div>
+                    <div>
+                        <span id="filter-results-count">Loading components...</span>
+                    </div>
+                </div>
             </div>
             
             <div class="component-grid" id="component-grid">
                 <!-- Components will be populated here -->
+            </div>
+            
+            <!-- Bulk Actions Panel (hidden by default) -->
+            <div class="bulk-actions" id="bulk-actions-panel">
+                <h4>📦 Bulk Actions</h4>
+                <p>Select components by checking the boxes, then choose an action:</p>
+                <div class="form-row">
+                    <div>
+                        <button onclick="selectAllVisibleComponents()" class="secondary">☑️ Select All Visible</button>
+                        <button onclick="deselectAllComponents()" class="secondary">❌ Deselect All</button>
+                    </div>
+                    <div>
+                        <button onclick="bulkAddToCart()" class="success">🛒 Add Selected to Cart</button>
+                        <button onclick="bulkDelete()" class="danger">🗑️ Delete Selected</button>
+                    </div>
+                </div>
+                <div id="bulk-selection-count">No components selected</div>
             </div>
         </div>
         
@@ -1827,36 +2020,53 @@
             }
         }
 
-        // Update component display to use API and include delete buttons
+        // Update component display to use API and new filtering system
         async function loadComponentLibrary() {
-            try {
-                const response = await fetch('/api/components');
-                const components = await response.json();
-                displayComponents(components);
-            } catch (error) {
-                console.error('Error loading components:', error);
-                showStatus('Error loading components', 'error');
-                // Fallback to local storage
-                displayComponents(db.components);
-            }
+            // Initialize filter event listeners if not already set
+            initializeFilterEventListeners();
+            
+            // Use the new filtering system instead of direct display
+            await filterComponents();
         }
 
+        // Initialize filter event listeners
+        function initializeFilterEventListeners() {
+            // Add search input event listener for real-time filtering
+            const searchInput = document.getElementById('component-search');
+            if (searchInput && !searchInput.hasAttribute('data-listener-added')) {
+                searchInput.addEventListener('keyup', function(event) {
+                    // Filter on Enter key or after a brief delay
+                    if (event.key === 'Enter') {
+                        filterComponents();
+                    } else {
+                        // Debounced filtering for real-time search
+                        clearTimeout(searchInput.filterTimeout);
+                        searchInput.filterTimeout = setTimeout(filterComponents, 300);
+                    }
+                });
+                searchInput.setAttribute('data-listener-added', 'true');
+            }
+
+            // Ensure all filter dropdowns have their onchange handlers
+            const filterElements = [
+                'section-filter',
+                'skill-level-filter', 
+                'industry-filter',
+                'usage-filter'
+            ];
+            
+            filterElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element && !element.hasAttribute('data-listener-added')) {
+                    element.addEventListener('change', filterComponents);
+                    element.setAttribute('data-listener-added', 'true');
+                }
+            });
+        }
+
+        // Legacy function kept for compatibility - now redirects to filtering
         function displayComponents(components) {
-            const grid = document.getElementById('component-grid');
-            grid.innerHTML = components.map(component => `
-                <div class="component-card" onclick="selectComponent('${component.id}')">
-                    <div class="component-title">${component.title}</div>
-                    <div class="component-preview">${component.content}</div>
-                    <div class="component-meta">
-                        <span>${component.section_type_name || component.section_type}</span>
-                        <span>Used: ${component.usage_count || 0} times</span>
-                    </div>
-                    <div class="component-actions">
-                        <button class="edit-btn" onclick="event.stopPropagation(); editComponentDetails('${component.id}')">✏️ Edit</button>
-                        <button class="delete-btn" onclick="event.stopPropagation(); deleteComponent('${component.id}', '${component.title}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `).join('') || '<p>No components found. Add some components to get started.</p>';
+            displayFilteredComponents(components);
         }
 
         // Delete component function
@@ -1906,7 +2116,7 @@
                 }
                 
                 // Pre-fill the component modal with existing data
-                document.getElementById('modal-section-type').value = component.section_type || 'professional_summary';
+                document.getElementById('modal-section-type').value = component.section_type_name || component.section_type || 'professional_summary';
                 document.getElementById('modal-skill-level').value = component.skill_level || 'intermediate';
                 document.getElementById('modal-title').value = component.title || '';
                 document.getElementById('modal-content').value = component.content || '';
@@ -2075,10 +2285,491 @@
         }
 
         function searchComponents() {
-            const query = document.getElementById('component-search').value;
+            // This function now also triggers the filter process
+            filterComponents();
+        }
+
+        // New comprehensive filtering function
+        async function filterComponents() {
+            try {
+                const searchQuery = document.getElementById('component-search').value.toLowerCase().trim();
+                const sectionFilter = document.getElementById('section-filter').value;
+                const skillLevelFilter = document.getElementById('skill-level-filter').value;
+                const industryFilter = document.getElementById('industry-filter').value;
+                const usageFilter = document.getElementById('usage-filter').value;
+                
+                console.log('Filter values:', { searchQuery, sectionFilter, skillLevelFilter, industryFilter, usageFilter });
+                
+                // Load components from API or local storage
+                let allComponents = [];
+                try {
+                    const response = await fetch('/api/components');
+                    if (response.ok) {
+                        allComponents = await response.json();
+                        console.log('Loaded components from API:', allComponents.length);
+                        
+                        // Debug: Log section types of first few components
+                        if (allComponents.length > 0) {
+                            console.log('Sample component section types:', 
+                                allComponents.slice(0, 5).map(c => ({ 
+                                    id: c.id, 
+                                    title: c.title, 
+                                    section_type: c.section_type,
+                                    section_type_name: c.section_type_name 
+                                }))
+                            );
+                        }
+                        
+                        // Debug: Show what section filter value we're looking for
+                        if (sectionFilter) {
+                            console.log('Looking for section filter:', sectionFilter);
+                        }
+                    } else {
+                        // Fallback to local storage
+                        allComponents = db.components || [];
+                        console.log('Using local storage components:', allComponents.length);
+                    }
+                } catch (error) {
+                    console.error('Error loading components:', error);
+                    allComponents = db.components || [];
+                    console.log('Using local storage after error:', allComponents.length);
+                }
+                
+                // Apply filters
+                let filteredComponents = allComponents.filter(component => {
+                    // Search query filter (if provided)
+                    if (searchQuery) {
+                        const searchableText = [
+                            component.title || '',
+                            component.content || '',
+                            component.keywords || '',
+                            component.industry_tags || ''
+                        ].join(' ').toLowerCase();
+                        
+                        if (!searchableText.includes(searchQuery)) {
+                            return false;
+                        }
+                    }
+                    
+                    // Section type filter - handle both section_type and section_type_name
+                    if (sectionFilter) {
+                        // Create bidirectional mapping for section types
+                        const sectionMapping = {
+                            // Database key -> Display name
+                            'professional_summary': 'Professional Summary',
+                            'technical_skills': 'Technical Skills',
+                            'professional_skills': 'Professional Skills',
+                            'work_experience': 'Work Experience',
+                            'projects': 'Projects',
+                            'certifications': 'Certifications',
+                            'education': 'Education',
+                            'accomplishments': 'Accomplishments',
+                            'client_contract': 'Client/Contract',
+                            'summary_mission': 'Summary/Mission',
+                            'blank_component': 'Blank Component',
+                            'general': 'General'
+                        };
+                        
+                        // Reverse mapping: Display name -> Database key
+                        const displayToKey = {};
+                        Object.keys(sectionMapping).forEach(key => {
+                            displayToKey[sectionMapping[key]] = key;
+                        });
+                        
+                        // Get the component's section type (normalize to database key)
+                        let componentSectionKey = component.section_type;
+                        if (!componentSectionKey && component.section_type_name) {
+                            // If we have a display name, convert it to database key
+                            componentSectionKey = displayToKey[component.section_type_name] || component.section_type_name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        }
+                        
+                        // Default to 'general' if no section type found
+                        componentSectionKey = componentSectionKey || 'general';
+                        
+                        // Compare with the selected filter
+                        if (componentSectionKey !== sectionFilter) {
+                            return false;
+                        }
+                    }
+                    
+                    // Skill level filter
+                    if (skillLevelFilter && component.skill_level !== skillLevelFilter) {
+                        return false;
+                    }
+                    
+                    // Industry filter
+                    if (industryFilter) {
+                        const industryTags = (component.industry_tags || '').toLowerCase();
+                        if (!industryTags.includes(industryFilter)) {
+                            return false;
+                        }
+                    }
+                    
+                    // Usage count filter
+                    if (usageFilter) {
+                        const usageCount = component.usage_count || 0;
+                        switch (usageFilter) {
+                            case 'unused':
+                                if (usageCount !== 0) return false;
+                                break;
+                            case 'low':
+                                if (usageCount < 1 || usageCount > 3) return false;
+                                break;
+                            case 'medium':
+                                if (usageCount < 4 || usageCount > 10) return false;
+                                break;
+                            case 'high':
+                                if (usageCount < 10) return false;
+                                break;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                console.log('Filtered components:', filteredComponents.length);
+                
+                // Display filtered components
+                displayFilteredComponents(filteredComponents);
+                
+                // Update filter UI
+                updateFilterDisplay(filteredComponents.length, allComponents.length);
+                updateFilterActiveStates();
+                
+            } catch (error) {
+                console.error('Error in filterComponents:', error);
+                showStatus('Error filtering components. Please try again.', 'error');
+            }
+        }
+
+        function displayFilteredComponents(components) {
+            const grid = document.getElementById('component-grid');
+            
+            // Section type mapping for better display names
+            const sectionTypeNames = {
+                'professional_summary': 'Professional Summary',
+                'technical_skills': 'Technical Skills',
+                'professional_skills': 'Professional Skills',
+                'work_experience': 'Work Experience',
+                'projects': 'Projects',
+                'certifications': 'Certifications',
+                'education': 'Education',
+                'accomplishments': 'Accomplishments',
+                'client_contract': 'Client/Contract',
+                'summary_mission': 'Summary/Mission',
+                'blank_component': 'Blank Component',
+                'general': 'General'
+            };
+            
+            if (components.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-components-message">
+                        <h4>No Components Found</h4>
+                        <p>No components match your current filters. Try adjusting your search criteria or <button onclick="clearSearchAndFilters()" class="link-button">clear all filters</button>.</p>
+                        <p style="margin-top: 15px;"><button onclick="showAddComponentModal()" class="success">➕ Add New Component</button></p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = components.map(component => {
+                const sectionType = component.section_type_name || component.section_type || 'general';
+                const sectionDisplayName = sectionTypeNames[sectionType] || sectionType;
+                
+                return `
+                    <div class="component-card" id="component-${component.id}">
+                        <div class="component-title">${component.title || 'Untitled Component'}</div>
+                        <div class="component-meta">
+                            <span class="tag">${sectionDisplayName}</span>
+                            ${component.skill_level ? `<span class="tag">${component.skill_level}</span>` : ''}
+                            ${component.usage_count ? `<span class="tag">Used ${component.usage_count}x</span>` : ''}
+                        </div>
+                        <div class="component-preview">${(component.content || '').substring(0, 150)}${(component.content || '').length > 150 ? '...' : ''}</div>
+                        ${component.keywords ? `<div class="keywords" style="font-size: 11px; color: #666; margin-top: 8px;"><strong>Keywords:</strong> ${component.keywords}</div>` : ''}
+                        ${component.industry_tags ? `<div class="industry-tags" style="font-size: 11px; color: #666; margin-top: 5px;"><strong>Industries:</strong> ${component.industry_tags}</div>` : ''}
+                        <div class="component-actions">
+                            <button class="edit-btn" onclick="editComponentDetails('${component.id}')">✏️ Edit</button>
+                            <button class="delete-btn" onclick="deleteComponent('${component.id}', '${(component.title || 'Untitled').replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                            <button class="secondary" onclick="selectComponent('${component.id}')">📋 Select</button>
+                            <button class="success" onclick="addToCart('${component.id}')">🛒 Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateFilterDisplay(filteredCount, totalCount) {
+            const countElement = document.getElementById('filter-results-count');
+            const activeFilters = getActiveFilters();
+            
+            if (activeFilters.length > 0) {
+                countElement.innerHTML = `
+                    Showing ${filteredCount} of ${totalCount} components
+                    <div class="filter-summary">
+                        Active filters: ${activeFilters.map(filter => `<span class="filter-tag">${filter} <button class="clear-filter" onclick="clearSpecificFilter('${filter.split(':')[0]}')">&times;</button></span>`).join('')}
+                    </div>
+                `;
+            } else {
+                countElement.textContent = `Showing all ${totalCount} components`;
+            }
+        }
+
+        function getActiveFilters() {
+            const filters = [];
+            const searchQuery = document.getElementById('component-search').value.trim();
             const sectionFilter = document.getElementById('section-filter').value;
-            // Implementation would use API search
-            showStatus('Search functionality available', 'info');
+            const skillLevelFilter = document.getElementById('skill-level-filter').value;
+            const industryFilter = document.getElementById('industry-filter').value;
+            const usageFilter = document.getElementById('usage-filter').value;
+            
+            if (searchQuery) filters.push(`search: ${searchQuery}`);
+            if (sectionFilter) filters.push(`section: ${sectionFilter}`);
+            if (skillLevelFilter) filters.push(`skill: ${skillLevelFilter}`);
+            if (industryFilter) filters.push(`industry: ${industryFilter}`);
+            if (usageFilter) filters.push(`usage: ${usageFilter}`);
+            
+            return filters;
+        }
+
+        function updateFilterActiveStates() {
+            // Add visual indicators for active filters
+            const filterElements = [
+                'component-search',
+                'section-filter',
+                'skill-level-filter',
+                'industry-filter',
+                'usage-filter'
+            ];
+            
+            filterElements.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    if ((element.type === 'text' && element.value.trim()) || 
+                        (element.type === 'select-one' && element.value)) {
+                        element.classList.add('filter-active');
+                    } else {
+                        element.classList.remove('filter-active');
+                    }
+                }
+            });
+        }
+
+        function clearSearchAndFilters() {
+            // Clear all filter inputs
+            document.getElementById('component-search').value = '';
+            document.getElementById('section-filter').value = '';
+            document.getElementById('skill-level-filter').value = '';
+            document.getElementById('industry-filter').value = '';
+            document.getElementById('usage-filter').value = '';
+            
+            // Trigger filter update
+            filterComponents();
+            
+            showStatus('All filters cleared', 'info');
+        }
+
+        function clearSpecificFilter(filterType) {
+            switch (filterType) {
+                case 'search':
+                    document.getElementById('component-search').value = '';
+                    break;
+                case 'section':
+                    document.getElementById('section-filter').value = '';
+                    break;
+                case 'skill':
+                    document.getElementById('skill-level-filter').value = '';
+                    break;
+                case 'industry':
+                    document.getElementById('industry-filter').value = '';
+                    break;
+                case 'usage':
+                    document.getElementById('usage-filter').value = '';
+                    break;
+            }
+            
+            filterComponents();
+        }
+
+        function showBulkActions() {
+            const panel = document.getElementById('bulk-actions-panel');
+            panel.classList.toggle('show');
+            
+            if (panel.classList.contains('show')) {
+                // Add checkboxes to all visible component cards
+                document.querySelectorAll('.component-card').forEach(card => {
+                    if (!card.querySelector('.bulk-checkbox')) {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.className = 'bulk-checkbox';
+                        checkbox.onchange = updateBulkSelectionCount;
+                        card.style.position = 'relative';
+                        card.appendChild(checkbox);
+                    }
+                });
+                showStatus('Bulk actions enabled. Check components to perform batch operations.', 'info');
+            } else {
+                // Remove checkboxes
+                document.querySelectorAll('.bulk-checkbox').forEach(checkbox => {
+                    checkbox.remove();
+                });
+                showStatus('Bulk actions disabled.', 'info');
+            }
+        }
+
+        function selectAllVisibleComponents() {
+            document.querySelectorAll('.bulk-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateBulkSelectionCount();
+        }
+
+        function deselectAllComponents() {
+            document.querySelectorAll('.bulk-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateBulkSelectionCount();
+        }
+
+        function updateBulkSelectionCount() {
+            const selectedCount = document.querySelectorAll('.bulk-checkbox:checked').length;
+            const totalVisible = document.querySelectorAll('.bulk-checkbox').length;
+            
+            const countElement = document.getElementById('bulk-selection-count');
+            countElement.textContent = `${selectedCount} of ${totalVisible} components selected`;
+            
+            // Update component card styles
+            document.querySelectorAll('.component-card').forEach(card => {
+                const checkbox = card.querySelector('.bulk-checkbox');
+                if (checkbox && checkbox.checked) {
+                    card.classList.add('selected-for-bulk');
+                } else {
+                    card.classList.remove('selected-for-bulk');
+                }
+            });
+        }
+
+        function bulkAddToCart() {
+            const selectedCheckboxes = document.querySelectorAll('.bulk-checkbox:checked');
+            let addedCount = 0;
+            
+            selectedCheckboxes.forEach(checkbox => {
+                const card = checkbox.closest('.component-card');
+                const componentId = card.id.replace('component-', '');
+                const component = db.components.find(comp => comp.id == componentId);
+                
+                if (component) {
+                    const existingItem = cart.find(item => item.id == componentId);
+                    if (!existingItem) {
+                        cart.push({...component});
+                        addedCount++;
+                    }
+                }
+            });
+            
+            if (addedCount > 0) {
+                updateCartDisplay();
+                showStatus(`Added ${addedCount} components to cart`, 'success');
+            } else {
+                showStatus('No new components were added (items may already be in cart)', 'info');
+            }
+        }
+
+        function bulkDelete() {
+            const selectedCheckboxes = document.querySelectorAll('.bulk-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                showStatus('No components selected for deletion.', 'error');
+                return;
+            }
+            
+            const confirmed = confirm(`Are you sure you want to delete ${selectedCheckboxes.length} selected components?\n\nThis action cannot be undone.`);
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            let deletedCount = 0;
+            
+            selectedCheckboxes.forEach(async (checkbox) => {
+                const card = checkbox.closest('.component-card');
+                const componentId = card.id.replace('component-', '');
+                const component = db.components.find(comp => comp.id == componentId);
+                
+                if (component) {
+                    try {
+                        const response = await fetch(`/api/components/${componentId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            deletedCount++;
+                        } else {
+                            // Fallback: remove from local storage
+                            db.components = db.components.filter(comp => comp.id != componentId);
+                            db.saveComponents();
+                            deletedCount++;
+                        }
+                    } catch (error) {
+                        console.error('Error deleting component:', error);
+                        // Fallback: remove from local storage
+                        db.components = db.components.filter(comp => comp.id != componentId);
+                        db.saveComponents();
+                        deletedCount++;
+                    }
+                }
+            });
+            
+            // Refresh the display after all deletions
+            setTimeout(() => {
+                loadComponentLibrary();
+                loadDashboard();
+                showStatus(`✅ Deleted ${deletedCount} components successfully!`, 'success');
+            }, 500);
+        }
+
+        // Enhanced component library keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Only apply shortcuts when component library tab is active
+            const componentLibraryTab = document.getElementById('component-library');
+            if (!componentLibraryTab || !componentLibraryTab.classList.contains('active')) {
+                return;
+            }
+            
+            // Ctrl/Cmd + F: Focus search box
+            if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+                event.preventDefault();
+                document.getElementById('component-search').focus();
+            }
+            
+            // Escape: Clear search and filters
+            if (event.key === 'Escape') {
+                clearSearchAndFilters();
+            }
+            
+            // Ctrl/Cmd + A: Select all (when bulk actions are enabled)
+            if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+                const bulkPanel = document.getElementById('bulk-actions-panel');
+                if (bulkPanel && bulkPanel.classList.contains('show')) {
+                    event.preventDefault();
+                    selectAllVisibleComponents();
+                }
+            }
+        });
+
+        // Add to cart function for the component library
+        function addToCart(componentId) {
+            const component = db.components.find(comp => comp.id == componentId);
+            if (component) {
+                // Add to the resume builder cart
+                const existingItem = cart.find(item => item.id == componentId);
+                if (!existingItem) {
+                    cart.push({...component});
+                    updateCartDisplay();
+                    showStatus(`Added "${component.title}" to cart`, 'success');
+                } else {
+                    showStatus(`"${component.title}" is already in cart`, 'info');
+                }
+            }
         }
 
         async function saveComponent() {
@@ -2153,14 +2844,20 @@
                 
                 closeModal('component-modal');
                 
-                // Clear form
+                // Clear form and reset to defaults
                 document.getElementById('modal-title').value = '';
                 document.getElementById('modal-content').value = '';
                 document.getElementById('modal-keywords').value = '';
                 document.getElementById('modal-industry-tags').value = '';
+                document.getElementById('modal-section-type').value = 'professional_summary';
+                document.getElementById('modal-skill-level').value = 'intermediate';
                 
-                loadComponentLibrary();
-                loadDashboard();
+                // Force a fresh reload of components from server
+                setTimeout(async () => {
+                    await loadComponentLibrary();
+                    loadDashboard();
+                    showStatus('Component display refreshed with latest changes.', 'info');
+                }, 100);
                 
             } catch (error) {
                 console.error('Error saving component:', error);
@@ -2713,7 +3410,7 @@
             // Group components by section type
             const sections = {};
             cart.forEach(component => {
-                const sectionType = component.section_type || 'general';
+                const sectionType = component.section_type_name || component.section_type || 'general';
                 if (!sections[sectionType]) {
                     sections[sectionType] = [];
                 }
