@@ -6,44 +6,38 @@
     <title>AI-Powered Resume Database System</title>
     <style>
         body {
-            font-family: 'Calibri', 'Segoe UI', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1400px;
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
         }
-        h1, h2, h3 {
-            color: #2f5597;
-        }
         .container {
             background-color: white;
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .tabs {
             display: flex;
             border-bottom: 1px solid #ddd;
             margin-bottom: 20px;
-            flex-wrap: wrap;
         }
         .tab {
-            padding: 10px 15px;
+            padding: 8px 16px;
             cursor: pointer;
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
             border-bottom: none;
-            border-radius: 5px 5px 0 0;
-            margin-right: 5px;
-            margin-bottom: -1px;
-            font-size: 14px;
+            margin-right: 2px;
+        }
+        .tab:hover {
+            background-color: #e9ecef;
         }
         .tab.active {
             background-color: white;
             font-weight: bold;
-            border-bottom: 1px solid white;
+            color: #2f5597;
         }
         .tab-content {
             display: none;
@@ -53,35 +47,68 @@
         }
         textarea, input, select {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-family: inherit;
-            box-sizing: border-box;
         }
+
+        textarea:focus, input:focus, select:focus {
+            border-color: #2f5597;
+            outline: none;
+        }
+
+        textarea:hover, input:hover, select:hover {
+            border-color: var(--gray-400);
+        }
+
         button {
             background-color: #2f5597;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
+
         button:hover {
-            background-color: #1e3a6a;
+            background-color: #1e3a8a;
         }
+
         button.secondary {
             background-color: #6c757d;
+            color: white;
         }
+
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+
         button.success {
             background-color: #28a745;
+            color: white;
         }
+
+        button.success:hover {
+            background-color: #218838;
+        }
+
         button.danger {
             background-color: #dc3545;
+            color: white;
+        }
+
+        button.danger:hover {
+            background-color: #c82333;
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            color: #ffffff;
+            cursor: not-allowed;
         }
         .search-interface {
             background-color: #f8f9fa;
@@ -2616,8 +2643,16 @@
             displayArea.textContent = text;
             displaySection.style.display = 'block';
             
+            // Remove existing event listener to avoid duplicates
+            displayArea.removeEventListener('mouseup', handleTextSelection);
+            
             // Add selection event listener
             displayArea.addEventListener('mouseup', handleTextSelection);
+            
+            // Clear any previous selection
+            selectedText = '';
+            
+            showStatus(`Resume loaded: ${filename}. Select text and click "Create Component from Selection" to add components.`, 'info');
         }
 
         // Handle text selection
@@ -4310,7 +4345,7 @@
                                             <input type="text" id="extract-title" placeholder="Component title">
                                         </div>
                                     </div>
-                                    <button onclick="createComponentFromSelection('${resume.id}')" class="success">➕ Create Component</button>
+                                    <button onclick="createComponentFromTextSelection('${resume.id}')" class="success">➕ Create Component</button>
                                 </div>
                             </div>
                             
@@ -4403,7 +4438,7 @@
             }
         }
 
-        async function createComponentFromSelection(resumeId) {
+        async function createComponentFromTextSelection(resumeId) {
             const textarea = document.getElementById('extraction-text');
             const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
             

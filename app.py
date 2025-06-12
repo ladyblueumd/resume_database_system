@@ -1134,20 +1134,20 @@ def get_work_orders():
         # Build query
         if unassigned:
             query = """
-                SELECT wo.* FROM work_orders wo
+                SELECT wo.* FROM fieldnation_work_orders wo
                 LEFT JOIN work_order_project_assignments wopa ON wo.id = wopa.work_order_id
                 WHERE wopa.work_order_id IS NULL
             """
             params = []
         else:
-            query = "SELECT * FROM work_orders WHERE 1=1"
+            query = "SELECT * FROM fieldnation_work_orders WHERE 1=1"
             params = []
         
         if category:
             query += " AND work_category = ?"
             params.append(category)
         if company:
-            query += " AND company_name LIKE ?"
+            query += " AND buyer_company LIKE ?"
             params.append(f"%{company}%")
         if work_type:
             query += " AND work_type LIKE ?"
@@ -1160,7 +1160,7 @@ def get_work_orders():
             params.append(state)
         if project_id:
             query = """
-                SELECT wo.* FROM work_orders wo
+                SELECT wo.* FROM fieldnation_work_orders wo
                 JOIN work_order_project_assignments wopa ON wo.id = wopa.work_order_id
                 WHERE wopa.project_id = ?
             """
@@ -1173,12 +1173,38 @@ def get_work_orders():
         cursor.execute(query, params)
         work_orders = [dict(row) for row in cursor.fetchall()]
         
-        # Parse JSON fields
+        # Clean and parse data
+        def clean_text(text):
+            """Remove markdown formatting and unwanted characters"""
+            if not text or not isinstance(text, str):
+                return text
+            # Remove markdown bold formatting
+            text = text.replace('**', '').replace('***', '')
+            # Clean up colons at the beginning of lines or standalone
+            text = text.replace('**:**', '').replace(': ', ' ').strip()
+            # Remove any remaining standalone colons
+            if text.startswith(':'):
+                text = text[1:].strip()
+            return text
+
+        # Parse JSON fields and clean text
         for wo in work_orders:
-            if wo['technologies_used']:
-                wo['technologies_used'] = json.loads(wo['technologies_used'])
-            if wo['skills_demonstrated']:
-                wo['skills_demonstrated'] = json.loads(wo['skills_demonstrated'])
+            # Clean all text fields
+            for key, value in wo.items():
+                if isinstance(value, str):
+                    wo[key] = clean_text(value)
+            
+            # Parse JSON fields
+            if wo.get('technologies_used'):
+                try:
+                    wo['technologies_used'] = json.loads(wo['technologies_used'])
+                except (json.JSONDecodeError, TypeError):
+                    wo['technologies_used'] = []
+            if wo.get('required_skills'):
+                try:
+                    wo['required_skills'] = json.loads(wo['required_skills'])
+                except (json.JSONDecodeError, TypeError):
+                    wo['required_skills'] = []
         
         conn.close()
         return jsonify(work_orders)
@@ -1194,21 +1220,21 @@ def get_work_order_stats():
         cursor = conn.cursor()
         
         # Overall stats
-        cursor.execute("SELECT COUNT(*) FROM work_orders")
+        cursor.execute("SELECT COUNT(*) FROM fieldnation_work_orders")
         total_orders = cursor.fetchone()[0]
         
-        cursor.execute("SELECT COUNT(DISTINCT company_name) FROM work_orders")
+        cursor.execute("SELECT COUNT(DISTINCT buyer_company) FROM fieldnation_work_orders")
         unique_companies = cursor.fetchone()[0]
         
-        cursor.execute("SELECT SUM(pay_amount) FROM work_orders WHERE pay_amount IS NOT NULL")
+        cursor.execute("SELECT SUM(pay_amount) FROM fieldnation_work_orders WHERE pay_amount IS NOT NULL")
         total_earnings = cursor.fetchone()[0] or 0
         
-        cursor.execute("SELECT AVG(pay_amount) FROM work_orders WHERE pay_amount IS NOT NULL")
+        cursor.execute("SELECT AVG(pay_amount) FROM fieldnation_work_orders WHERE pay_amount IS NOT NULL")
         avg_pay = cursor.fetchone()[0] or 0
         
         # Unassigned work orders
         cursor.execute("""
-            SELECT COUNT(*) FROM work_orders wo
+            SELECT COUNT(*) FROM fieldnation_work_orders wo
             LEFT JOIN work_order_project_assignments wopa ON wo.id = wopa.work_order_id
             WHERE wopa.work_order_id IS NULL
         """)
@@ -1218,7 +1244,7 @@ def get_work_order_stats():
         cursor.execute("""
             SELECT work_category, COUNT(*) as count, 
                    COALESCE(SUM(pay_amount), 0) as total_pay
-            FROM work_orders 
+            FROM fieldnation_work_orders 
             GROUP BY work_category 
             ORDER BY count DESC
         """)
@@ -1229,7 +1255,7 @@ def get_work_order_stats():
             SELECT strftime('%Y', service_date) as year, 
                    COUNT(*) as count,
                    COALESCE(SUM(pay_amount), 0) as total_pay
-            FROM work_orders 
+            FROM fieldnation_work_orders 
             WHERE service_date IS NOT NULL
             GROUP BY strftime('%Y', service_date)
             ORDER BY year DESC
@@ -1238,10 +1264,10 @@ def get_work_order_stats():
         
         # Top companies
         cursor.execute("""
-            SELECT company_name, COUNT(*) as count,
+            SELECT buyer_company, COUNT(*) as count,
                    COALESCE(SUM(pay_amount), 0) as total_pay
-            FROM work_orders 
-            GROUP BY company_name 
+            FROM fieldnation_work_orders 
+            GROUP BY buyer_company 
             ORDER BY count DESC
             LIMIT 10
         """)
@@ -1270,16 +1296,16 @@ def get_work_order_categories():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT DISTINCT work_category FROM work_orders ORDER BY work_category")
+        cursor.execute("SELECT DISTINCT work_category FROM fieldnation_work_orders ORDER BY work_category")
         categories = [row[0] for row in cursor.fetchall()]
         
-        cursor.execute("SELECT DISTINCT work_type FROM work_orders WHERE work_type IS NOT NULL ORDER BY work_type")
+        cursor.execute("SELECT DISTINCT work_type FROM fieldnation_work_orders WHERE work_type IS NOT NULL ORDER BY work_type")
         work_types = [row[0] for row in cursor.fetchall()]
         
-        cursor.execute("SELECT DISTINCT client_type FROM work_orders WHERE client_type IS NOT NULL ORDER BY client_type")
+        cursor.execute("SELECT DISTINCT client_type FROM fieldnation_work_orders WHERE client_type IS NOT NULL ORDER BY client_type")
         client_types = [row[0] for row in cursor.fetchall()]
         
-        cursor.execute("SELECT DISTINCT state FROM work_orders WHERE state IS NOT NULL ORDER BY state")
+        cursor.execute("SELECT DISTINCT state FROM fieldnation_work_orders WHERE state IS NOT NULL ORDER BY state")
         states = [row[0] for row in cursor.fetchall()]
         
         conn.close()
@@ -1301,7 +1327,7 @@ def get_work_order(work_order_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT * FROM work_orders WHERE id = ?", (work_order_id,))
+        cursor.execute("SELECT * FROM fieldnation_work_orders WHERE id = ?", (work_order_id,))
         work_order = cursor.fetchone()
         
         if not work_order:
@@ -1309,11 +1335,36 @@ def get_work_order(work_order_id):
         
         wo_dict = dict(work_order)
         
+        # Clean and parse data
+        def clean_text(text):
+            """Remove markdown formatting and unwanted characters"""
+            if not text or not isinstance(text, str):
+                return text
+            # Remove markdown bold formatting
+            text = text.replace('**', '').replace('***', '')
+            # Clean up colons at the beginning of lines or standalone
+            text = text.replace('**:**', '').replace(': ', ' ').strip()
+            # Remove any remaining standalone colons
+            if text.startswith(':'):
+                text = text[1:].strip()
+            return text
+
+        # Clean all text fields
+        for key, value in wo_dict.items():
+            if isinstance(value, str):
+                wo_dict[key] = clean_text(value)
+
         # Parse JSON fields
-        if wo_dict['technologies_used']:
-            wo_dict['technologies_used'] = json.loads(wo_dict['technologies_used'])
-        if wo_dict['skills_demonstrated']:
-            wo_dict['skills_demonstrated'] = json.loads(wo_dict['skills_demonstrated'])
+        if wo_dict.get('technologies_used'):
+            try:
+                wo_dict['technologies_used'] = json.loads(wo_dict['technologies_used'])
+            except (json.JSONDecodeError, TypeError):
+                wo_dict['technologies_used'] = []
+        if wo_dict.get('required_skills'):
+            try:
+                wo_dict['required_skills'] = json.loads(wo_dict['required_skills'])
+            except (json.JSONDecodeError, TypeError):
+                wo_dict['required_skills'] = []
         
         conn.close()
         return jsonify(wo_dict)
@@ -2868,10 +2919,883 @@ def export_resume_pdf():
         return jsonify({'error': f'Failed to export PDF: {str(e)}'}), 500
 
 
+@app.route('/enhanced-work-orders')
+def enhanced_work_orders():
+    """Serve the enhanced work order interface"""
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced FieldNation Work Orders</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-container {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .work-orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .work-order-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .work-order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+        }
+
+        .work-order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+        }
+
+        .wo-id {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .wo-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 10px 0;
+            line-height: 1.3;
+        }
+
+        .company-name {
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .work-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .work-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e8f5e8;
+            color: #27ae60;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .pay-amount {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: right;
+        }
+
+        .description-preview {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            max-height: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .description-preview::after {
+            content: '...';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: white;
+            padding-left: 20px;
+        }
+
+        .technologies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tech-tag {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            border: 1px solid #e9ecef;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .date-badge {
+            background: #f8f9fa;
+            color: #6c757d;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .view-details-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .view-details-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 1% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 1600px;
+            max-height: 95vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 25px;
+            top: 25px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .info-value {
+            color: #212529;
+            text-align: right;
+        }
+
+        .full-description {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            background: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .work-orders-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                min-width: auto;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 FieldNation Work Orders</h1>
+            <p>Comprehensive work order management and search system</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number" id="total-orders">0</span>
+                <span class="stat-label">Total Orders</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="unique-companies">0</span>
+                <span class="stat-label">Companies</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="total-earnings">$0</span>
+                <span class="stat-label">Total Earnings</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="avg-pay">$0</span>
+                <span class="stat-label">Average Pay</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" class="search-input" id="search-input" 
+                       placeholder="Search work orders by company, title, technology, location...">
+                <span class="search-icon">🔍</span>
+            </div>
+            
+            <select class="filter-select" id="company-filter">
+                <option value="">All Companies</option>
+            </select>
+            
+            <select class="filter-select" id="work-type-filter">
+                <option value="">All Work Types</option>
+            </select>
+            
+            <select class="filter-select" id="location-filter">
+                <option value="">All Locations</option>
+            </select>
+        </div>
+
+        <div id="loading" class="loading">
+            <div>🔄 Loading work orders...</div>
+        </div>
+
+        <div id="work-orders-container" class="work-orders-grid" style="display: none;">
+        </div>
+
+        <div id="no-results" class="no-results" style="display: none;">
+            <div>📭 No work orders found matching your criteria</div>
+            <p>Try adjusting your search or filters</p>
+        </div>
+    </div>
+
+    <!-- Modal for Work Order Details -->
+    <div id="work-order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Work Order Details</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class WorkOrderManager {
+            constructor() {
+                this.workOrders = [];
+                this.filteredOrders = [];
+                this.filters = {
+                    search: '',
+                    company: '',
+                    workType: '',
+                    location: ''
+                };
+                
+                this.initializeEventListeners();
+                this.loadWorkOrders();
+            }
+
+            initializeEventListeners() {
+                // Search input
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    this.filters.search = e.target.value.toLowerCase();
+                    this.applyFilters();
+                });
+
+                // Filter dropdowns
+                document.getElementById('company-filter').addEventListener('change', (e) => {
+                    this.filters.company = e.target.value;
+                    this.applyFilters();
+                });
+
+                document.getElementById('work-type-filter').addEventListener('change', (e) => {
+                    this.filters.workType = e.target.value;
+                    this.applyFilters();
+                });
+
+                document.getElementById('location-filter').addEventListener('change', (e) => {
+                    this.filters.location = e.target.value;
+                    this.applyFilters();
+                });
+
+                // Modal close
+                document.querySelector('.close').addEventListener('click', () => {
+                    document.getElementById('work-order-modal').style.display = 'none';
+                });
+
+                // Close modal when clicking outside
+                document.getElementById('work-order-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'work-order-modal') {
+                        document.getElementById('work-order-modal').style.display = 'none';
+                    }
+                });
+            }
+
+            async loadWorkOrders() {
+                try {
+                    const response = await fetch('/api/work-orders');
+                    if (!response.ok) throw new Error('Failed to load work orders');
+                    
+                    this.workOrders = await response.json();
+                    this.filteredOrders = [...this.workOrders];
+                    
+                    this.populateFilters();
+                    this.updateStats();
+                    this.renderWorkOrders();
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('work-orders-container').style.display = 'grid';
+                    
+                } catch (error) {
+                    console.error('Error loading work orders:', error);
+                    document.getElementById('loading').innerHTML = 
+                        '<div style="color: #e74c3c;">❌ Error loading work orders. Please refresh the page.</div>';
+                }
+            }
+
+            populateFilters() {
+                // Populate company filter
+                const companies = [...new Set(this.workOrders.map(wo => wo.buyer_company))].sort();
+                const companySelect = document.getElementById('company-filter');
+                companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company;
+                    option.textContent = company;
+                    companySelect.appendChild(option);
+                });
+
+                // Populate work type filter
+                const workTypes = [...new Set(this.workOrders.map(wo => wo.work_type).filter(Boolean))].sort();
+                const workTypeSelect = document.getElementById('work-type-filter');
+                workTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    workTypeSelect.appendChild(option);
+                });
+
+                // Populate location filter
+                const locations = [...new Set(this.workOrders.map(wo => wo.location || wo.city || wo.state).filter(Boolean))].sort();
+                const locationSelect = document.getElementById('location-filter');
+                locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    locationSelect.appendChild(option);
+                });
+            }
+
+            applyFilters() {
+                this.filteredOrders = this.workOrders.filter(wo => {
+                    // Search filter
+                    if (this.filters.search) {
+                        const searchText = this.filters.search;
+                        const searchableText = [
+                            wo.title,
+                            wo.buyer_company,
+                            wo.work_description,
+                            wo.work_type,
+                            wo.location,
+                            wo.city,
+                            wo.state,
+                            ...(wo.technologies_used ? JSON.parse(wo.technologies_used || '[]') : []),
+                            ...(wo.required_skills ? JSON.parse(wo.required_skills || '[]') : [])
+                        ].join(' ').toLowerCase();
+                        
+                        if (!searchableText.includes(searchText)) return false;
+                    }
+
+                    // Company filter
+                    if (this.filters.company && wo.buyer_company !== this.filters.company) return false;
+
+                    // Work type filter
+                    if (this.filters.workType && wo.work_type !== this.filters.workType) return false;
+
+                    // Location filter
+                    if (this.filters.location) {
+                        const woLocation = wo.location || wo.city || wo.state || '';
+                        if (!woLocation.includes(this.filters.location)) return false;
+                    }
+
+                    return true;
+                });
+
+                this.updateStats();
+                this.renderWorkOrders();
+            }
+
+            updateStats() {
+                const orders = this.filteredOrders;
+                const totalEarnings = orders.reduce((sum, wo) => sum + (wo.pay_amount || 0), 0);
+                const avgPay = orders.length > 0 ? totalEarnings / orders.length : 0;
+                const uniqueCompanies = new Set(orders.map(wo => wo.buyer_company)).size;
+
+                document.getElementById('total-orders').textContent = orders.length;
+                document.getElementById('unique-companies').textContent = uniqueCompanies;
+                document.getElementById('total-earnings').textContent = `$${totalEarnings.toFixed(2)}`;
+                document.getElementById('avg-pay').textContent = `$${avgPay.toFixed(2)}`;
+            }
+
+            renderWorkOrders() {
+                const container = document.getElementById('work-orders-container');
+                const noResults = document.getElementById('no-results');
+
+                if (this.filteredOrders.length === 0) {
+                    container.style.display = 'none';
+                    noResults.style.display = 'block';
+                    return;
+                }
+
+                container.style.display = 'grid';
+                noResults.style.display = 'none';
+
+                container.innerHTML = this.filteredOrders.map(wo => this.createWorkOrderCard(wo)).join('');
+
+                // Add click listeners to cards
+                container.querySelectorAll('.work-order-card').forEach((card, index) => {
+                    card.addEventListener('click', () => this.showWorkOrderDetails(this.filteredOrders[index]));
+                });
+            }
+
+            createWorkOrderCard(wo) {
+                const technologies = Array.isArray(wo.technologies_used) ? wo.technologies_used : [];
+                const skills = Array.isArray(wo.required_skills) ? wo.required_skills : [];
+                const allTechs = [...technologies, ...skills].slice(0, 5);
+
+                const payDisplay = wo.pay_amount ? `$${wo.pay_amount.toFixed(2)}` : 'N/A';
+                const dateDisplay = wo.service_date ? new Date(wo.service_date).toLocaleDateString() : 'N/A';
+                const description = wo.work_description || wo.service_description || 'No description available';
+                const truncatedDesc = description.length > 150 ? description.substring(0, 150) + '...' : description;
+
+                // Create a meaningful title from available data
+                const workTitle = wo.work_type ? 
+                    `${wo.work_type} - ${wo.buyer_company}` : 
+                    `Work Order - ${wo.buyer_company}`;
+
+                return `
+                    <div class="work-order-card">
+                        <div class="wo-id">WO #${wo.fn_work_order_id}</div>
+                        
+                        <div class="wo-title">${workTitle}</div>
+                        <div class="company-name">${wo.buyer_company}</div>
+                        
+                        ${wo.work_type ? `<div class="work-type-badge">${wo.work_type}</div>` : ''}
+                        
+                        <div class="work-details">
+                            <div class="detail-item">
+                                <span>📍</span>
+                                <span>${wo.location || wo.city || wo.state || 'Location N/A'}</span>
+                            </div>
+                            <div class="pay-amount">${payDisplay}</div>
+                        </div>
+                        
+                        <div class="description-preview">${truncatedDesc}</div>
+                        
+                        ${allTechs.length > 0 ? `
+                            <div class="technologies">
+                                ${allTechs.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="card-footer">
+                            <div class="date-badge">${dateDisplay}</div>
+                            <button class="view-details-btn">View Details</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            showWorkOrderDetails(wo) {
+                const modal = document.getElementById('work-order-modal');
+                const modalTitle = document.getElementById('modal-title');
+                const modalBody = document.getElementById('modal-body');
+
+                const modalWorkTitle = wo.work_type ? 
+                    `${wo.work_type} - ${wo.buyer_company}` : 
+                    `Work Order - ${wo.buyer_company}`;
+                modalTitle.textContent = `WO #${wo.fn_work_order_id}: ${modalWorkTitle}`;
+
+                const technologies = Array.isArray(wo.technologies_used) ? wo.technologies_used : [];
+                const skills = Array.isArray(wo.required_skills) ? wo.required_skills : [];
+                const tools = Array.isArray(wo.required_tools) ? wo.required_tools : [];
+
+                modalBody.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-section">
+                            <h3 class="section-title">Work Order Information</h3>
+                            <ul class="info-list">
+                                <li><span class="info-label">Work Order ID:</span><span class="info-value">${wo.fn_work_order_id}</span></li>
+                                <li><span class="info-label">Title:</span><span class="info-value">${wo.title || 'N/A'}</span></li>
+                                <li><span class="info-label">Company:</span><span class="info-value">${wo.buyer_company}</span></li>
+                                <li><span class="info-label">Work Type:</span><span class="info-value">${wo.work_type || 'N/A'}</span></li>
+                                <li><span class="info-label">Service Type:</span><span class="info-value">${wo.service_type || 'N/A'}</span></li>
+                                <li><span class="info-label">Status:</span><span class="info-value">${wo.status || 'N/A'}</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="section-title">Financial & Timeline</h3>
+                            <ul class="info-list">
+                                <li><span class="info-label">Pay Amount:</span><span class="info-value">${wo.pay_amount ? `$${wo.pay_amount.toFixed(2)}` : 'N/A'}</span></li>
+                                <li><span class="info-label">Service Date:</span><span class="info-value">${wo.service_date ? new Date(wo.service_date).toLocaleDateString() : 'N/A'}</span></li>
+                                <li><span class="info-label">Actual Hours:</span><span class="info-value">${wo.actual_hours || 'N/A'}</span></li>
+                                <li><span class="info-label">Complexity:</span><span class="info-value">${wo.complexity_level || 'N/A'}</span></li>
+                                <li><span class="info-label">Industry:</span><span class="info-value">${wo.industry_category || 'N/A'}</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="section-title">Location & Contact</h3>
+                            <ul class="info-list">
+                                <li><span class="info-label">Location:</span><span class="info-value">${wo.location || 'N/A'}</span></li>
+                                <li><span class="info-label">City:</span><span class="info-value">${wo.city || 'N/A'}</span></li>
+                                <li><span class="info-label">State:</span><span class="info-value">${wo.state || 'N/A'}</span></li>
+                                <li><span class="info-label">Manager Contact:</span><span class="info-value">${wo.manager_contact || 'N/A'}</span></li>
+                                <li><span class="info-label">Site Contact:</span><span class="info-value">${wo.site_contact || 'N/A'}</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="section-title">Data Source</h3>
+                            <ul class="info-list">
+                                <li><span class="info-label">Source:</span><span class="info-value">${wo.data_source || 'N/A'}</span></li>
+                                <li><span class="info-label">File Path:</span><span class="info-value">${wo.source_file_path ? wo.source_file_path.split('/').pop() : 'N/A'}</span></li>
+                                <li><span class="info-label">Created:</span><span class="info-value">${wo.created_at ? new Date(wo.created_at).toLocaleDateString() : 'N/A'}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    ${wo.work_description || wo.service_description ? `
+                        <div class="detail-section">
+                            <h3 class="section-title">Work Description</h3>
+                            <div class="full-description">
+                                ${wo.work_description || wo.service_description || 'No description available'}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${technologies.length > 0 ? `
+                        <div class="detail-section">
+                            <h3 class="section-title">Technologies Used</h3>
+                            <div class="tags-container">
+                                ${technologies.map(tech => `<span class="tag">${tech}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${skills.length > 0 ? `
+                        <div class="detail-section">
+                            <h3 class="section-title">Required Skills</h3>
+                            <div class="tags-container">
+                                ${skills.map(skill => `<span class="tag">${skill}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${tools.length > 0 ? `
+                        <div class="detail-section">
+                            <h3 class="section-title">Required Tools</h3>
+                            <div class="tags-container">
+                                ${tools.map(tool => `<span class="tag">${tool}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                modal.style.display = 'block';
+            }
+        }
+
+        // Initialize the work order manager when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new WorkOrderManager();
+        });
+    </script>
+</body>
+</html>
+    """
+
+
 if __name__ == '__main__':
     # Ensure database exists
     if not os.path.exists(DATABASE_PATH):
         logger.warning(f"Database not found at {DATABASE_PATH}. Run resume_extractor.py first.")
     
+    # Add enhanced work order endpoints
+    try:
+        from enhanced_work_order_endpoints import add_work_order_endpoints
+        add_work_order_endpoints(app, DATABASE_PATH)
+        logger.info("Enhanced work order endpoints added successfully")
+    except ImportError as e:
+        logger.warning(f"Could not import enhanced work order endpoints: {e}")
+    
     # Run the Flask app
-    app.run(debug=True, host='0.0.0.0', port=5001) 
+    app.run(debug=True, host='0.0.0.0', port=8000) 

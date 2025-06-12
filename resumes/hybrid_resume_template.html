@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Resume Template - Contract & W2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .resume {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .summary {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #555;
+            text-align: justify;
+        }
+        
+        .contract-work {
+            background: #f8f9ff;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 25px;
+        }
+        
+        .platform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .platform-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .contract-stats {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .contract-role {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+        
+        .contract-duration {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .work-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .work-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .job-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .company {
+            font-size: 1rem;
+            color: #34495e;
+            font-weight: 500;
+        }
+        
+        .duration {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-align: right;
+        }
+        
+        .location {
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+        
+        .achievements {
+            list-style: none;
+            margin-top: 10px;
+        }
+        
+        .achievements li {
+            margin-bottom: 6px;
+            padding-left: 20px;
+            position: relative;
+            color: #555;
+        }
+        
+        .achievements li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-size: 0.8rem;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .skill-category {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-top: 3px solid #3498db;
+        }
+        
+        .skill-category h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .skill-list {
+            list-style: none;
+        }
+        
+        .skill-list li {
+            padding: 3px 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .education-item {
+            margin-bottom: 15px;
+        }
+        
+        .degree {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .institution {
+            color: #34495e;
+            font-style: italic;
+        }
+        
+        .cert-item {
+            background: #e8f5e8;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #27ae60;
+        }
+        
+        .cert-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .cert-issuer {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .project-item {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .project-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .project-tech {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .highlight-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .highlight-text {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .resume {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="resume">
+        <div class="header">
+            <h1 class="name">Sadiqa "Sadie" Thornton</h1>
+            <h2 class="title">Technology Services Professional | Field Service Specialist | IT Contractor</h2>
+            <div class="contact-info">
+                <div class="contact-item">📧 sadie@techladyservices.com</div>
+                <div class="contact-item">📱 (555) 123-4567</div>
+                <div class="contact-item">📍 Vermont, USA</div>
+                <div class="contact-item">🌐 linkedin.com/in/sadietechservices</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h3 class="section-title">Professional Summary</h3>
+                <p class="summary">
+                    Accomplished technology services professional with extensive experience in field service deployment, 
+                    desktop support, and AI automation development. Proven track record with 960+ completed work orders 
+                    across diverse client environments including retail, healthcare, and enterprise systems. Combines 
+                    hands-on technical expertise with innovative software development capabilities. Owner of Sadie the 
+                    Tech Lady Services, specializing in computer hardware upgrades, system migrations, and intelligent 
+                    automation solutions.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <span class="highlight-number">960+</span>
+                <span class="highlight-text">Completed Field Service Work Orders</span>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Contract & Freelance Experience</h3>
+                
+                <div class="contract-work">
+                    <div class="platform-header">
+                        <span class="platform-name">Field Services Nationwide</span>
+                        <span class="contract-stats">960+ Work Orders Completed</span>
+                    </div>
+                    <div class="contract-role">Independent Technology Contractor</div>
+                    <div class="contract-duration">2020 - Present</div>
+                    <ul class="achievements">
+                        <li>Execute complex computer hardware upgrades and replacements for enterprise clients</li>
+                        <li>Perform on-site IT deployments for retail environments including POS system installations</li>
+                        <li>Manage veterinary office computer migrations with PIMS application integration</li>
+                        <li>Coordinate with project managers for multi-day, multi-technician deployments</li>
+                        <li>Maintain 98%+ client satisfaction rating across diverse service environments</li>
+                        <li>Specialize in minimal downtime deployments for business-critical systems</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-header">
+                        <div>
+                            <div class="job-title">Technology Contractor</div>
+                            <div class="company">Sadie the Tech Lady Services</div>
+                        </div>
+                        <div class="duration">
+                            2019 - Present<br>
+                            <span class="location">Vermont</span>
+                        </div>
+                    </div>
+                    <ul class="achievements">
+                        <li>Founded and operate independent technology services business</li>
+                        <li>Develop AI automation solutions and intelligent agent systems</li>
+                        <li>Create custom web applications using React, Next.js, and Three.js</li>
+                        <li>Provide specialized IT field services for regional and national clients</li>
+                        <li>Built holographic dashboard systems and productivity automation tools</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-header">
+                        <div>
+                            <div class="job-title">IT Deployment Specialist</div>
+                            <div class="company">Miles IT (Contract)</div>
+                        </div>
+                        <div class="duration">
+                            2023 - Present<br>
+                            <span class="location">Vermont</span>
+                        </div>
+                    </div>
+                    <ul class="achievements">
+                        <li>Lead computer hardware upgrade deployments for veterinary practices</li>
+                        <li>Manage PIMS application installations and server integrations</li>
+                        <li>Coordinate with Vetcor domain administration for seamless migrations</li>
+                        <li>Document deployment processes and maintain hourly project updates</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-header">
+                        <div>
+                            <div class="job-title">Retail Technology Specialist</div>
+                            <div class="company">ATS Dispatch Dept (Contract)</div>
+                        </div>
+                        <div class="duration">
+                            2025<br>
+                            <span class="location">Multiple Locations</span>
+                        </div>
+                    </div>
+                    <ul class="achievements">
+                        <li>Execute register refresh projects for major retail chains</li>
+                        <li>Install Queue Line fixtures to enhance customer experience</li>
+                        <li>Perform POS system upgrades with minimal store disruption</li>
+                        <li>Coordinate multi-day deployments with strict timing requirements</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">W2 Employment History</h3>
+                
+                <div class="work-item">
+                    <div class="work-header">
+                        <div>
+                            <div class="job-title">[Previous W2 Position Title]</div>
+                            <div class="company">[Company Name]</div>
+                        </div>
+                        <div class="duration">
+                            [Start Date] - [End Date]<br>
+                            <span class="location">[Location]</span>
+                        </div>
+                    </div>
+                    <ul class="achievements">
+                        <li>[Key achievement or responsibility #1]</li>
+                        <li>[Key achievement or responsibility #2]</li>
+                        <li>[Key achievement or responsibility #3]</li>
+                        <li>[Quantified result or impact]</li>
+                    </ul>
+                </div>
+
+                <div class="work-item">
+                    <div class="work-header">
+                        <div>
+                            <div class="job-title">[Another W2 Position Title]</div>
+                            <div class="company">[Company Name]</div>
+                        </div>
+                        <div class="duration">
+                            [Start Date] - [End Date]<br>
+                            <span class="location">[Location]</span>
+                        </div>
+                    </div>
+                    <ul class="achievements">
+                        <li>[Key achievement or responsibility #1]</li>
+                        <li>[Key achievement or responsibility #2]</li>
+                        <li>[Key achievement or responsibility #3]</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Key Projects</h3>
+                
+                <div class="project-item">
+                    <div class="project-name">AI/OS Holographic Website</div>
+                    <div class="project-tech">Next.js, React, Three.js, Tailwind CSS</div>
+                    <p>Developed advanced holographic web application with theme management system and interactive 3D elements.</p>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-name">Metro Productivity Dashboard</div>
+                    <div class="project-tech">Swift, AppKit, MCP Integration</div>
+                    <p>Created transparent macOS dashboard with voice command capabilities and server monitoring integration.</p>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-name">AI Bookmark Classification System</div>
+                    <div class="project-tech">Python, Transformers, scikit-learn, LM Studio</div>
+                    <p>Built intelligent bookmark organization system with hierarchical categorization and local AI processing.</p>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-name">Resume Database & Builder</div>
+                    <div class="project-tech">SQLite, Python, Web Interface</div>
+                    <p>Developed comprehensive resume component database with AI-powered job matching and automated building capabilities.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Technical Skills</h3>
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <h4>Hardware & Systems</h4>
+                        <ul class="skill-list">
+                            <li>Computer Hardware Installation</li>
+                            <li>Desktop Support & Troubleshooting</li>
+                            <li>POS System Configuration</li>
+                            <li>Network Equipment Setup</li>
+                            <li>Cable Management</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category">
+                        <h4>Software Development</h4>
+                        <ul class="skill-list">
+                            <li>JavaScript/TypeScript</li>
+                            <li>React & Next.js</li>
+                            <li>Python Development</li>
+                            <li>Swift & AppKit</li>
+                            <li>AI/ML Integration</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category">
+                        <h4>Field Service</h4>
+                        <ul class="skill-list">
+                            <li>Project Coordination</li>
+                            <li>Client Communication</li>
+                            <li>Documentation & Reporting</li>
+                            <li>Deployment Planning</li>
+                            <li>Quality Assurance</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category">
+                        <h4>Platforms & Tools</h4>
+                        <ul class="skill-list">
+                            <li>Field Services Nationwide</li>
+                            <li>Veterinary PIMS Systems</li>
+                            <li>Domain Administration</li>
+                            <li>LM Studio & Local AI</li>
+                            <li>Git & Version Control</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Certifications</h3>
+                <div class="cert-item">
+                    <div class="cert-name">[Certification Name]</div>
+                    <div class="cert-issuer">[Issuing Organization] • [Date]</div>
+                </div>
+                <div class="cert-item">
+                    <div class="cert-name">[Certification Name]</div>
+                    <div class="cert-issuer">[Issuing Organization] • [Date]</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Education</h3>
+                <div class="education-item">
+                    <div class="degree">[Degree Type] in [Field of Study]</div>
+                    <div class="institution">[Institution Name] • [Graduation Year]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

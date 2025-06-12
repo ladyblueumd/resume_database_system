@@ -21,7 +21,7 @@ transformers==4.30.2
 torch==2.0.1
 
 # Database
-sqlite3  # Built into Python
+# sqlite3 is built into Python - removed from requirements
 
 # Optional: For enhanced AI features
 openai==0.27.8

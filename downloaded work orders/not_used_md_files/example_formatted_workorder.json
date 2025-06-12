@@ -1,0 +1,190 @@
+{
+  "workOrder": {
+    "id": "17184413",
+    "platform": "Field Nation",
+    "title": "On site support for various IT issues",
+    "description": "Seeking a technician to provide on site support for various IT Issues. Technician will arrive onsite and coordinate with the local POC and internal CHN resource to perform various tasks including identifying open support tickets, addressing new issues, verifying network accessibility, and confirming completion.",
+    "status": "completed",
+    "priority": "medium",
+    "dateCreated": "2025-05-28",
+    "dateCompleted": "2025-06-02",
+    "estimatedHours": 2,
+    "actualHours": 1.35,
+    "workType": "Windows Device",
+    "serviceType": "Troubleshooting"
+  },
+  "client": {
+    "name": "PPCHN",
+    "location": "Williston, VT 05495 US",
+    "locationType": "Commercial",
+    "contactPerson": "P.J. Roberts",
+    "contactInfo": "Manager/Site contact",
+    "overallSatisfaction": 272
+  },
+  "technician": {
+    "name": "Sadiqa Thornton",
+    "id": "24217",
+    "phone": "862-350-1878",
+    "certification": null
+  },
+  "schedule": {
+    "date": "2025-06-02",
+    "arrivalTime": "11:00 AM (EDT)",
+    "hardStart": true,
+    "estimatedDuration": 2,
+    "timeZone": "EDT"
+  },
+  "equipment": {
+    "type": "Windows Device",
+    "manufacturer": null,
+    "model": null,
+    "serialNumber": null,
+    "assetTag": null
+  },
+  "tasks": [
+    {
+      "category": "Prep",
+      "description": "Set start time",
+      "completed": true,
+      "completedDate": "2025-05-28",
+      "completedTime": "12:59 PM(EDT)",
+      "timeSpent": null,
+      "notes": null
+    },
+    {
+      "category": "On Site",
+      "description": "Check in",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "10:57 AM(EDT)",
+      "timeSpent": null,
+      "notes": "0.01 miles from site"
+    },
+    {
+      "category": "On Site",
+      "description": "Check in with on site POC or Internal CHN resource",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "11:11 AM(EDT)",
+      "timeSpent": null,
+      "notes": null
+    },
+    {
+      "category": "On Site",
+      "description": "Join Teams call if working with internal CHN resource",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "12:18 PM(EDT)",
+      "timeSpent": null,
+      "notes": null
+    },
+    {
+      "category": "On Site",
+      "description": "Complete any IT tasks identified by the site POC or CHN internal resource",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "1:06 PM(EDT)",
+      "timeSpent": null,
+      "notes": null
+    },
+    {
+      "category": "On Site",
+      "description": "Verify with on site POC or internal CHN resource that all work has been completed",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "1:07 PM(EDT)",
+      "timeSpent": null,
+      "notes": null
+    },
+    {
+      "category": "Post",
+      "description": "Enter closeout notes",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "1:09 PM(EDT)",
+      "timeSpent": null,
+      "notes": "there was only one ticket. Artis completed the laptop setup and the end users confirmed the closure of the ticket. a network latency ticket was issued and Artis escalated to the network team. SD 14647"
+    },
+    {
+      "category": "Post",
+      "description": "Send email regarding Close out notes and explanation of work completed",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "1:10 PM(EDT)",
+      "timeSpent": null,
+      "notes": null
+    },
+    {
+      "category": "Post",
+      "description": "Check out",
+      "completed": true,
+      "completedDate": "2025-06-02",
+      "completedTime": "12:18 PM(EDT)",
+      "timeSpent": null,
+      "notes": "0.01 miles from site"
+    }
+  ],
+  "timeLog": {
+    "totalHours": 1.35,
+    "checkInTime": "2025-06-02 10:57 AM(EDT)",
+    "checkOutTime": "2025-06-02 12:18 PM(EDT)",
+    "checkInDistance": "0.01 miles from site",
+    "checkOutDistance": "0.01 miles from site",
+    "loggedBy": "Sadiqa Thornton"
+  },
+  "parts": [],
+  "resolution": {
+    "summary": "Completed laptop setup and addressed network latency issue",
+    "rootCause": "Open support ticket for laptop setup and network latency",
+    "actionsTaken": "Artis completed laptop setup, end users confirmed ticket closure, network latency ticket escalated to network team",
+    "followUpRequired": true,
+    "followUpNotes": "Network latency ticket SD 14647 escalated to network team",
+    "ticketNumbers": ["SD 14647"]
+  },
+  "billing": {
+    "laborRate": 130.00,
+    "firstHoursRate": 130.00,
+    "firstHours": 2,
+    "additionalHoursRate": 65.00,
+    "maxAdditionalHours": 4,
+    "laborCost": 130.00,
+    "serviceCharges": 20.67,
+    "taxes": 0.35,
+    "totalCost": 108.98,
+    "billableHours": 1.35,
+    "paymentTerms": "7-day terms (processed on the second Friday after Work Order approval)",
+    "estimatedApprovalTime": "2 days"
+  },
+  "compliance": {
+    "gpsRequired": true,
+    "safetyChecks": true,
+    "qualityAssurance": true,
+    "customerSignoff": true,
+    "warranty": null,
+    "hardStartCompliance": true,
+    "onTimeArrival": true
+  },
+  "platform": {
+    "name": "Field Nation",
+    "workOrderUrl": null,
+    "messages": 4,
+    "deliverables": 0,
+    "shipments": 0
+  },
+  "requirements": {
+    "experience": [
+      "Must have background installing, configuring and deploying new PCs and laptops and general IT knowledge",
+      "Must be able to read and follow written instructions",
+      "Must be able to lift a minimum of 25+ lbs. without any restrictions",
+      "Excellent customer service skills to interact with POC and staff"
+    ],
+    "tools": [
+      "Valid photo ID",
+      "Fully-charged smartphone", 
+      "Hotspot capabilities",
+      "Basic PC toolkit",
+      "Any tools required to complete the scope above"
+    ],
+    "qualifications": "No required/optional Qualifications found"
+  }
+}
