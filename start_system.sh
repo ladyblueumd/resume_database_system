@@ -20,7 +20,7 @@ if [ ! -f "resume_database.db" ]; then
     
     # Run the extractor to create database
     if [ -f "resume_extractor.py" ]; then
-        python3 resume_extractor.py
+        python resume_extractor.py
         echo -e "${GREEN}[✓]${NC} Database created and populated"
     else
         echo -e "${RED}[✗]${NC} resume_extractor.py not found!"
@@ -35,13 +35,13 @@ echo ""
 echo -e "${BLUE}[?]${NC} Do you want to import data from your existing resume template app? (y/n)"
 read -r response
 if [[ "$response" =~ ^[Yy]$ ]]; then
-    python3 integrate_existing_app.py
+    python integrate_existing_app.py
 fi
 
 # Install/Update Python dependencies
 echo ""
 echo -e "${BLUE}[i]${NC} Checking Python dependencies..."
-pip3 install -r requirements.txt --quiet
+pip install -r requirements.txt --quiet
 
 # Start the Flask backend
 echo ""
@@ -53,4 +53,4 @@ echo ""
 (sleep 3 && open http://localhost:5000) &
 
 # Start Flask app
-python3 app.py 
+python app.py 

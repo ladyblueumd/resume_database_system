@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FieldNation Markdown Processor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .section h2 {
+            color: #444;
+            margin-top: 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .results {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #cce7ff;
+            color: #004085;
+            border: 1px solid #b6d7ff;
+        }
+        .work-order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: white;
+        }
+        .work-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .work-order-id {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 18px;
+        }
+        .quality-score {
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .quality-high { background-color: #28a745; }
+        .quality-medium { background-color: #ffc107; color: #000; }
+        .quality-low { background-color: #dc3545; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 FieldNation Markdown Processor</h1>
+        
+        <!-- Processing Controls -->
+        <div class="section">
+            <h2>📁 Process Work Orders</h2>
+            
+            <div class="input-group">
+                <label for="singleFile">Process Single File:</label>
+                <input type="text" id="singleFile" placeholder="downloaded work orders/work_order_430895_2025_06_10_21_29_56.md">
+                <button class="button" onclick="processSingleFile()">Process File</button>
+            </div>
+            
+            <div class="input-group">
+                <label for="directoryPath">Process Directory:</label>
+                <input type="text" id="directoryPath" value="downloaded work orders/" placeholder="Path to markdown files directory">
+                <button class="button" onclick="processDirectory()">Process All Files</button>
+            </div>
+            
+            <div id="processingStatus"></div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="section">
+            <h2>📊 Processing Statistics</h2>
+            <button class="button" onclick="loadStats()">Refresh Stats</button>
+            <div id="statsContainer">
+                <div class="loading">Click "Refresh Stats" to load statistics</div>
+            </div>
+        </div>
+        
+        <!-- Work Orders View -->
+        <div class="section">
+            <h2>📋 Processed Work Orders</h2>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <input type="text" id="searchInput" placeholder="Search work orders..." style="flex: 1; min-width: 200px;">
+                <input type="text" id="companyFilter" placeholder="Filter by company" style="flex: 1; min-width: 200px;">
+                <input type="number" id="limitInput" placeholder="Limit (default: 20)" value="20" style="width: 150px;">
+                <button class="button" onclick="loadWorkOrders()">Search</button>
+            </div>
+            
+            <div id="workOrdersContainer">
+                <div class="loading">Click "Search" to load work orders</div>
+            </div>
+        </div>
+        
+        <!-- Migration Tools -->
+        <div class="section">
+            <h2>🔄 Data Migration</h2>
+            <p>Migrate processed markdown data to the main FieldNation work orders table:</p>
+            <button class="button" onclick="migrateData()">Migrate to FieldNation Table</button>
+            <div id="migrationStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        // Base API URL - adjust this if needed
+        const API_BASE = '/api/markdown-processor';
+        
+        // Utility function to show status messages
+        function showStatus(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        // Process single file
+        async function processSingleFile() {
+            const filePath = document.getElementById('singleFile').value.trim();
+            if (!filePath) {
+                showStatus('processingStatus', 'Please enter a file path', 'error');
+                return;
+            }
+            
+            showStatus('processingStatus', 'Processing file...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/process-single`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_path: filePath })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('processingStatus', 
+                        `✅ File processed successfully!\n` +
+                        `Work Order ID: ${result.work_order_id}\n` +
+                        `Title: ${result.title}\n` +
+                        `Company: ${result.company_name}\n` +
+                        `Total Paid: $${result.total_paid}\n` +
+                        `Quality Score: ${result.quality_score}`, 'success');
+                } else {
+                    showStatus('processingStatus', `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('processingStatus', `❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Process directory
+        async function processDirectory() {
+            const directoryPath = document.getElementById('directoryPath').value.trim();
+            if (!directoryPath) {
+                showStatus('processingStatus', 'Please enter a directory path', 'error');
+                return;
+            }
+            
+            showStatus('processingStatus', 'Processing directory... This may take a while.', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/process-directory`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ directory_path: directoryPath })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('processingStatus', 
+                        `✅ Directory processed successfully!\n` +
+                        `Results: ${JSON.stringify(result.results, null, 2)}`, 'success');
+                } else {
+                    showStatus('processingStatus', `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('processingStatus', `❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Load statistics
+        async function loadStats() {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading statistics...</p></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const stats = await response.json();
+                
+                if (stats.error) {
+                    container.innerHTML = `<div class="status error">Error loading stats: ${stats.error}</div>`;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_orders}</div>
+                            <div class="stat-label">Total Work Orders</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.unique_companies}</div>
+                            <div class="stat-label">Unique Companies</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">$${stats.total_earnings.toLocaleString()}</div>
+                            <div class="stat-label">Total Earnings</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">$${stats.average_pay.toFixed(2)}</div>
+                            <div class="stat-label">Average Pay</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.average_quality_score.toFixed(3)}</div>
+                            <div class="stat-label">Avg Quality Score</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Top Companies</h3>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${stats.top_companies.map(company => `
+                            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                                <span>${company.company || 'Unknown'}</span>
+                                <span>${company.count} orders ($${company.total_pay.toFixed(2)})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error loading statistics: ${error.message}</div>`;
+            }
+        }
+        
+        // Load work orders
+        async function loadWorkOrders() {
+            const search = document.getElementById('searchInput').value.trim();
+            const company = document.getElementById('companyFilter').value.trim();
+            const limit = document.getElementById('limitInput').value || 20;
+            
+            const container = document.getElementById('workOrdersContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading work orders...</p></div>';
+            
+            try {
+                const params = new URLSearchParams({
+                    limit: limit,
+                    offset: 0
+                });
+                if (search) params.append('search', search);
+                if (company) params.append('company', company);
+                
+                const response = await fetch(`${API_BASE}/work-orders?${params}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    container.innerHTML = `<div class="status error">Error loading work orders: ${data.error}</div>`;
+                    return;
+                }
+                
+                if (data.work_orders.length === 0) {
+                    container.innerHTML = '<div class="status info">No work orders found matching your criteria.</div>';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="margin-bottom: 10px; color: #666;">
+                        Showing ${data.work_orders.length} of ${data.total_count} work orders
+                    </div>
+                    ${data.work_orders.map(wo => {
+                        const qualityClass = wo.data_quality_score >= 0.8 ? 'quality-high' : 
+                                           wo.data_quality_score >= 0.6 ? 'quality-medium' : 'quality-low';
+                        
+                        return `
+                            <div class="work-order-card">
+                                <div class="work-order-header">
+                                    <div class="work-order-id">WO ${wo.work_order_id}</div>
+                                    <div class="quality-score ${qualityClass}">
+                                        Quality: ${(wo.data_quality_score * 100).toFixed(0)}%
+                                    </div>
+                                </div>
+                                <div><strong>Title:</strong> ${wo.title || 'N/A'}</div>
+                                <div><strong>Company:</strong> ${wo.company_name || 'N/A'}</div>
+                                <div><strong>Total Paid:</strong> $${wo.total_paid || '0'}</div>
+                                <div><strong>Scheduled Date:</strong> ${wo.scheduled_date || 'N/A'}</div>
+                                <div><strong>Location:</strong> ${wo.location_city || 'N/A'}, ${wo.location_state || 'N/A'}</div>
+                                <div><strong>Work Type:</strong> ${wo.work_type || 'N/A'}</div>
+                                <div><strong>Status:</strong> ${wo.status || 'N/A'}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                `;
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error loading work orders: ${error.message}</div>`;
+            }
+        }
+        
+        // Migrate data
+        async function migrateData() {
+            showStatus('migrationStatus', 'Starting migration...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/migrate-to-fieldnation`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('migrationStatus', 
+                        `✅ Migration completed!\n` +
+                        `Migrated: ${result.migrated_count} / ${result.total_processed} records\n` +
+                        `Errors: ${result.errors.length}`, 'success');
+                } else {
+                    showStatus('migrationStatus', `❌ Migration failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('migrationStatus', `❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('FieldNation Markdown Processor Interface Loaded');
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Work Order Extraction Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border-right: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab:hover {
+            background: #e9ecef;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            min-height: 600px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .extraction-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+        
+        .extraction-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .panel-header {
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            margin: -25px -25px 20px -25px;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .data-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .data-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-value {
+            font-size: 1em;
+            color: #2d3748;
+            font-weight: 500;
+        }
+        
+        .data-value.highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .raw-text-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .raw-text-header {
+            background: #2d3748;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .raw-text-content {
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8em;
+            line-height: 1.5;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .comparison-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .comparison-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .comparison-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .card-title {
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            margin: -25px -25px 20px -25px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin: 2px;
+        }
+        
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .badge-info {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+        
+        .badge-warning {
+            background: #faf089;
+            color: #744210;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Enhanced Work Order Extraction Showcase</h1>
+            <div class="subtitle">Same Work Order #15746028 - Markdown vs PDF Extraction Comparison</div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('markdown-extraction')">
+                📄 Markdown Extraction
+            </div>
+            <div class="tab" onclick="showTab('pdf-extraction')">
+                📋 PDF Extraction
+            </div>
+            <div class="tab" onclick="showTab('comparison')">
+                ⚖️ Side-by-Side Comparison
+            </div>
+        </div>
+        
+        <!-- Markdown Extraction Tab -->
+        <div id="markdown-extraction" class="tab-content active">
+            <div class="extraction-showcase">
+                <div class="extraction-panel">
+                    <div class="panel-header">
+                        📄 Markdown Extraction - Work Order #15746028
+                    </div>
+                    <div class="data-grid" id="markdownDataGrid">
+                        <div class="loading">Loading markdown extraction data...</div>
+                    </div>
+                    <div class="raw-text-section">
+                        <div class="raw-text-header">Full Markdown Content</div>
+                        <div class="raw-text-content" id="markdownRawText">Loading...</div>
+                    </div>
+                </div>
+                
+                <div class="extraction-panel">
+                    <div class="panel-header">
+                        📊 Extraction Analysis
+                    </div>
+                    <div id="markdownAnalysis">
+                        <div class="loading">Analyzing extraction quality...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PDF Extraction Tab -->
+        <div id="pdf-extraction" class="tab-content">
+            <div class="extraction-showcase">
+                <div class="extraction-panel">
+                    <div class="panel-header">
+                        📋 PDF Extraction - Work Order #15746028
+                    </div>
+                    <div class="data-grid" id="pdfDataGrid">
+                        <div class="loading">Loading PDF extraction data...</div>
+                    </div>
+                    <div class="raw-text-section">
+                        <div class="raw-text-header">Full PDF Content</div>
+                        <div class="raw-text-content" id="pdfRawText">Loading...</div>
+                    </div>
+                </div>
+                
+                <div class="extraction-panel">
+                    <div class="panel-header">
+                        📊 Extraction Analysis
+                    </div>
+                    <div id="pdfAnalysis">
+                        <div class="loading">Analyzing extraction quality...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comparison Tab -->
+        <div id="comparison" class="tab-content">
+            <div class="comparison-section">
+                <div class="comparison-header">
+                    <h2>Work Order #15746028 - Direct Comparison</h2>
+                    <p>Same work order extracted using both Markdown and PDF methods</p>
+                </div>
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <div class="card-title">📄 Markdown Extraction</div>
+                        <div id="markdownStats">
+                            <div class="loading">Loading markdown statistics...</div>
+                        </div>
+                    </div>
+                    <div class="comparison-card">
+                        <div class="card-title">📋 PDF Extraction</div>
+                        <div id="pdfStats">
+                            <div class="loading">Loading PDF statistics...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        
+        // Tab switching
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load data for the selected tab
+            if (tabId === 'markdown-extraction') {
+                loadMarkdownExtraction();
+            } else if (tabId === 'pdf-extraction') {
+                loadPdfExtraction();
+            } else if (tabId === 'comparison') {
+                loadComparison();
+            }
+        }
+        
+        // Load markdown extraction data
+        async function loadMarkdownExtraction() {
+            try {
+                const response = await fetch(`${API_BASE}/work-orders/markdown/15746028`);
+                const data = await response.json();
+                
+                displayMarkdownData(data);
+                displayMarkdownAnalysis(data);
+            } catch (error) {
+                console.error('Error loading markdown data:', error);
+                document.getElementById('markdownDataGrid').innerHTML = '<div class="error">Failed to load markdown extraction data</div>';
+            }
+        }
+        
+        // Load PDF extraction data
+        async function loadPdfExtraction() {
+            try {
+                const response = await fetch(`${API_BASE}/work-orders/pdf/15746028`);
+                const data = await response.json();
+                
+                displayPdfData(data);
+                displayPdfAnalysis(data);
+            } catch (error) {
+                console.error('Error loading PDF data:', error);
+                document.getElementById('pdfDataGrid').innerHTML = '<div class="error">Failed to load PDF extraction data</div>';
+            }
+        }
+        
+        // Display markdown data
+        function displayMarkdownData(data) {
+            const grid = document.getElementById('markdownDataGrid');
+            
+            // Create comprehensive field display matching exact database schema
+            const fields = [
+                // Primary Key
+                ['Work Order ID', data.work_order_id, 'highlight'],
+                
+                // Basic Information
+                ['Platform', data.platform],
+                ['Title', data.title],
+                ['Description', data.description],
+                ['Status', data.status],
+                ['Status Detail', data.status_detail],
+                ['Date Created', data.date_created],
+                ['Date Completed', data.date_completed],
+                ['Date Paid', data.date_paid],
+                ['Priority', data.priority],
+                ['Work Type', data.work_type],
+                ['Service Type', data.service_type],
+                
+                // Full Service Description
+                ['Service Description Full', data.service_description_full ? data.service_description_full.substring(0, 200) + '...' : null],
+                ['Scope of Work', data.scope_of_work ? data.scope_of_work.substring(0, 200) + '...' : null],
+                
+                // Company Information
+                ['Company Name', data.company_name],
+                ['Company Overall Satisfaction', data.company_overall_satisfaction],
+                ['Company Reviews Count', data.company_reviews_count],
+                ['Manager Name', data.manager_name],
+                ['Manager Phone', data.manager_phone],
+                ['Manager Email', data.manager_email],
+                
+                // Provider Information
+                ['Provider Name', data.provider_name],
+                ['Provider ID', data.provider_id],
+                ['Provider Phone', data.provider_phone],
+                ['Provider Email', data.provider_email],
+                ['Provider Rating', data.provider_rating],
+                
+                // Financial Information
+                ['Total Paid', data.total_paid, 'highlight'],
+                ['Base Pay', data.base_pay],
+                ['Bonus Pay', data.bonus_pay],
+                ['Expense Reimbursement', data.expense_reimbursement],
+                ['Hourly Rate', data.hourly_rate],
+                ['Scheduled Hours', data.scheduled_hours],
+                ['Estimated Hours', data.estimated_hours],
+                ['Actual Hours Logged', data.actual_hours_logged],
+                ['Overtime Hours', data.overtime_hours],
+                ['Travel Time', data.travel_time],
+                
+                // Location Information
+                ['Location Address', data.location_address],
+                ['Location City', data.location_city],
+                ['Location State', data.location_state],
+                ['Location ZIP', data.location_zip],
+                ['Location Country', data.location_country],
+                ['Location Coordinates', data.location_coordinates],
+                ['Site Contact Name', data.site_contact_name],
+                ['Site Contact Phone', data.site_contact_phone],
+                
+                // Schedule Information
+                ['Scheduled Date', data.scheduled_date],
+                ['Scheduled Start Time', data.scheduled_start_time],
+                ['Scheduled End Time', data.scheduled_end_time],
+                ['Actual Start Time', data.actual_start_time],
+                ['Actual End Time', data.actual_end_time],
+                ['Timezone', data.timezone],
+                
+                // Technical Information
+                ['Equipment Type', data.equipment_type],
+                ['Equipment Model', data.equipment_model],
+                ['Equipment Serial', data.equipment_serial],
+                ['Software Version', data.software_version],
+                ['Network Requirements', data.network_requirements],
+                ['Special Tools Required', data.special_tools_required],
+                
+                // Work Details
+                ['Closeout Notes', data.closeout_notes ? data.closeout_notes.substring(0, 200) + '...' : null],
+                ['Customer Signature Required', data.customer_signature_required ? 'Yes' : 'No'],
+                ['Photos Required', data.photos_required ? 'Yes' : 'No'],
+                ['Parts Used', data.parts_used],
+                
+                // JSON Fields
+                ['Tasks Completed', data.tasks_completed],
+                ['Deliverables', data.deliverables],
+                ['Buyer Custom Fields', data.buyer_custom_fields],
+                ['Provider Custom Fields', data.provider_custom_fields],
+                
+                // Search and Classification
+                ['Search Text', data.search_text ? data.search_text.substring(0, 200) + '...' : null],
+                ['Industry Category', data.industry_category],
+                ['Skill Tags', data.skill_tags],
+                
+                // Metadata
+                ['File Source', data.file_source],
+                ['Processed Date', data.processed_date],
+                ['Data Quality Score', data.data_quality_score]
+            ];
+            
+            grid.innerHTML = fields.map(([label, value, highlight]) => `
+                <div class="data-item">
+                    <div class="data-label">${label}</div>
+                    <div class="data-value ${highlight || ''}">${value || 'N/A'}</div>
+                </div>
+            `).join('');
+            
+            // Display full raw text
+            const rawTextElement = document.getElementById('markdownRawText');
+            const rawText = data.search_text || data.description || data.scope_of_work || data.service_description_full || 'No raw text available';
+            rawTextElement.textContent = rawText; // Show full content, no truncation
+        }
+        
+        // Display PDF data
+        function displayPdfData(data) {
+            const grid = document.getElementById('pdfDataGrid');
+            
+            // Create comprehensive field display matching exact PDF database schema
+            const fields = [
+                // Primary Key
+                ['ID', data.id],
+                
+                // File Information
+                ['PDF Filename', data.pdf_filename],
+                ['PDF File Path', data.pdf_file_path],
+                ['PDF File Size', data.pdf_file_size ? (data.pdf_file_size / 1024).toFixed(1) + ' KB' : null],
+                ['PDF Page Count', data.pdf_page_count],
+                ['Extraction Date', data.extraction_date],
+                ['Extraction Quality Score', data.extraction_quality_score ? (data.extraction_quality_score * 100).toFixed(1) + '%' : null],
+                
+                // Work Order Identification
+                ['Work Order ID', data.work_order_id, 'highlight'],
+                ['Work Order Number', data.work_order_number],
+                ['Field Nation ID', data.field_nation_id],
+                ['Reference Number', data.reference_number],
+                
+                // Basic Information
+                ['Title', data.title],
+                ['Description', data.description],
+                ['Full Description', data.full_description ? data.full_description.substring(0, 200) + '...' : null],
+                ['Scope of Work', data.scope_of_work ? data.scope_of_work.substring(0, 200) + '...' : null],
+                ['Work Summary', data.work_summary],
+                ['Service Type', data.service_type],
+                ['Work Category', data.work_category],
+                ['Priority Level', data.priority_level],
+                
+                // Status and Dates
+                ['Status', data.status],
+                ['Status Detail', data.status_detail],
+                ['Date Created', data.date_created],
+                ['Date Posted', data.date_posted],
+                ['Date Scheduled', data.date_scheduled],
+                ['Date Started', data.date_started],
+                ['Date Completed', data.date_completed],
+                ['Date Approved', data.date_approved],
+                ['Date Paid', data.date_paid],
+                
+                // Company Information
+                ['Company Name', data.company_name],
+                ['Company ID', data.company_id],
+                ['Company Address', data.company_address],
+                ['Company Phone', data.company_phone],
+                ['Company Email', data.company_email],
+                ['Company Website', data.company_website],
+                ['Company Contact Person', data.company_contact_person],
+                
+                // Client/Buyer Information
+                ['Buyer Name', data.buyer_name],
+                ['Buyer Company', data.buyer_company],
+                ['Buyer Email', data.buyer_email],
+                ['Buyer Phone', data.buyer_phone],
+                ['Buyer Address', data.buyer_address],
+                ['Buyer Contact Instructions', data.buyer_contact_instructions],
+                
+                // Provider Information
+                ['Provider Name', data.provider_name],
+                ['Provider ID', data.provider_id],
+                ['Provider Email', data.provider_email],
+                ['Provider Phone', data.provider_phone],
+                ['Provider Rating', data.provider_rating],
+                ['Provider Reviews Count', data.provider_reviews_count],
+                
+                // Location Details
+                ['Work Location Name', data.work_location_name],
+                ['Work Location Address', data.work_location_address],
+                ['Work Location City', data.work_location_city],
+                ['Work Location State', data.work_location_state],
+                ['Work Location ZIP', data.work_location_zip],
+                ['Work Location Country', data.work_location_country],
+                ['Work Location Coordinates', data.work_location_coordinates],
+                ['Work Location Instructions', data.work_location_instructions],
+                ['Parking Instructions', data.parking_instructions],
+                ['Access Instructions', data.access_instructions],
+                
+                // Financial Information
+                ['Total Amount', data.total_amount ? '$' + data.total_amount : null, 'highlight'],
+                ['Base Pay', data.base_pay ? '$' + data.base_pay : null],
+                ['Bonus Amount', data.bonus_amount ? '$' + data.bonus_amount : null],
+                ['Additional Pay', data.additional_pay ? '$' + data.additional_pay : null],
+                ['Expense Allowance', data.expense_allowance ? '$' + data.expense_allowance : null],
+                ['Mileage Reimbursement', data.mileage_reimbursement ? '$' + data.mileage_reimbursement : null],
+                ['Hourly Rate', data.hourly_rate ? '$' + data.hourly_rate : null],
+                ['Overtime Rate', data.overtime_rate ? '$' + data.overtime_rate : null],
+                ['Currency', data.currency],
+                ['Payment Terms', data.payment_terms],
+                ['Payment Method', data.payment_method],
+                
+                // Time Information
+                ['Estimated Duration', data.estimated_duration],
+                ['Scheduled Start Time', data.scheduled_start_time],
+                ['Scheduled End Time', data.scheduled_end_time],
+                ['Actual Start Time', data.actual_start_time],
+                ['Actual End Time', data.actual_end_time],
+                ['Total Hours Worked', data.total_hours_worked],
+                ['Break Time', data.break_time],
+                ['Travel Time', data.travel_time],
+                
+                // Requirements and Qualifications
+                ['Required Skills', data.required_skills],
+                ['Required Certifications', data.required_certifications],
+                ['Required Tools', data.required_tools],
+                ['Required Equipment', data.required_equipment],
+                ['Background Check Required', data.background_check_required ? 'Yes' : 'No'],
+                ['Drug Test Required', data.drug_test_required ? 'Yes' : 'No'],
+                ['Insurance Required', data.insurance_required ? 'Yes' : 'No'],
+                
+                // Equipment and Technology
+                ['Equipment Provided', data.equipment_provided],
+                ['Equipment Needed', data.equipment_needed],
+                ['Technology Requirements', data.technology_requirements],
+                ['Software Requirements', data.software_requirements],
+                ['Hardware Specifications', data.hardware_specifications],
+                ['Network Requirements', data.network_requirements],
+                
+                // Contact Information
+                ['Primary Contact Name', data.primary_contact_name],
+                ['Primary Contact Phone', data.primary_contact_phone],
+                ['Primary Contact Email', data.primary_contact_email],
+                ['Secondary Contact Name', data.secondary_contact_name],
+                ['Secondary Contact Phone', data.secondary_contact_phone],
+                ['Secondary Contact Email', data.secondary_contact_email],
+                ['Emergency Contact Name', data.emergency_contact_name],
+                ['Emergency Contact Phone', data.emergency_contact_phone],
+                
+                // Check-in/Check-out
+                ['Check In Required', data.check_in_required ? 'Yes' : 'No'],
+                ['Check In Contact', data.check_in_contact],
+                ['Check In Phone', data.check_in_phone],
+                ['Check In Instructions', data.check_in_instructions],
+                ['Check Out Required', data.check_out_required ? 'Yes' : 'No'],
+                ['Check Out Contact', data.check_out_contact],
+                ['Check Out Phone', data.check_out_phone],
+                ['Check Out Instructions', data.check_out_instructions],
+                
+                // Work Details
+                ['Work Instructions', data.work_instructions],
+                ['Special Instructions', data.special_instructions],
+                ['Safety Requirements', data.safety_requirements],
+                ['Dress Code', data.dress_code],
+                ['Security Requirements', data.security_requirements],
+                ['Confidentiality Requirements', data.confidentiality_requirements],
+                
+                // Completion and Approval
+                ['Completion Requirements', data.completion_requirements],
+                ['Approval Process', data.approval_process],
+                ['Approval Contact Name', data.approval_contact_name],
+                ['Approval Contact Phone', data.approval_contact_phone],
+                ['Approval Contact Email', data.approval_contact_email],
+                ['Deliverables', data.deliverables],
+                ['Documentation Required', data.documentation_required],
+                ['Photos Required', data.photos_required ? 'Yes' : 'No'],
+                ['Signature Required', data.signature_required ? 'Yes' : 'No'],
+                
+                // Issues and Notes
+                ['Known Issues', data.known_issues],
+                ['Troubleshooting Notes', data.troubleshooting_notes],
+                ['Previous Work Notes', data.previous_work_notes],
+                ['Vendor Notes', data.vendor_notes],
+                ['Client Notes', data.client_notes],
+                ['Provider Notes', data.provider_notes],
+                ['Admin Notes', data.admin_notes],
+                
+                // Custom Fields
+                ['Custom Field 1', data.custom_field_1_name ? `${data.custom_field_1_name}: ${data.custom_field_1_value}` : null],
+                ['Custom Field 2', data.custom_field_2_name ? `${data.custom_field_2_name}: ${data.custom_field_2_value}` : null],
+                ['Custom Field 3', data.custom_field_3_name ? `${data.custom_field_3_name}: ${data.custom_field_3_value}` : null],
+                ['Custom Field 4', data.custom_field_4_name ? `${data.custom_field_4_name}: ${data.custom_field_4_value}` : null],
+                ['Custom Field 5', data.custom_field_5_name ? `${data.custom_field_5_name}: ${data.custom_field_5_value}` : null],
+                
+                // Structured Data (JSON)
+                ['Extracted Tables', data.extracted_tables],
+                ['Extracted Forms', data.extracted_forms],
+                ['Extracted Signatures', data.extracted_signatures],
+                ['Extracted Images', data.extracted_images],
+                
+                // Quality and Confidence
+                ['Text Extraction Confidence', data.text_extraction_confidence ? (data.text_extraction_confidence * 100).toFixed(1) + '%' : null],
+                ['Data Completeness Score', data.data_completeness_score ? (data.data_completeness_score * 100).toFixed(1) + '%' : null],
+                ['Manual Review Required', data.manual_review_required ? 'Yes' : 'No'],
+                ['Extraction Errors', data.extraction_errors],
+                
+                // Processing Flags
+                ['Is Processed', data.is_processed ? 'Yes' : 'No'],
+                ['Is Merged With Markdown', data.is_merged_with_markdown ? 'Yes' : 'No'],
+                ['Needs Manual Review', data.needs_manual_review ? 'Yes' : 'No'],
+                
+                // Timestamps
+                ['Created At', data.created_at],
+                ['Updated At', data.updated_at]
+            ];
+            
+            grid.innerHTML = fields.map(([label, value, highlight]) => `
+                <div class="data-item">
+                    <div class="data-label">${label}</div>
+                    <div class="data-value ${highlight || ''}">${value || 'N/A'}</div>
+                </div>
+            `).join('');
+            
+            // Display full raw text
+            const rawTextElement = document.getElementById('pdfRawText');
+            const rawText = data.raw_text_full || 'No raw text available';
+            rawTextElement.textContent = rawText; // Show full content, no truncation
+        }
+        
+        // Display markdown analysis
+        function displayMarkdownAnalysis(data) {
+            const analysis = document.getElementById('markdownAnalysis');
+            const textLength = (data.search_text || '').length;
+            const fieldsExtracted = Object.values(data).filter(v => v && v !== 'N/A').length;
+            
+            analysis.innerHTML = `
+                <div class="stats-row">
+                    <span class="stat-label">Extraction Method</span>
+                    <span class="stat-value">Structured Markdown</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Text Length</span>
+                    <span class="stat-value">${textLength.toLocaleString()} chars</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Fields Extracted</span>
+                    <span class="stat-value">${fieldsExtracted}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Data Quality</span>
+                    <span class="stat-value">
+                        <span class="badge badge-success">High</span>
+                    </span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Processing Speed</span>
+                    <span class="stat-value">
+                        <span class="badge badge-success">Fast</span>
+                    </span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Structured Data</span>
+                    <span class="stat-value">
+                        <span class="badge badge-success">Excellent</span>
+                    </span>
+                </div>
+            `;
+        }
+        
+        // Display PDF analysis
+        function displayPdfAnalysis(data) {
+            const analysis = document.getElementById('pdfAnalysis');
+            const textLength = (data.raw_text_full || '').length;
+            const qualityScore = data.extraction_quality_score || 0;
+            
+            analysis.innerHTML = `
+                <div class="stats-row">
+                    <span class="stat-label">Extraction Method</span>
+                    <span class="stat-value">PDF Text Extraction</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Text Length</span>
+                    <span class="stat-value">${textLength.toLocaleString()} chars</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Pages Processed</span>
+                    <span class="stat-value">${data.pdf_page_count || 0}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Quality Score</span>
+                    <span class="stat-value">
+                        <span class="badge ${qualityScore > 0.8 ? 'badge-success' : qualityScore > 0.6 ? 'badge-info' : 'badge-warning'}">
+                            ${(qualityScore * 100).toFixed(1)}%
+                        </span>
+                    </span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Manual Review</span>
+                    <span class="stat-value">
+                        <span class="badge ${data.needs_manual_review ? 'badge-warning' : 'badge-success'}">
+                            ${data.needs_manual_review ? 'Required' : 'Not Required'}
+                        </span>
+                    </span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Confidence</span>
+                    <span class="stat-value">
+                        <span class="badge badge-info">
+                            ${((data.text_extraction_confidence || 0) * 100).toFixed(1)}%
+                        </span>
+                    </span>
+                </div>
+            `;
+        }
+        
+        // Load comparison data
+        async function loadComparison() {
+            try {
+                // Load both datasets for the SAME work order for comparison
+                const [markdownResponse, pdfResponse] = await Promise.all([
+                    fetch(`${API_BASE}/work-orders/markdown/15746028`),
+                    fetch(`${API_BASE}/work-orders/pdf/15746028`)
+                ]);
+                
+                const markdownData = await markdownResponse.json();
+                const pdfData = await pdfResponse.json();
+                
+                displayComparison(markdownData, pdfData);
+            } catch (error) {
+                console.error('Error loading comparison data:', error);
+                document.getElementById('markdownStats').innerHTML = '<div class="error">Failed to load comparison data</div>';
+                document.getElementById('pdfStats').innerHTML = '<div class="error">Failed to load comparison data</div>';
+            }
+        }
+        
+        // Display comparison
+        function displayComparison(markdownData, pdfData) {
+            const markdownStats = document.getElementById('markdownStats');
+            const pdfStats = document.getElementById('pdfStats');
+            
+            const markdownTextLength = (markdownData.search_text || '').length;
+            const pdfTextLength = (pdfData.raw_text_full || '').length;
+            const markdownFields = Object.values(markdownData).filter(v => v && v !== 'N/A').length;
+            const pdfFields = Object.values(pdfData).filter(v => v && v !== 'N/A').length;
+            
+            markdownStats.innerHTML = `
+                <div class="stats-row">
+                    <span class="stat-label">Work Order ID</span>
+                    <span class="stat-value">#${markdownData.work_order_id}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Text Length</span>
+                    <span class="stat-value">${markdownTextLength.toLocaleString()}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Fields Extracted</span>
+                    <span class="stat-value">${markdownFields}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Payment Data</span>
+                    <span class="stat-value">$${markdownData.total_paid || '0.00'}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Advantages</span>
+                    <span class="stat-value">
+                        <span class="badge badge-success">Structured</span>
+                        <span class="badge badge-success">Fast</span>
+                        <span class="badge badge-success">Reliable</span>
+                    </span>
+                </div>
+            `;
+            
+            pdfStats.innerHTML = `
+                <div class="stats-row">
+                    <span class="stat-label">Work Order ID</span>
+                    <span class="stat-value">#${pdfData.work_order_id}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Text Length</span>
+                    <span class="stat-value">${pdfTextLength.toLocaleString()}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Pages Processed</span>
+                    <span class="stat-value">${pdfData.pdf_page_count || 0}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Quality Score</span>
+                    <span class="stat-value">${((pdfData.extraction_quality_score || 0) * 100).toFixed(1)}%</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stat-label">Advantages</span>
+                    <span class="stat-value">
+                        <span class="badge badge-info">Visual</span>
+                        <span class="badge badge-info">Complete</span>
+                        <span class="badge badge-warning">Complex</span>
+                    </span>
+                </div>
+            `;
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMarkdownExtraction();
+        });
+    </script>
+</body>
+</html> 

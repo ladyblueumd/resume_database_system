@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Enhanced Work Order Endpoints
 Additional Flask endpoints for comprehensive work order management and job matching
@@ -471,4 +471,54 @@ def add_work_order_endpoints(app, db_path='resume_database.db'):
             return jsonify({
                 'success': False,
                 'error': str(e)
-            }), 500 
+            }), 500
+
+    @app.route('/api/work-orders/markdown/<int:work_order_id>', methods=['GET'])
+    def get_showcase_markdown_work_order(work_order_id):
+        """Get detailed markdown work order data for showcase"""
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT * FROM work_orders_markdown 
+                WHERE work_order_id = ?
+            """, (work_order_id,))
+            
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return jsonify(dict(row))
+            else:
+                return jsonify({'error': 'Work order not found'}), 404
+                
+        except Exception as e:
+            logger.error(f"Error getting markdown work order {work_order_id}: {e}")
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/work-orders/pdf/<int:work_order_id>', methods=['GET'])
+    def get_showcase_pdf_work_order(work_order_id):
+        """Get detailed PDF work order data for showcase"""
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT * FROM work_orders_pdf 
+                WHERE work_order_id = ?
+            """, (work_order_id,))
+            
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return jsonify(dict(row))
+            else:
+                return jsonify({'error': 'Work order not found'}), 404
+                
+        except Exception as e:
+            logger.error(f"Error getting PDF work order {work_order_id}: {e}")
+            return jsonify({'error': str(e)}), 500 

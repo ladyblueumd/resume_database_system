@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Flask Backend API for Resume Database System
 Provides REST endpoints for frontend to interact with SQLite database
@@ -37,6 +37,9 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import inch
 import io
 
+# Import the Claude Markdown Processor
+from claude_markdown_processor import FieldNationMarkdownProcessor
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app, origins=['*'])  # Allow CORS for local development
@@ -64,6 +67,14 @@ try:
 except Exception as e:
     logger.warning(f"Could not load semantic model: {e}. Falling back to keyword matching.")
     semantic_model = None
+
+# Initialize the Claude Markdown Processor
+try:
+    markdown_processor = FieldNationMarkdownProcessor(DATABASE_PATH)
+    logger.info("Claude Markdown Processor initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize Claude Markdown Processor: {e}")
+    markdown_processor = None
 
 
 def allowed_file(filename):
@@ -1353,7 +1364,7 @@ def get_work_order(work_order_id):
         for key, value in wo_dict.items():
             if isinstance(value, str):
                 wo_dict[key] = clean_text(value)
-
+        
         # Parse JSON fields
         if wo_dict.get('technologies_used'):
             try:
@@ -3783,6 +3794,23 @@ def enhanced_work_orders():
 </html>
     """
 
+@app.route('/extraction-showcase')
+def extraction_showcase():
+    """Serve the extraction showcase page"""
+    try:
+        with open('enhanced_work_order_showcase.html', 'r') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Showcase page not found", 404
+
+# Import enhanced work order endpoints
+from enhanced_work_order_endpoints import add_work_order_endpoints
+
+# Import markdown processor endpoints
+from markdown_processor_endpoints import add_markdown_processor_endpoints
+
+# Import contact management endpoints
+from contact_management_endpoints import add_contact_management_endpoints
 
 if __name__ == '__main__':
     # Ensure database exists
@@ -3791,11 +3819,26 @@ if __name__ == '__main__':
     
     # Add enhanced work order endpoints
     try:
-        from enhanced_work_order_endpoints import add_work_order_endpoints
         add_work_order_endpoints(app, DATABASE_PATH)
         logger.info("Enhanced work order endpoints added successfully")
-    except ImportError as e:
-        logger.warning(f"Could not import enhanced work order endpoints: {e}")
+    except Exception as e:
+        logger.error(f"Failed to add enhanced work order endpoints: {e}")
     
-    # Run the Flask app
-    app.run(debug=True, host='0.0.0.0', port=8000) 
+    # Add markdown processor endpoints
+    try:
+        add_markdown_processor_endpoints(app, DATABASE_PATH)
+        logger.info("Markdown processor endpoints added successfully")
+    except Exception as e:
+        logger.error(f"Failed to add markdown processor endpoints: {e}")
+    
+    # Add contact management endpoints
+    try:
+        add_contact_management_endpoints(app, DATABASE_PATH)
+        logger.info("Contact management endpoints added successfully")
+    except Exception as e:
+        logger.error(f"Failed to add contact management endpoints: {e}")
+    
+    # Start the Flask application
+    port = int(os.environ.get('PORT', 8000))
+    logger.info(f"Starting Flask app on port {port}")
+    app.run(debug=True, host='0.0.0.0', port=port) 
