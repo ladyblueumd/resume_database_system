@@ -1112,20 +1112,6 @@ def serve_html():
         """
 
 
-@app.route('/test_importer.html')
-def serve_test_importer():
-    """Serve the test importer HTML file"""
-    try:
-        with open('test_importer.html', 'r') as f:
-            return f.read()
-    except FileNotFoundError:
-        return """
-        <h1>Test Importer Not Found</h1>
-        <p>test_importer.html file not found.</p>
-        <p><a href="/">Go back to main app</a></p>
-        """
-
-
 # Work Orders API Routes
 
 @app.route('/api/work-orders', methods=['GET'])
@@ -2888,4 +2874,4 @@ if __name__ == '__main__':
         logger.warning(f"Database not found at {DATABASE_PATH}. Run resume_extractor.py first.")
     
     # Run the Flask app
-    app.run(debug=False, host='0.0.0.0', port=5001) 
+    app.run(debug=True, host='0.0.0.0', port=5001) 

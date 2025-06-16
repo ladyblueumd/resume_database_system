@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Importer Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { border: 1px solid #ccc; padding: 20px; margin: 20px 0; }
+        .resume-display-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            user-select: text;
+            cursor: text;
+            margin: 10px 0;
+        }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .success { background: #4caf50; color: white; border: none; }
+        .error { background: #f44336; color: white; border: none; }
+        textarea { width: 100%; height: 150px; margin: 10px 0; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+        #debug-log { background: #f0f0f0; padding: 10px; height: 200px; overflow-y: auto; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Resume Importer Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h2>Debug Log</h2>
+        <div id="debug-log"></div>
+        <button onclick="clearDebugLog()">Clear Log</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>Step 1: Paste Resume Text</h2>
+        <textarea id="resume-text-input" placeholder="Paste your resume text here..."></textarea>
+        <button class="success" onclick="displayPastedText()">📄 Display Text</button>
+    </div>
+
+    <div class="debug-section" id="resume-display-section" style="display: none;">
+        <h2>Step 2: Select Text and Create Component</h2>
+        <p><strong>Instructions:</strong> Select any text below with your mouse, then click "Create Component"</p>
+        <div id="resume-display-area" class="resume-display-area"></div>
+        <button class="success" onclick="createComponentFromSelection()">➕ Create Component from Selection</button>
+        <button onclick="clearResumeDisplay()">🗑️ Clear Display</button>
+    </div>
+
+    <!-- Component Creation Modal -->
+    <div id="create-component-modal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Create Component from Selection</h2>
+            
+            <div class="form-group">
+                <label for="selected-text-preview">Selected Text:</label>
+                <textarea id="selected-text-preview" readonly rows="4"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-section-type">Component Type:</label>
+                <select id="component-section-type">
+                    <option value="work_experience">💼 Work Experience</option>
+                    <option value="education">🎓 Education</option>
+                    <option value="technical_skills">🔧 Technical Skills</option>
+                    <option value="professional_skills">💻 Professional Skills</option>
+                    <option value="certifications">📜 Certifications</option>
+                    <option value="accomplishments">🏆 Accomplishments</option>
+                    <option value="professional_summary">📋 Professional Summary</option>
+                    <option value="projects">🚀 Projects</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-title-input">Component Title:</label>
+                <input type="text" id="component-title-input" placeholder="Enter a descriptive title">
+            </div>
+            
+            <div class="form-group">
+                <label for="component-content-input">Component Content:</label>
+                <textarea id="component-content-input" rows="6" placeholder="Edit the content as needed..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="component-keywords-input">Keywords (optional):</label>
+                <input type="text" id="component-keywords-input" placeholder="e.g. project management, leadership">
+            </div>
+            
+            <div class="form-group">
+                <label for="component-industry-input">Industry Tags (optional):</label>
+                <input type="text" id="component-industry-input" placeholder="e.g. healthcare, finance, technology">
+            </div>
+            
+            <button class="success" onclick="saveSelectedComponent()">💾 Save Component</button>
+            <button onclick="closeCreateComponentModal()">❌ Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Debug logging
+        function debugLog(message) {
+            const log = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        function clearDebugLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+
+        // Global variables
+        let currentResumeText = '';
+        let selectedText = '';
+
+        debugLog('🚀 Resume Importer Debug Tool loaded');
+
+        // Display pasted text
+        function displayPastedText() {
+            debugLog('📝 displayPastedText() called');
+            
+            const textInput = document.getElementById('resume-text-input');
+            const text = textInput.value.trim();
+            
+            debugLog(`Text length: ${text.length}`);
+            
+            if (!text) {
+                debugLog('❌ No text provided');
+                alert('Please paste some resume text first.');
+                return;
+            }
+            
+            currentResumeText = text;
+            displayResumeText(text, 'Pasted Text');
+            debugLog('✅ Resume text displayed successfully');
+        }
+
+        // Display resume text in the preview area
+        function displayResumeText(text, filename) {
+            debugLog(`🖥️ displayResumeText() called with filename: ${filename}`);
+            
+            const displayArea = document.getElementById('resume-display-area');
+            const displaySection = document.getElementById('resume-display-section');
+            
+            if (!displayArea) {
+                debugLog('❌ resume-display-area element not found');
+                return;
+            }
+            
+            if (!displaySection) {
+                debugLog('❌ resume-display-section element not found');
+                return;
+            }
+            
+            displayArea.textContent = text;
+            displaySection.style.display = 'block';
+            
+            // Add selection event listener
+            displayArea.addEventListener('mouseup', handleTextSelection);
+            debugLog('✅ Text displayed and event listener added');
+        }
+
+        // Handle text selection
+        function handleTextSelection() {
+            debugLog('🖱️ handleTextSelection() called');
+            
+            const selection = window.getSelection();
+            selectedText = selection.toString().trim();
+            
+            debugLog(`Selected text length: ${selectedText.length}`);
+            debugLog(`Selected text: "${selectedText.substring(0, 100)}${selectedText.length > 100 ? '...' : ''}"`);
+            
+            if (selectedText.length > 10) {
+                debugLog('✅ Valid text selection detected');
+            } else {
+                debugLog('⚠️ Text selection too short (need 10+ characters)');
+            }
+        }
+
+        // Create component from selected text
+        function createComponentFromSelection() {
+            debugLog('🔧 createComponentFromSelection() called');
+            debugLog(`Current selectedText: "${selectedText}"`);
+            debugLog(`selectedText length: ${selectedText.length}`);
+            
+            if (!selectedText || selectedText.length < 10) {
+                debugLog('❌ No valid text selected');
+                alert('Please select some text first (minimum 10 characters).');
+                return;
+            }
+            
+            // Check if modal elements exist
+            const modal = document.getElementById('create-component-modal');
+            const preview = document.getElementById('selected-text-preview');
+            const contentInput = document.getElementById('component-content-input');
+            const titleInput = document.getElementById('component-title-input');
+            
+            if (!modal) {
+                debugLog('❌ Modal element not found');
+                return;
+            }
+            
+            if (!preview || !contentInput || !titleInput) {
+                debugLog('❌ Modal form elements not found');
+                return;
+            }
+            
+            // Pre-fill the modal with selected text
+            preview.value = selectedText;
+            contentInput.value = selectedText;
+            
+            // Generate a suggested title
+            const suggestedTitle = selectedText.substring(0, 50).replace(/\n.*/, '') + (selectedText.length > 50 ? '...' : '');
+            titleInput.value = suggestedTitle;
+            
+            // Show the modal
+            modal.style.display = 'block';
+            debugLog('✅ Modal displayed with pre-filled content');
+        }
+
+        // Save component from selection
+        async function saveSelectedComponent() {
+            debugLog('💾 saveSelectedComponent() called');
+            
+            const componentData = {
+                section_type: document.getElementById('component-section-type').value,
+                title: document.getElementById('component-title-input').value.trim(),
+                content: document.getElementById('component-content-input').value.trim(),
+                keywords: document.getElementById('component-keywords-input').value.trim(),
+                industry_tags: document.getElementById('component-industry-input').value.trim()
+            };
+            
+            debugLog(`Component data: ${JSON.stringify(componentData, null, 2)}`);
+            
+            if (!componentData.title || !componentData.content) {
+                debugLog('❌ Missing title or content');
+                alert('Please provide both title and content.');
+                return;
+            }
+            
+            try {
+                debugLog('🌐 Sending POST request to /add_component');
+                
+                const response = await fetch('/add_component', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(componentData)
+                });
+                
+                debugLog(`Response status: ${response.status}`);
+                
+                const result = await response.json();
+                debugLog(`Response data: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success) {
+                    debugLog('✅ Component created successfully');
+                    alert(`✅ Component "${componentData.title}" created successfully!`);
+                    closeCreateComponentModal();
+                } else {
+                    debugLog(`❌ Component creation failed: ${result.error}`);
+                    alert(`❌ Error: ${result.error}`);
+                }
+            } catch (error) {
+                debugLog(`❌ Network error: ${error.message}`);
+                console.error('Error saving component:', error);
+                alert('❌ Error saving component. Please try again.');
+            }
+        }
+
+        // Close create component modal
+        function closeCreateComponentModal() {
+            debugLog('❌ Closing modal');
+            
+            const modal = document.getElementById('create-component-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            
+            // Clear form
+            document.getElementById('component-title-input').value = '';
+            document.getElementById('component-content-input').value = '';
+            document.getElementById('component-keywords-input').value = '';
+            document.getElementById('component-industry-input').value = '';
+            document.getElementById('selected-text-preview').value = '';
+            
+            debugLog('✅ Modal closed and form cleared');
+        }
+
+        // Clear resume display
+        function clearResumeDisplay() {
+            debugLog('🗑️ Clearing resume display');
+            
+            document.getElementById('resume-display-section').style.display = 'none';
+            document.getElementById('resume-display-area').textContent = '';
+            currentResumeText = '';
+            selectedText = '';
+            
+            debugLog('✅ Resume display cleared');
+        }
+
+        // Add sample text for testing
+        window.addEventListener('load', function() {
+            debugLog('🎯 Page loaded - adding sample text');
+            const sampleText = `John Doe
+Software Engineer
+
+PROFESSIONAL SUMMARY
+Experienced software engineer with 5+ years developing web applications using Python, JavaScript, and React. Strong background in database design and API development.
+
+TECHNICAL SKILLS
+- Programming Languages: Python, JavaScript, Java
+- Frameworks: React, Flask, Django
+- Databases: PostgreSQL, MySQL, MongoDB
+
+WORK EXPERIENCE
+Senior Software Engineer | TechCorp | 2020-Present
+• Led development of customer portal using React and Python Flask
+• Designed and implemented RESTful APIs serving 10,000+ daily users
+• Mentored junior developers and conducted code reviews`;
+            
+            document.getElementById('resume-text-input').value = sampleText;
+            debugLog('✅ Sample text added for testing');
+        });
+    </script>
+</body>
+</html> 

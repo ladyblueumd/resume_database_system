@@ -369,12 +369,12 @@
 
         .modal-content {
             background-color: #fefefe;
-            margin: 5% auto;
+            margin: 2% auto;
             padding: 2rem;
             border-radius: 8px;
             width: 90%;
             max-width: 800px;
-            max-height: 80vh;
+            max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
@@ -983,8 +983,110 @@
         }
 
         /* Resume Builder Shopping Cart Functions */
-        // cart variable already declared above - no need to redeclare
-        let builderComponents = [];
+
+        /* Resume Importer Styles */
+        .test-area { 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        /* Resume Importer Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-dialog {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: 2vh auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-section input,
+        .form-section select,
+        .form-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-section textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-actions {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
 
         /* Resume Library Modal Styles */
         .modal-overlay {
@@ -1966,45 +2068,51 @@
         
         <!-- Resume Importer Tab -->
         <div class="tab-content" id="importer">
-            <!-- Resume Importer Section -->
-            <div class="search-interface">
-                <h2>📥 Resume Importer</h2>
-                <p>Upload your resume to extract the text, then manually select and create components from the displayed content.</p>
-                
-                <div class="resume-import-methods">
-                    <!-- File Upload Method -->
-                    <div class="import-method">
-                        <h3>📎 Upload Resume File</h3>
-                        <div class="upload-area" onclick="document.getElementById('resume-file-input').click()">
-                            <p>📁 Click here to select a resume file</p>
-                            <p style="font-size: 0.9rem; color: #666;">Supports: .txt, .doc, .docx, .pdf, .html</p>
-                        </div>
-                        <input type="file" id="resume-file-input" accept=".txt,.doc,.docx,.pdf,.html" style="display: none;" onchange="uploadAndDisplayResume()">
-                        
-                        <div id="file-upload-status" style="margin-top: 1rem;"></div>
-                    </div>
-                    
-                    <!-- Text Input Method -->
-                    <div class="import-method">
-                        <h3>📝 Paste Resume Text</h3>
-                        <textarea id="resume-text-input" placeholder="Paste your resume text here..." rows="8" style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;"></textarea>
-                        <button class="success" onclick="displayPastedText()" style="margin-top: 1rem;">📄 Display Text</button>
-                    </div>
+            <h2>📥 Resume Importer</h2>
+            <p>Upload your resume to extract the text, then manually select and create components from the displayed content.</p>
+            
+            <div class="test-area">
+                <h3>📎 Step 1: Upload Resume File</h3>
+                <div class="upload-area" onclick="document.getElementById('resume-file-input').click()">
+                    <p>📁 Click here to select a resume file</p>
+                    <p style="font-size: 0.9rem; color: #666;">Supports: .txt, .doc, .docx, .pdf, .html</p>
                 </div>
-                
-                <!-- Resume Display Area -->
-                <div id="resume-display-section" style="display: none;">
-                    <h3>📄 Resume Content</h3>
-                    <p>Select any text below and click "Create Component" to add it to your library:</p>
-                    
-                    <div class="resume-display-controls">
-                        <button class="success" onclick="createComponentFromSelection()">➕ Create Component from Selection</button>
-                        <button class="secondary" onclick="clearResumeDisplay()">🗑️ Clear Display</button>
-                    </div>
-                    
-                    <div id="resume-display-area" class="resume-display-area">
-                        <!-- Resume text will be displayed here -->
-                    </div>
+                <input type="file" id="resume-file-input" accept=".txt,.doc,.docx,.pdf,.html" style="display: none;" onchange="uploadAndDisplayResume()">
+            </div>
+            
+            <div class="test-area">
+                <h3>📝 Step 1 (Alternative): Paste Resume Text</h3>
+                <textarea id="resume-text-input" rows="10" placeholder="Paste your resume text here..." style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;">
+John Doe
+Senior Software Engineer
+
+PROFESSIONAL SUMMARY
+Experienced software engineer with 8+ years developing web applications using JavaScript, Python, and React. Strong background in full-stack development, database design, and cloud architecture.
+
+TECHNICAL SKILLS
+• Programming Languages: JavaScript, Python, Java, C#
+• Frontend: React, Vue.js, HTML5, CSS3, Bootstrap
+• Backend: Node.js, Django, Flask, Express.js
+• Databases: PostgreSQL, MongoDB, MySQL, Redis
+• Cloud: AWS, Azure, Docker, Kubernetes
+
+WORK EXPERIENCE
+Senior Software Engineer | TechCorp Inc. | 2020-Present
+• Led development of microservices architecture serving 1M+ users
+• Implemented CI/CD pipelines reducing deployment time by 60%
+• Mentored junior developers and conducted code reviews
+                </textarea>
+                <br>
+                <button class="success" onclick="displayImporterText()">📄 Display Text</button>
+            </div>
+            
+            <div class="test-area" id="importer-text-display" style="display: none;">
+                <h3>📄 Step 2: Select Text and Create Component</h3>
+                <p>Select any text below with your mouse, then click the button:</p>
+                <button class="success" onclick="createImporterComponent()">➕ Create Component from Selection</button>
+                <button class="secondary" onclick="clearImporterDisplay()">🗑️ Clear Display</button>
+                <div id="importer-resume-content" style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; background: #f9f9f9; user-select: text;">
+                    <!-- Text will be displayed here -->
                 </div>
             </div>
         </div>
@@ -2244,59 +2352,58 @@
         </div>
     </div>
 
-    <!-- Component Creation Modal for Resume Importer -->
-    <div id="create-component-modal" class="modal">
-        <div class="modal-content">
+    <!-- Resume Importer Component Creation Modal -->
+    <div id="resume-importer-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
             <div class="modal-header">
-                <h2>➕ Create Component from Selection</h2>
-                <span class="close" onclick="closeCreateComponentModal()">&times;</span>
+                <h3>➕ Create Component from Selection</h3>
+                <button class="close-btn" onclick="closeResumeImporterModal()">&times;</button>
             </div>
             
-            <div class="form-group">
-                <label for="selected-text-preview">Selected Text:</label>
-                <textarea id="selected-text-preview" readonly style="background: #f8f9fa; color: #6c757d;" rows="8"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="component-section-type">Component Type:</label>
-                <select id="component-section-type">
-                    <option value="work_experience">💼 Work Experience</option>
-                    <option value="education">🎓 Education</option>
-                    <option value="technical_skills">🔧 Technical Skills</option>
-                    <option value="professional_skills">💻 Professional Skills</option>
-                    <option value="certifications">📜 Certifications</option>
-                    <option value="accomplishments">🏆 Accomplishments</option>
-                    <option value="professional_summary">📋 Professional Summary</option>
-                    <option value="projects">🚀 Projects</option>
-                    <option value="client_contract">🤝 Client/Contract</option>
-                    <option value="summary_mission">📝 Summary/Mission</option>
-                    <option value="blank_component">📄 Blank Component</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="component-title-input">Component Title:</label>
-                <input type="text" id="component-title-input" placeholder="Enter a descriptive title for this component">
-            </div>
-            
-            <div class="form-group">
-                <label for="component-content-input">Component Content:</label>
-                <textarea id="component-content-input" rows="10" placeholder="Edit the content as needed..."></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="component-keywords-input">Keywords (optional):</label>
-                <input type="text" id="component-keywords-input" placeholder="e.g. project management, leadership, technical support">
-            </div>
-            
-            <div class="form-group">
-                <label for="component-industry-input">Industry Tags (optional):</label>
-                <input type="text" id="component-industry-input" placeholder="e.g. healthcare, finance, technology">
+            <div class="modal-body">
+                <div class="form-section">
+                    <label for="importer-selected-text">Selected Text:</label>
+                    <textarea id="importer-selected-text" readonly rows="4" style="background: #f8f9fa; color: #6c757d; resize: vertical;"></textarea>
+                </div>
+                
+                <div class="form-section">
+                    <label for="importer-component-type">Component Type:</label>
+                    <select id="importer-component-type">
+                        <option value="professional_summary">📋 Professional Summary</option>
+                        <option value="work_experience">💼 Work Experience</option>
+                        <option value="technical_skills">🔧 Technical Skills</option>
+                        <option value="professional_skills">💻 Professional Skills</option>
+                        <option value="education">🎓 Education</option>
+                        <option value="certifications">📜 Certifications</option>
+                        <option value="accomplishments">🏆 Accomplishments</option>
+                        <option value="projects">🚀 Projects</option>
+                    </select>
+                </div>
+                
+                <div class="form-section">
+                    <label for="importer-component-title">Component Title:</label>
+                    <input type="text" id="importer-component-title" placeholder="Enter a descriptive title">
+                </div>
+                
+                <div class="form-section">
+                    <label for="importer-component-content">Component Content:</label>
+                    <textarea id="importer-component-content" rows="8" placeholder="Edit the content as needed..."></textarea>
+                </div>
+                
+                <div class="form-section">
+                    <label for="importer-component-keywords">Keywords (optional):</label>
+                    <input type="text" id="importer-component-keywords" placeholder="e.g. project management, leadership, technical support">
+                </div>
+                
+                <div class="form-section">
+                    <label for="importer-component-industry">Industry Tags (optional):</label>
+                    <input type="text" id="importer-component-industry" placeholder="e.g. healthcare, finance, technology">
+                </div>
             </div>
             
             <div class="modal-actions">
-                <button class="success" onclick="saveSelectedComponent()">💾 Save Component</button>
-                <button class="secondary" onclick="closeCreateComponentModal()">❌ Cancel</button>
+                <button class="success" onclick="saveImporterComponent()">💾 Save Component</button>
+                <button class="secondary" onclick="closeResumeImporterModal()">❌ Cancel</button>
             </div>
         </div>
     </div>
@@ -2553,10 +2660,9 @@
             loadDashboard();
         }
         
-        // Resume Importer functions
-        let currentResumeText = '';
-        let selectedText = '';
-
+        // Resume Importer functions (Working Version)
+        let importerSelectedText = '';
+        
         // Upload and display resume file
         async function uploadAndDisplayResume() {
             const fileInput = document.getElementById('resume-file-input');
@@ -2581,8 +2687,7 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    currentResumeText = result.text;
-                    displayResumeText(result.text, result.filename);
+                    displayImporterResumeText(result.text, result.filename);
                     showStatus(`✅ ${result.message}`, 'success');
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
@@ -2594,119 +2699,174 @@
         }
 
         // Display pasted text
-        function displayPastedText() {
-            const textInput = document.getElementById('resume-text-input');
-            const text = textInput.value.trim();
+        function displayImporterText() {
+            const textArea = document.getElementById('resume-text-input');
+            const text = textArea.value.trim();
             
             if (!text) {
-                showStatus('Please paste some resume text first.', 'error');
+                showStatus('Please enter some text first', 'error');
                 return;
             }
             
-            currentResumeText = text;
-            displayResumeText(text, 'Pasted Text');
-            showStatus('✅ Resume text displayed successfully!', 'success');
+            displayImporterResumeText(text, 'Pasted Text');
+            showStatus('✅ Text displayed. Now select some text with your mouse.', 'info');
         }
-
+        
         // Display resume text in the preview area
-        function displayResumeText(text, filename) {
-            const displayArea = document.getElementById('resume-display-area');
-            const displaySection = document.getElementById('resume-display-section');
+        function displayImporterResumeText(text, filename) {
+            const content = document.getElementById('importer-resume-content');
+            const displayDiv = document.getElementById('importer-text-display');
             
-            displayArea.textContent = text;
-            displaySection.style.display = 'block';
+            if (!content || !displayDiv) {
+                console.error('Resume display elements not found');
+                showStatus('Error: Display elements not found.', 'error');
+                return;
+            }
             
+            content.textContent = text;
+            displayDiv.style.display = 'block';
+            
+            // Remove existing event listeners to avoid duplicates
+            content.removeEventListener('mouseup', handleImporterSelection);
             // Add selection event listener
-            displayArea.addEventListener('mouseup', handleTextSelection);
+            content.addEventListener('mouseup', handleImporterSelection);
+            
+            console.log('Resume text displayed and event listener added');
         }
 
         // Handle text selection
-        function handleTextSelection() {
+        function handleImporterSelection() {
             const selection = window.getSelection();
-            selectedText = selection.toString().trim();
+            importerSelectedText = selection.toString().trim();
             
-            if (selectedText.length > 10) {
-                showStatus(`Selected: "${selectedText.substring(0, 50)}${selectedText.length > 50 ? '...' : ''}"`, 'info');
+            console.log('Selected text:', importerSelectedText);
+            
+            if (importerSelectedText.length > 10) {
+                showStatus(`Selected: "${importerSelectedText.substring(0, 50)}${importerSelectedText.length > 50 ? '...' : ''}"`, 'info');
+            } else if (importerSelectedText.length > 0) {
+                showStatus('Please select at least 10 characters', 'error');
             }
         }
 
         // Create component from selected text
-        function createComponentFromSelection() {
-            if (!selectedText || selectedText.length < 10) {
-                showStatus('Please select some text first (minimum 10 characters).', 'error');
+        function createImporterComponent() {
+            console.log('createImporterComponent called, selectedText:', importerSelectedText);
+            
+            if (!importerSelectedText || importerSelectedText.length < 10) {
+                showStatus('Please select at least 10 characters of text first', 'error');
                 return;
             }
             
-            // Pre-fill the modal with selected text
-            document.getElementById('selected-text-preview').value = selectedText;
-            document.getElementById('component-content-input').value = selectedText;
+            // Fill modal
+            const selectedTextArea = document.getElementById('importer-selected-text');
+            const contentTextArea = document.getElementById('importer-component-content');
+            const titleInput = document.getElementById('importer-component-title');
             
-            // Generate a suggested title
-            const suggestedTitle = selectedText.substring(0, 50).replace(/\n.*/, '') + (selectedText.length > 50 ? '...' : '');
-            document.getElementById('component-title-input').value = suggestedTitle;
+            if (!selectedTextArea || !contentTextArea || !titleInput) {
+                console.error('Modal form elements not found');
+                showStatus('Error: Modal form elements not found.', 'error');
+                return;
+            }
             
-            // Show the modal
-            document.getElementById('create-component-modal').style.display = 'block';
+            selectedTextArea.value = importerSelectedText;
+            contentTextArea.value = importerSelectedText;
+            
+            // Generate title
+            const title = importerSelectedText.substring(0, 50).replace(/\n.*/, '') + (importerSelectedText.length > 50 ? '...' : '');
+            titleInput.value = title;
+            
+            // Show modal
+            const modal = document.getElementById('resume-importer-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('Modal displayed');
+                showStatus('Modal opened. Fill out the form and save.', 'info');
+            } else {
+                console.error('Modal not found');
+                showStatus('Error: Modal not found.', 'error');
+            }
         }
 
-        // Save component from selection
-        async function saveSelectedComponent() {
-            const componentData = {
-                section_type: document.getElementById('component-section-type').value,
-                title: document.getElementById('component-title-input').value.trim(),
-                content: document.getElementById('component-content-input').value.trim(),
-                keywords: document.getElementById('component-keywords-input').value.trim(),
-                industry_tags: document.getElementById('component-industry-input').value.trim()
+        // Save component from importer
+        async function saveImporterComponent() {
+            const data = {
+                section_type: document.getElementById('importer-component-type').value,
+                title: document.getElementById('importer-component-title').value.trim(),
+                content: document.getElementById('importer-component-content').value.trim(),
+                keywords: document.getElementById('importer-component-keywords').value.trim(),
+                industry_tags: document.getElementById('importer-component-industry').value.trim()
             };
             
-            if (!componentData.title || !componentData.content) {
-                showStatus('Please provide both title and content.', 'error');
+            console.log('Saving component:', data);
+            
+            if (!data.title || !data.content) {
+                showStatus('Please provide both title and content', 'error');
                 return;
             }
             
             try {
+                showStatus('💾 Saving component...', 'info');
+                
                 const response = await fetch('/add_component', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(componentData)
+                    body: JSON.stringify(data)
                 });
                 
                 const result = await response.json();
+                console.log('API Response:', result);
                 
                 if (result.success) {
-                    showStatus(`✅ Component "${componentData.title}" created successfully!`, 'success');
-                    closeCreateComponentModal();
-                    loadComponentLibrary();
-                    loadDashboard();
+                    showStatus(`✅ Component "${data.title}" created successfully! ID: ${result.id}`, 'success');
+                    closeResumeImporterModal();
+                    // Refresh component library and dashboard
+                    if (typeof loadComponentLibrary === 'function') {
+                        loadComponentLibrary();
+                    }
+                    if (typeof loadDashboard === 'function') {
+                        loadDashboard();
+                    }
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Error saving component:', error);
-                showStatus('❌ Error saving component. Please try again.', 'error');
+                showStatus(`❌ Network error: ${error.message}`, 'error');
             }
         }
 
-        // Close create component modal
-        function closeCreateComponentModal() {
-            document.getElementById('create-component-modal').style.display = 'none';
+        // Close resume importer modal
+        function closeResumeImporterModal() {
+            const modal = document.getElementById('resume-importer-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
             
             // Clear form
-            document.getElementById('component-title-input').value = '';
-            document.getElementById('component-content-input').value = '';
-            document.getElementById('component-keywords-input').value = '';
-            document.getElementById('component-industry-input').value = '';
-            document.getElementById('selected-text-preview').value = '';
+            document.getElementById('importer-component-title').value = '';
+            document.getElementById('importer-component-content').value = '';
+            document.getElementById('importer-component-keywords').value = '';
+            document.getElementById('importer-component-industry').value = '';
+            document.getElementById('importer-selected-text').value = '';
+            
+            console.log('Modal closed and form cleared');
         }
 
         // Clear resume display
-        function clearResumeDisplay() {
-            document.getElementById('resume-display-section').style.display = 'none';
-            document.getElementById('resume-display-area').textContent = '';
-            currentResumeText = '';
-            selectedText = '';
+        function clearImporterDisplay() {
+            const displayDiv = document.getElementById('importer-text-display');
+            const content = document.getElementById('importer-resume-content');
+            
+            if (displayDiv) {
+                displayDiv.style.display = 'none';
+            }
+            if (content) {
+                content.textContent = '';
+            }
+            
+            importerSelectedText = '';
             showStatus('Resume display cleared.', 'info');
         }
 
