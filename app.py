@@ -1180,10 +1180,20 @@ def get_work_orders():
             """
             params = [project_id]
         
+        # Get total count first (without LIMIT/OFFSET)
+        count_query = query.replace("SELECT *", "SELECT COUNT(*)")
+        count_query = count_query.replace("SELECT wo.*", "SELECT COUNT(*)")
+        cursor = conn.cursor()
+        
+        # For count query, we need to use params without limit and offset
+        count_params = params[:-2] if len(params) >= 2 else params
+        cursor.execute(count_query, count_params)
+        total_count = cursor.fetchone()[0]
+        
+        # Now get the paginated results
         query += " ORDER BY service_date DESC LIMIT ? OFFSET ?"
         params.extend([limit, offset])
         
-        cursor = conn.cursor()
         cursor.execute(query, params)
         work_orders = [dict(row) for row in cursor.fetchall()]
         
@@ -1195,7 +1205,13 @@ def get_work_orders():
                 wo['skills_demonstrated'] = json.loads(wo['skills_demonstrated'])
         
         conn.close()
-        return jsonify(work_orders)
+        return jsonify({
+            'work_orders': work_orders,
+            'total_count': total_count,
+            'limit': limit,
+            'offset': offset,
+            'has_more': offset + limit < total_count
+        })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2880,6 +2896,157 @@ def export_resume_pdf():
     except Exception as e:
         logger.error(f"Error exporting PDF: {e}")
         return jsonify({'error': f'Failed to export PDF: {str(e)}'}), 500
+
+
+# Add this new endpoint after the existing work orders endpoints
+
+@app.route('/api/work-orders/load-jsonl', methods=['POST'])
+def load_work_orders_from_jsonl():
+    """Load work orders from the extracted_work_orders.jsonl file"""
+    try:
+        import json
+        import os
+        
+        jsonl_file = 'extracted_work_orders.jsonl'
+        if not os.path.exists(jsonl_file):
+            return jsonify({'error': 'JSONL file not found'}), 404
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Create work_orders table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS work_orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                work_order_number TEXT UNIQUE,
+                title TEXT,
+                service_description TEXT,
+                tools TEXT,
+                software TEXT,
+                skills TEXT,
+                source_file TEXT,
+                company_name TEXT,
+                work_category TEXT,
+                work_type TEXT,
+                client_type TEXT,
+                state TEXT,
+                city TEXT,
+                service_date TEXT,
+                pay_amount REAL,
+                technologies_used TEXT,
+                skills_demonstrated TEXT,
+                work_description TEXT,
+                location TEXT,
+                include_in_resume BOOLEAN DEFAULT 0,
+                highlight_project BOOLEAN DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        loaded_count = 0
+        skipped_count = 0
+        
+        with open(jsonl_file, 'r', encoding='utf-8') as f:
+            for line_num, line in enumerate(f, 1):
+                try:
+                    if line.strip():
+                        data = json.loads(line.strip())
+                        
+                        # Extract work order number from the data
+                        work_order_number = data.get('work_order_number', f'WO_{line_num}')
+                        
+                        # Check if work order already exists
+                        cursor.execute('SELECT id FROM work_orders WHERE work_order_number = ?', (work_order_number,))
+                        if cursor.fetchone():
+                            skipped_count += 1
+                            continue
+                        
+                        # Prepare data for insertion
+                        title = data.get('title', 'Untitled Work Order')
+                        service_description = data.get('service_description', '')
+                        tools = json.dumps(data.get('tools', []))
+                        software = json.dumps(data.get('software', []))
+                        skills = json.dumps(data.get('skills', []))
+                        source_file = data.get('source_file', '')
+                        
+                        # Extract company name from source file or title
+                        company_name = 'Field Nation'  # Default company
+                        if 'source_file' in data and data['source_file']:
+                            # Try to extract company from filename
+                            filename = os.path.basename(data['source_file'])
+                            if 'staples' in filename.lower():
+                                company_name = 'Staples'
+                            elif 'tjx' in filename.lower() or 'tj maxx' in service_description.lower():
+                                company_name = 'TJX Companies'
+                            elif 'pnc' in filename.lower() or 'pnc bank' in service_description.lower():
+                                company_name = 'PNC Bank'
+                            elif 'davita' in filename.lower() or 'davita' in service_description.lower():
+                                company_name = 'DaVita'
+                            elif 'victoria' in service_description.lower():
+                                company_name = 'Victoria\'s Secret'
+                            elif 'synchrony' in service_description.lower():
+                                company_name = 'Synchrony'
+                            elif 'metlife' in service_description.lower():
+                                company_name = 'MetLife'
+                        
+                        # Categorize work type
+                        work_category = 'technical_support'
+                        work_type = 'installation'
+                        
+                        if 'pos' in title.lower() or 'register' in title.lower():
+                            work_category = 'pos_systems'
+                            work_type = 'pos_installation'
+                        elif 'printer' in title.lower():
+                            work_category = 'hardware'
+                            work_type = 'printer_setup'
+                        elif 'desktop' in title.lower() or 'deskside' in title.lower():
+                            work_category = 'desktop_support'
+                            work_type = 'user_support'
+                        elif 'server' in title.lower():
+                            work_category = 'server_infrastructure'
+                            work_type = 'server_deployment'
+                        elif 'network' in title.lower():
+                            work_category = 'networking'
+                            work_type = 'network_setup'
+                        elif 'install' in title.lower():
+                            work_category = 'installation'
+                            work_type = 'hardware_installation'
+                        
+                        client_type = 'enterprise'
+                        
+                        # Insert work order
+                        cursor.execute('''
+                            INSERT INTO work_orders (
+                                work_order_number, title, service_description, tools, software, skills,
+                                source_file, company_name, work_category, work_type, client_type,
+                                technologies_used, skills_demonstrated, work_description
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ''', (
+                            work_order_number, title, service_description, tools, software, skills,
+                            source_file, company_name, work_category, work_type, client_type,
+                            tools, skills, service_description
+                        ))
+                        
+                        loaded_count += 1
+                        
+                except json.JSONDecodeError as e:
+                    print(f"Error parsing line {line_num}: {e}")
+                    continue
+                except Exception as e:
+                    print(f"Error processing line {line_num}: {e}")
+                    continue
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'message': f'Successfully loaded {loaded_count} work orders',
+            'loaded': loaded_count,
+            'skipped': skipped_count
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

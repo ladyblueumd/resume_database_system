@@ -70,10 +70,20 @@ def get_work_orders():
             """
             params = [project_id]
         
+        # Get total count first (without LIMIT/OFFSET)
+        count_query = query.replace("SELECT *", "SELECT COUNT(*)")
+        count_query = count_query.replace("SELECT wo.*", "SELECT COUNT(*)")
+        cursor = conn.cursor()
+        
+        # For count query, we need to use params without limit and offset
+        count_params = params[:-2] if len(params) >= 2 else params
+        cursor.execute(count_query, count_params)
+        total_count = cursor.fetchone()[0]
+        
+        # Now get the paginated results
         query += " ORDER BY service_date DESC LIMIT ? OFFSET ?"
         params.extend([limit, offset])
         
-        cursor = conn.cursor()
         cursor.execute(query, params)
         work_orders = [dict(row) for row in cursor.fetchall()]
         
@@ -85,7 +95,13 @@ def get_work_orders():
                 wo['skills_demonstrated'] = json.loads(wo['skills_demonstrated'])
         
         conn.close()
-        return jsonify(work_orders)
+        return jsonify({
+            'work_orders': work_orders,
+            'total_count': total_count,
+            'limit': limit,
+            'offset': offset,
+            'has_more': offset + limit < total_count
+        })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

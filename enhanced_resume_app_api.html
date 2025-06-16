@@ -1483,6 +1483,307 @@
             font-weight: bold;
             margin: 0;
         }
+
+        /* Work Orders Tiles Styles */
+        .work-orders-tiles {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .work-order-tile {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .work-order-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .work-order-tile.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .work-order-tile.in-cart {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .work-order-tile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .work-order-number {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .work-order-tile-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 10px 0;
+            line-height: 1.3;
+        }
+
+        .work-order-tile-company {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .work-order-tile-description {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .work-order-tile-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .work-order-tile-tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            border: 1px solid #dee2e6;
+        }
+
+        .work-order-tile-tag.tools {
+            background: #ffeaa7;
+            color: #2d3436;
+        }
+
+        .work-order-tile-tag.software {
+            background: #74b9ff;
+            color: white;
+        }
+
+        .work-order-tile-tag.skills {
+            background: #fd79a8;
+            color: white;
+        }
+
+        .work-order-tile-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .work-order-tile-actions button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-view {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #0056b3;
+        }
+
+        .btn-cart {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-cart:hover {
+            background: #1e7e34;
+        }
+
+        .btn-cart.in-cart {
+            background: #6c757d;
+        }
+
+        .btn-cart.in-cart:hover {
+            background: #545b62;
+        }
+
+        /* Work Order Modal Styles */
+        .work-order-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .work-order-modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .work-order-modal-header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .work-order-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .work-order-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .work-order-modal-close:hover {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        .work-order-modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .work-order-detail-section {
+            margin-bottom: 20px;
+        }
+
+        .work-order-detail-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        .work-order-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .work-order-detail-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .work-order-detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .work-order-detail-value {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .work-order-modal-footer {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .controls-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Load More Button Styles */
+        .load-more-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        #load-more-work-orders {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        #load-more-work-orders:hover:not(:disabled) {
+            background: #545b62;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        #load-more-work-orders:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         
         /* Center the component meta information */
         .work-order-card .component-meta,
@@ -1754,64 +2055,20 @@
         <div class="tab-content" id="work-orders">
             <h2>🔧 Work Orders</h2>
             
-            <div class="search-interface">
-                <h3>🔍 Search & Filter Work Orders</h3>
-                
-                <!-- Search Row -->
+            <div class="controls-panel">
                 <div class="form-row">
                     <div>
-                        <label for="work-order-search">Search Keywords:</label>
-                        <input type="text" id="work-order-search" placeholder="Search by title, company, or description...">
+                        <button onclick="loadWorkOrdersFromJsonl()" class="success">📥 Load JSONL Data</button>
+                        <button onclick="refreshWorkOrders()" class="secondary">🔄 Refresh</button>
                     </div>
                     <div>
-                        <button onclick="searchWorkOrders()" class="success">🔍 Search</button>
-                        <button onclick="clearWorkOrderFilters()" class="secondary">🗑️ Clear All</button>
-                    </div>
-                </div>
-                
-                <!-- Filter Row -->
-                <div class="form-row">
-                    <div>
-                        <label for="category-filter">Category:</label>
-                        <select id="category-filter" onchange="filterWorkOrders()">
-                            <option value="">All Categories</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="company-filter">Company:</label>
+                        <input type="text" id="work-order-search" placeholder="Search work orders..." onkeyup="filterWorkOrders()">
                         <select id="company-filter" onchange="filterWorkOrders()">
                             <option value="">All Companies</option>
                         </select>
-                    </div>
-                </div>
-                
-                <!-- Additional Filters Row -->
-                <div class="form-row">
-                    <div>
-                        <label for="state-filter">State:</label>
-                        <select id="state-filter" onchange="filterWorkOrders()">
-                            <option value="">All States</option>
+                        <select id="category-filter" onchange="filterWorkOrders()">
+                            <option value="">All Categories</option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="date-range-filter">Date Range:</label>
-                        <select id="date-range-filter" onchange="filterWorkOrders()">
-                            <option value="">All Dates</option>
-                            <option value="last-year">Last Year</option>
-                            <option value="last-2-years">Last 2 Years</option>
-                            <option value="last-5-years">Last 5 Years</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="form-row">
-                    <div>
-                        <button onclick="showBulkWorkOrderActions()" class="secondary">📦 Bulk Actions</button>
-                        <button onclick="addSelectedWorkOrdersToCart()" class="success">🛒 Add Selected to Cart</button>
-                    </div>
-                    <div>
-                        <span id="work-order-results-count">Loading work orders...</span>
                     </div>
                 </div>
             </div>
@@ -1827,40 +2084,41 @@
                     <div class="stat-label">Companies</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="total-earnings">$0</div>
-                    <div class="stat-label">Total Earnings</div>
+                    <div class="stat-number" id="selected-work-orders">0</div>
+                    <div class="stat-label">Selected for Resume</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="unassigned-work-orders">0</div>
-                    <div class="stat-label">Unassigned</div>
+                    <div class="stat-number" id="cart-work-orders">0</div>
+                    <div class="stat-label">In Cart</div>
                 </div>
             </div>
             
-            <!-- Work Orders Grid -->
-            <div class="component-grid" id="work-orders-grid">
-                <!-- Work orders will be populated here -->
+            <!-- Work Orders Tiles Grid -->
+            <div class="work-orders-tiles" id="work-orders-grid">
+                <!-- Work order tiles will be populated here -->
             </div>
             
-            <!-- Bulk Actions Panel (hidden by default) -->
-            <div class="bulk-actions" id="work-order-bulk-actions-panel" style="display: none;">
-                <h4>📦 Bulk Actions for Work Orders</h4>
-                <p>Select work orders by checking the boxes, then choose an action:</p>
-                <div class="form-row">
-                    <div>
-                        <button onclick="selectAllVisibleWorkOrders()" class="secondary">☑️ Select All Visible</button>
-                        <button onclick="deselectAllWorkOrders()" class="secondary">❌ Deselect All</button>
-                    </div>
-                    <div>
-                        <button onclick="bulkAddWorkOrdersToCart()" class="success">🛒 Add Selected to Cart</button>
-                        <button onclick="bulkCreateComponentsFromWorkOrders()" class="success">📝 Create Components</button>
-                    </div>
+            <!-- Load More Button -->
+            <div class="load-more-container" style="text-align: center; margin-top: 20px;">
+                <button id="load-more-work-orders" onclick="loadMoreWorkOrders()" class="secondary" style="display: none;">
+                    📄 Load More Work Orders
+                </button>
+            </div>
+        </div>
+
+        <!-- Work Order Modal -->
+        <div id="work-order-modal" class="work-order-modal">
+            <div class="work-order-modal-content">
+                <div class="work-order-modal-header">
+                    <h3 id="work-order-modal-title">Work Order Details</h3>
+                    <button class="work-order-modal-close" onclick="closeWorkOrderModal()">&times;</button>
                 </div>
-                <div class="form-row">
-                    <div>
-                        <button onclick="bulkExportWorkOrders()" class="secondary">📊 Export to CSV</button>
-                        <button onclick="showBulkWorkOrderActions()" class="secondary">❌ Hide Panel</button>
-                    </div>
-                    <div id="work-order-bulk-selection-count">No work orders selected</div>
+                <div class="work-order-modal-body" id="work-order-modal-body">
+                    <!-- Work order details will be populated here -->
+                </div>
+                <div class="work-order-modal-footer">
+                    <button class="btn-cart" id="modal-cart-btn" onclick="toggleWorkOrderInCart()">Add to Cart</button>
+                    <button class="btn-view" onclick="closeWorkOrderModal()">Close</button>
                 </div>
             </div>
         </div>
@@ -5194,22 +5452,86 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
         
         let workOrders = [];
         let filteredWorkOrders = [];
-        let selectedWorkOrders = [];
+        let currentWorkOrder = null;
+        
+        // Pagination state for work orders
+        let workOrdersPagination = {
+            offset: 0,
+            limit: 50,
+            totalCount: 0,
+            hasMore: false,
+            loading: false
+        };
 
-        // Load work orders data
-        async function loadWorkOrders() {
+        // Load work orders from JSONL file
+        async function loadWorkOrdersFromJsonl() {
             try {
-                const response = await fetch('/api/work-orders');
-                workOrders = await response.json();
+                showStatus('Loading work orders from JSONL file...', 'info');
+                const response = await fetch('/api/work-orders/load-jsonl', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus(result.message, 'success');
+                    // Reset pagination when loading new data
+                    workOrdersPagination.offset = 0;
+                    await refreshWorkOrders(true);
+                } else {
+                    showStatus(result.error || 'Error loading JSONL data', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading JSONL data:', error);
+                showStatus('Error loading JSONL data', 'error');
+            }
+        }
+
+        // Refresh work orders data
+        async function refreshWorkOrders(reset = true) {
+            try {
+                if (reset) {
+                    workOrdersPagination.offset = 0;
+                    workOrders = [];
+                }
+                
+                workOrdersPagination.loading = true;
+                updateLoadMoreButton();
+                
+                const url = `/api/work-orders?limit=${workOrdersPagination.limit}&offset=${workOrdersPagination.offset}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Handle new API response format
+                if (data.work_orders) {
+                    if (reset) {
+                        workOrders = data.work_orders;
+                    } else {
+                        workOrders = [...workOrders, ...data.work_orders];
+                    }
+                    workOrdersPagination.totalCount = data.total_count;
+                    workOrdersPagination.hasMore = data.has_more;
+                    if (!reset) {
+                        workOrdersPagination.offset += workOrdersPagination.limit;
+                    }
+                } else {
+                    // Fallback for old API format
+                    workOrders = data;
+                    workOrdersPagination.hasMore = false;
+                }
+                
                 filteredWorkOrders = [...workOrders];
+                workOrdersPagination.loading = false;
                 
                 await loadWorkOrderFilters();
                 await loadWorkOrderStats();
-                displayWorkOrders();
+                displayWorkOrderTiles(reset);
+                updateLoadMoreButton();
                 
-                showStatus(`Loaded ${workOrders.length} work orders`, 'success');
+                showStatus(`Loaded ${workOrders.length} work orders (${workOrdersPagination.totalCount} total)`, 'success');
             } catch (error) {
                 console.error('Error loading work orders:', error);
+                workOrdersPagination.loading = false;
+                updateLoadMoreButton();
                 showStatus('Error loading work orders', 'error');
             }
         }
@@ -5269,39 +5591,259 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
             }
         }
 
-        // Display work orders in grid
-        function displayWorkOrders() {
+        // Display work orders as tiles
+        function displayWorkOrderTiles(reset = true) {
             const grid = document.getElementById('work-orders-grid');
-            const resultsCount = document.getElementById('work-order-results-count');
             
             if (filteredWorkOrders.length === 0) {
-                grid.innerHTML = '<p>No work orders found. Try adjusting your filters.</p>';
-                resultsCount.textContent = 'No work orders found';
+                grid.innerHTML = '<div class="no-components-message">No work orders found. Click "Load JSONL Data" to import work orders.</div>';
                 return;
             }
             
-            resultsCount.textContent = `Showing ${filteredWorkOrders.length} work orders`;
+            const workOrdersHtml = filteredWorkOrders.map(workOrder => {
+                const isInCart = cart.some(item => item.id === `wo_${workOrder.work_order_number || workOrder.id}`);
+                const cartButtonText = isInCart ? 'In Cart' : 'Add to Cart';
+                const cartButtonClass = isInCart ? 'btn-cart in-cart' : 'btn-cart';
+                
+                // Parse tools, software, and skills from JSONL data
+                const tools = Array.isArray(workOrder.tools) ? workOrder.tools : [];
+                const software = Array.isArray(workOrder.software) ? workOrder.software : [];
+                const skills = Array.isArray(workOrder.skills) ? workOrder.skills : [];
+                
+                return `
+                    <div class="work-order-tile" id="work-order-tile-${workOrder.work_order_number || workOrder.id}">
+                        <div class="work-order-tile-header">
+                            <div class="work-order-number">#${workOrder.work_order_number || workOrder.id}</div>
+                            <input type="checkbox" class="work-order-select" value="${workOrder.work_order_number || workOrder.id}" onchange="updateWorkOrderSelection()">
+                        </div>
+                        
+                        <div class="work-order-tile-title">${workOrder.title || 'Work Order'}</div>
+                        
+                        <div class="work-order-tile-description">
+                            ${workOrder.service_description || workOrder.description || 'No description available'}
+                        </div>
+                        
+                        <div class="work-order-tile-tags">
+                            ${tools.slice(0, 3).map(tool => `<span class="work-order-tile-tag tools">${tool}</span>`).join('')}
+                            ${software.slice(0, 3).map(sw => `<span class="work-order-tile-tag software">${sw}</span>`).join('')}
+                            ${skills.slice(0, 2).map(skill => `<span class="work-order-tile-tag skills">${skill}</span>`).join('')}
+                        </div>
+                        
+                        <div class="work-order-tile-actions">
+                            <button onclick="openWorkOrderModal('${workOrder.work_order_number || workOrder.id}')" class="btn-view">👁️ View Details</button>
+                            <button onclick="toggleWorkOrderInCart('${workOrder.work_order_number || workOrder.id}')" class="${cartButtonClass}">${cartButtonText}</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
-            grid.innerHTML = filteredWorkOrders.map(workOrder => `
-                <div class="component-card work-order-card" data-id="${workOrder.id}">
-                    <div class="component-title">
-                        <input type="checkbox" class="work-order-select" data-id="${workOrder.id}" onchange="toggleWorkOrderSelection(${workOrder.id})">
-                        <span class="card-title">${workOrder.title}</span>
-                    </div>
-                    <div class="component-preview">
-                        <strong>Company:</strong> ${workOrder.company_name}<br>
-                        <strong>Date:</strong> ${workOrder.service_date || 'N/A'}<br>
-                        <strong>Category:</strong> ${workOrder.work_category || 'N/A'}<br>
-                        <strong>Location:</strong> ${workOrder.city || 'N/A'}, ${workOrder.state || 'N/A'}<br>
-                        <strong>Pay:</strong> $${workOrder.pay_amount || 0}<br>
-                        ${workOrder.work_description ? `<strong>Description:</strong> ${workOrder.work_description.substring(0, 150)}...` : ''}
-                    </div>
-                    <div class="component-meta">
-                        <span>Technologies: ${workOrder.technologies_used ? JSON.parse(workOrder.technologies_used).slice(0, 3).join(', ') : 'None'}</span>
-                        <button onclick="addWorkOrderToCart(${workOrder.id})" class="success" style="padding: 5px 10px; font-size: 12px;">🛒 Add to Cart</button>
+            if (reset) {
+                grid.innerHTML = workOrdersHtml;
+            } else {
+                grid.innerHTML += workOrdersHtml;
+            }
+        }
+
+        // Load more work orders
+        async function loadMoreWorkOrders() {
+            if (workOrdersPagination.loading || !workOrdersPagination.hasMore) {
+                return;
+            }
+            
+            await refreshWorkOrders(false); // Don't reset, append to existing
+        }
+
+        // Update load more button state
+        function updateLoadMoreButton() {
+            const button = document.getElementById('load-more-work-orders');
+            if (!button) return;
+            
+            if (workOrdersPagination.loading) {
+                button.textContent = '⏳ Loading...';
+                button.disabled = true;
+                button.style.display = 'inline-block';
+            } else if (workOrdersPagination.hasMore) {
+                button.textContent = `📄 Load More Work Orders (${workOrdersPagination.totalCount - workOrders.length} remaining)`;
+                button.disabled = false;
+                button.style.display = 'inline-block';
+            } else {
+                button.style.display = 'none';
+            }
+        }
+
+        // Open work order modal
+        function openWorkOrderModal(workOrderId) {
+            const workOrder = workOrders.find(wo => wo.work_order_number === workOrderId || wo.id === workOrderId);
+            if (!workOrder) {
+                showStatus('Work order not found', 'error');
+                return;
+            }
+            
+            currentWorkOrder = workOrder;
+            
+            // Update modal title
+            document.getElementById('work-order-modal-title').textContent = `Work Order #${workOrder.work_order_number || workOrder.id}`;
+            
+            // Parse tools, software, and skills
+            const tools = Array.isArray(workOrder.tools) ? workOrder.tools : [];
+            const software = Array.isArray(workOrder.software) ? workOrder.software : [];
+            const skills = Array.isArray(workOrder.skills) ? workOrder.skills : [];
+            
+            // Build modal content
+            const modalContent = `
+                <div class="work-order-detail-section">
+                    <h4>📋 Work Order Information</h4>
+                    <div class="work-order-detail-grid">
+                        <div class="work-order-detail-item">
+                            <div class="work-order-detail-label">Work Order Number</div>
+                            <div class="work-order-detail-value">#${workOrder.work_order_number || workOrder.id}</div>
+                        </div>
+                        <div class="work-order-detail-item">
+                            <div class="work-order-detail-label">Title</div>
+                            <div class="work-order-detail-value">${workOrder.title || 'N/A'}</div>
+                        </div>
+                        <div class="work-order-detail-item">
+                            <div class="work-order-detail-label">Source File</div>
+                            <div class="work-order-detail-value">${workOrder.source_file || 'N/A'}</div>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+                
+                <div class="work-order-detail-section">
+                    <h4>📝 Service Description</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; line-height: 1.5;">
+                        ${workOrder.service_description || workOrder.description || 'No description available'}
+                    </div>
+                </div>
+                
+                ${tools.length > 0 ? `
+                <div class="work-order-detail-section">
+                    <h4>🔧 Tools Required</h4>
+                    <div class="work-order-tile-tags">
+                        ${tools.map(tool => `<span class="work-order-tile-tag tools">${tool}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${software.length > 0 ? `
+                <div class="work-order-detail-section">
+                    <h4>💻 Software Used</h4>
+                    <div class="work-order-tile-tags">
+                        ${software.map(sw => `<span class="work-order-tile-tag software">${sw}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${skills.length > 0 ? `
+                <div class="work-order-detail-section">
+                    <h4>🎯 Skills Demonstrated</h4>
+                    <div class="work-order-tile-tags">
+                        ${skills.map(skill => `<span class="work-order-tile-tag skills">${skill}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="work-order-detail-section">
+                    <h4>📊 Raw JSONL Data</h4>
+                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 12px; max-height: 200px; overflow-y: auto;">${JSON.stringify(workOrder, null, 2)}</pre>
+                </div>
+            `;
+            
+            document.getElementById('work-order-modal-body').innerHTML = modalContent;
+            
+            // Update cart button in modal
+            const isInCart = cart.some(item => item.id === `wo_${workOrder.work_order_number || workOrder.id}`);
+            const modalCartBtn = document.getElementById('modal-cart-btn');
+            modalCartBtn.textContent = isInCart ? 'Remove from Cart' : 'Add to Cart';
+            modalCartBtn.className = isInCart ? 'btn-cart in-cart' : 'btn-cart';
+            
+            // Show modal
+            document.getElementById('work-order-modal').style.display = 'block';
+        }
+
+        // Close work order modal
+        function closeWorkOrderModal() {
+            document.getElementById('work-order-modal').style.display = 'none';
+            currentWorkOrder = null;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('work-order-modal');
+            if (event.target === modal) {
+                closeWorkOrderModal();
+            }
+        }
+
+        // Toggle work order in cart from modal
+        function toggleWorkOrderInCart(workOrderId = null) {
+            const workOrder = workOrderId ? 
+                workOrders.find(wo => wo.work_order_number === workOrderId || wo.id === workOrderId) : 
+                currentWorkOrder;
+                
+            if (!workOrder) {
+                showStatus('Work order not found', 'error');
+                return;
+            }
+            
+            const cartItemId = `wo_${workOrder.work_order_number || workOrder.id}`;
+            const existingIndex = cart.findIndex(item => item.id === cartItemId);
+            
+            if (existingIndex >= 0) {
+                // Remove from cart
+                cart.splice(existingIndex, 1);
+                showStatus(`Removed "${workOrder.title}" from cart`, 'success');
+            } else {
+                // Add to cart
+                const cartItem = {
+                    id: cartItemId,
+                    title: workOrder.title || `Work Order #${workOrder.work_order_number || workOrder.id}`,
+                    content: workOrder.service_description || workOrder.description || 'Work order completion',
+                    section_type: 'work_experience',
+                    section_type_name: 'Work Experience',
+                    type: 'work_order',
+                    original_data: workOrder
+                };
+                
+                cart.push(cartItem);
+                showStatus(`Added "${workOrder.title}" to cart`, 'success');
+            }
+            
+            updateCartDisplay();
+            displayWorkOrderTiles(); // Refresh tiles to update button states
+            
+            // Update modal button if modal is open
+            if (currentWorkOrder) {
+                const isInCart = cart.some(item => item.id === cartItemId);
+                const modalCartBtn = document.getElementById('modal-cart-btn');
+                modalCartBtn.textContent = isInCart ? 'Remove from Cart' : 'Add to Cart';
+                modalCartBtn.className = isInCart ? 'btn-cart in-cart' : 'btn-cart';
+            }
+        }
+
+        // Filter work orders
+        function filterWorkOrders() {
+            const searchTerm = document.getElementById('work-order-search').value.toLowerCase().trim();
+            const companyFilter = document.getElementById('company-filter').value;
+            const categoryFilter = document.getElementById('category-filter').value;
+            
+            filteredWorkOrders = workOrders.filter(workOrder => {
+                const matchesSearch = !searchTerm || 
+                    (workOrder.title && workOrder.title.toLowerCase().includes(searchTerm)) ||
+                    (workOrder.service_description && workOrder.service_description.toLowerCase().includes(searchTerm)) ||
+                    (workOrder.work_order_number && workOrder.work_order_number.toString().includes(searchTerm));
+                
+                const matchesCompany = !companyFilter || 
+                    (workOrder.company_name && workOrder.company_name === companyFilter);
+                
+                const matchesCategory = !categoryFilter || 
+                    (workOrder.work_category && workOrder.work_category === categoryFilter);
+                
+                return matchesSearch && matchesCompany && matchesCategory;
+            });
+            
+            displayWorkOrderTiles();
+            updateLoadMoreButton(); // Update button state after filtering
         }
 
         // Search work orders
@@ -5988,4 +6530,5 @@ ${project.key_achievements || 'Successfully delivered project objectives'}`,
         }
     </script>
 </body>
+</html>
 </html>
