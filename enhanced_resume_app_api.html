@@ -2103,8 +2103,8 @@
                 <button id="load-more-work-orders" onclick="loadMoreWorkOrders()" class="secondary" style="display: none;">
                     📄 Load More Work Orders
                 </button>
-            </div>
-        </div>
+                    </div>
+                    </div>
 
         <!-- Work Order Modal -->
         <div id="work-order-modal" class="work-order-modal">
@@ -2115,7 +2115,7 @@
                 </div>
                 <div class="work-order-modal-body" id="work-order-modal-body">
                     <!-- Work order details will be populated here -->
-                </div>
+                    </div>
                 <div class="work-order-modal-footer">
                     <button class="btn-cart" id="modal-cart-btn" onclick="toggleWorkOrderInCart()">Add to Cart</button>
                     <button class="btn-view" onclick="closeWorkOrderModal()">Close</button>
@@ -2145,15 +2145,15 @@
                 <!-- Filter Row -->
                 <div class="form-row">
                     <div>
-                        <label for="project-type-filter">Project Type:</label>
+                        <label for="project-type-filter">Work Category:</label>
                         <select id="project-type-filter" onchange="filterProjects()">
-                            <option value="">All Types</option>
+                            <option value="">All Categories</option>
                         </select>
                     </div>
                     <div>
-                        <label for="client-type-filter">Client Type:</label>
+                        <label for="client-type-filter">Work Type:</label>
                         <select id="client-type-filter" onchange="filterProjects()">
-                            <option value="">All Client Types</option>
+                            <option value="">All Work Types</option>
                         </select>
                     </div>
                 </div>
@@ -2185,6 +2185,7 @@
                 <div class="form-row">
                     <div>
                         <button onclick="showCreateProjectModal()" class="success">➕ Create New Project</button>
+                        <button onclick="autoCreateProjectsByTitle()" class="success">🔗 Bundle by Title</button>
                         <button onclick="showBulkProjectActions()" class="secondary">📦 Bulk Actions</button>
                         <button onclick="addSelectedProjectsToCart()" class="success">🛒 Add Selected to Cart</button>
                     </div>
@@ -2205,12 +2206,12 @@
                     <div class="stat-label">Active Projects</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="project-total-earnings">$0</div>
-                    <div class="stat-label">Project Earnings</div>
+                    <div class="stat-number" id="project-total-earnings">0</div>
+                    <div class="stat-label">Total Work Orders</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="avg-project-duration">0</div>
-                    <div class="stat-label">Avg Duration (weeks)</div>
+                    <div class="stat-label">Avg Work Orders/Project</div>
                 </div>
             </div>
             
@@ -2326,18 +2327,18 @@
         
         <!-- Resume Importer Tab -->
         <div class="tab-content" id="importer">
-            <h2>📥 Resume Importer</h2>
-            <p>Upload your resume to extract the text, then manually select and create components from the displayed content.</p>
-            
+                <h2>📥 Resume Importer</h2>
+                <p>Upload your resume to extract the text, then manually select and create components from the displayed content.</p>
+                
             <div class="test-area">
                 <h3>📎 Step 1: Upload Resume File</h3>
-                <div class="upload-area" onclick="document.getElementById('resume-file-input').click()">
-                    <p>📁 Click here to select a resume file</p>
-                    <p style="font-size: 0.9rem; color: #666;">Supports: .txt, .doc, .docx, .pdf, .html</p>
-                </div>
-                <input type="file" id="resume-file-input" accept=".txt,.doc,.docx,.pdf,.html" style="display: none;" onchange="uploadAndDisplayResume()">
-            </div>
-            
+                        <div class="upload-area" onclick="document.getElementById('resume-file-input').click()">
+                            <p>📁 Click here to select a resume file</p>
+                            <p style="font-size: 0.9rem; color: #666;">Supports: .txt, .doc, .docx, .pdf, .html</p>
+                        </div>
+                        <input type="file" id="resume-file-input" accept=".txt,.doc,.docx,.pdf,.html" style="display: none;" onchange="uploadAndDisplayResume()">
+                    </div>
+                    
             <div class="test-area">
                 <h3>📝 Step 1 (Alternative): Paste Resume Text</h3>
                 <textarea id="resume-text-input" rows="10" placeholder="Paste your resume text here..." style="width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;">
@@ -2362,8 +2363,8 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
                 </textarea>
                 <br>
                 <button class="success" onclick="displayImporterText()">📄 Display Text</button>
-            </div>
-            
+                    </div>
+                    
             <div class="test-area" id="importer-text-display" style="display: none;">
                 <h3>📄 Step 2: Select Text and Create Component</h3>
                 <p>Select any text below with your mouse, then click the button:</p>
@@ -2622,37 +2623,37 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
                 <div class="form-section">
                     <label for="importer-selected-text">Selected Text:</label>
                     <textarea id="importer-selected-text" readonly rows="4" style="background: #f8f9fa; color: #6c757d; resize: vertical;"></textarea>
-                </div>
-                
+            </div>
+            
                 <div class="form-section">
                     <label for="importer-component-type">Component Type:</label>
                     <select id="importer-component-type">
                         <option value="professional_summary">📋 Professional Summary</option>
-                        <option value="work_experience">💼 Work Experience</option>
-                        <option value="technical_skills">🔧 Technical Skills</option>
-                        <option value="professional_skills">💻 Professional Skills</option>
+                    <option value="work_experience">💼 Work Experience</option>
+                    <option value="technical_skills">🔧 Technical Skills</option>
+                    <option value="professional_skills">💻 Professional Skills</option>
                         <option value="education">🎓 Education</option>
-                        <option value="certifications">📜 Certifications</option>
-                        <option value="accomplishments">🏆 Accomplishments</option>
-                        <option value="projects">🚀 Projects</option>
-                    </select>
-                </div>
-                
+                    <option value="certifications">📜 Certifications</option>
+                    <option value="accomplishments">🏆 Accomplishments</option>
+                    <option value="projects">🚀 Projects</option>
+                </select>
+            </div>
+            
                 <div class="form-section">
                     <label for="importer-component-title">Component Title:</label>
                     <input type="text" id="importer-component-title" placeholder="Enter a descriptive title">
-                </div>
-                
+            </div>
+            
                 <div class="form-section">
                     <label for="importer-component-content">Component Content:</label>
                     <textarea id="importer-component-content" rows="8" placeholder="Edit the content as needed..."></textarea>
-                </div>
-                
+            </div>
+            
                 <div class="form-section">
                     <label for="importer-component-keywords">Keywords (optional):</label>
                     <input type="text" id="importer-component-keywords" placeholder="e.g. project management, leadership, technical support">
-                </div>
-                
+            </div>
+            
                 <div class="form-section">
                     <label for="importer-component-industry">Industry Tags (optional):</label>
                     <input type="text" id="importer-component-industry" placeholder="e.g. healthcare, finance, technology">
@@ -2920,7 +2921,7 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
         
         // Resume Importer functions (Working Version)
         let importerSelectedText = '';
-        
+
         // Upload and display resume file
         async function uploadAndDisplayResume() {
             const fileInput = document.getElementById('resume-file-input');
@@ -2969,7 +2970,7 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
             displayImporterResumeText(text, 'Pasted Text');
             showStatus('✅ Text displayed. Now select some text with your mouse.', 'info');
         }
-        
+
         // Display resume text in the preview area
         function displayImporterResumeText(text, filename) {
             const content = document.getElementById('importer-resume-content');
@@ -3081,10 +3082,10 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
                     closeResumeImporterModal();
                     // Refresh component library and dashboard
                     if (typeof loadComponentLibrary === 'function') {
-                        loadComponentLibrary();
+                    loadComponentLibrary();
                     }
                     if (typeof loadDashboard === 'function') {
-                        loadDashboard();
+                    loadDashboard();
                     }
                 } else {
                     showStatus(`❌ Error: ${result.error}`, 'error');
@@ -5615,24 +5616,24 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
                         <div class="work-order-tile-header">
                             <div class="work-order-number">#${workOrder.work_order_number || workOrder.id}</div>
                             <input type="checkbox" class="work-order-select" value="${workOrder.work_order_number || workOrder.id}" onchange="updateWorkOrderSelection()">
-                        </div>
+                    </div>
                         
                         <div class="work-order-tile-title">${workOrder.title || 'Work Order'}</div>
                         
                         <div class="work-order-tile-description">
                             ${workOrder.service_description || workOrder.description || 'No description available'}
-                        </div>
+                    </div>
                         
                         <div class="work-order-tile-tags">
                             ${tools.slice(0, 3).map(tool => `<span class="work-order-tile-tag tools">${tool}</span>`).join('')}
                             ${software.slice(0, 3).map(sw => `<span class="work-order-tile-tag software">${sw}</span>`).join('')}
                             ${skills.slice(0, 2).map(skill => `<span class="work-order-tile-tag skills">${skill}</span>`).join('')}
-                        </div>
+                    </div>
                         
                         <div class="work-order-tile-actions">
                             <button onclick="openWorkOrderModal('${workOrder.work_order_number || workOrder.id}')" class="btn-view">👁️ View Details</button>
                             <button onclick="toggleWorkOrderInCart('${workOrder.work_order_number || workOrder.id}')" class="${cartButtonClass}">${cartButtonText}</button>
-                        </div>
+                </div>
                     </div>
                 `;
             }).join('');
@@ -6073,19 +6074,19 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
 
         // Load filter options for projects
         function loadProjectFilters() {
-            // Populate project type filter
+            // Populate work category filter (renamed from project type)
             const projectTypeFilter = document.getElementById('project-type-filter');
-            projectTypeFilter.innerHTML = '<option value="">All Types</option>';
-            const uniqueTypes = [...new Set(projects.map(p => p.project_type).filter(Boolean))].sort();
-            uniqueTypes.forEach(type => {
-                projectTypeFilter.innerHTML += `<option value="${type}">${type}</option>`;
+            projectTypeFilter.innerHTML = '<option value="">All Categories</option>';
+            const uniqueCategories = [...new Set(projects.map(p => p.work_category).filter(Boolean))].sort();
+            uniqueCategories.forEach(category => {
+                projectTypeFilter.innerHTML += `<option value="${category}">${category}</option>`;
             });
             
-            // Populate client type filter
+            // Populate work type filter (renamed from client type)
             const clientTypeFilter = document.getElementById('client-type-filter');
-            clientTypeFilter.innerHTML = '<option value="">All Client Types</option>';
-            const uniqueClientTypes = [...new Set(projects.map(p => p.client_type).filter(Boolean))].sort();
-            uniqueClientTypes.forEach(type => {
+            clientTypeFilter.innerHTML = '<option value="">All Work Types</option>';
+            const uniqueWorkTypes = [...new Set(projects.map(p => p.work_type).filter(Boolean))].sort();
+            uniqueWorkTypes.forEach(type => {
                 clientTypeFilter.innerHTML += `<option value="${type}">${type}</option>`;
             });
         }
@@ -6093,22 +6094,20 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
         // Load project statistics
         function loadProjectStats() {
             const totalProjects = projects.length;
-            const activeProjects = projects.filter(p => 
-                !p.end_date || new Date(p.end_date) > new Date()
-            ).length;
+            const activeProjects = projects.length; // All projects are considered active in simplified table
             
-            const totalEarnings = projects.reduce((sum, p) => sum + (p.total_earnings || 0), 0);
+            const totalWorkOrders = projects.reduce((sum, p) => sum + (p.total_work_orders || 0), 0);
             
-            const avgDuration = projects.length > 0 ? 
-                projects.reduce((sum, p) => sum + (p.duration_weeks || 0), 0) / projects.length : 0;
+            const avgWorkOrdersPerProject = projects.length > 0 ? 
+                totalWorkOrders / projects.length : 0;
             
             document.getElementById('total-projects').textContent = totalProjects;
             document.getElementById('active-projects').textContent = activeProjects;
-            document.getElementById('project-total-earnings').textContent = `$${totalEarnings.toFixed(2)}`;
-            document.getElementById('avg-project-duration').textContent = Math.round(avgDuration);
+            document.getElementById('project-total-earnings').textContent = totalWorkOrders;
+            document.getElementById('avg-project-duration').textContent = Math.round(avgWorkOrdersPerProject);
         }
 
-        // Display projects in grid
+        // Display projects in grid (similar to work order tiles)
         function displayProjects() {
             const grid = document.getElementById('projects-grid');
             const resultsCount = document.getElementById('project-results-count');
@@ -6122,22 +6121,28 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
             resultsCount.textContent = `Showing ${filteredProjects.length} projects`;
             
             grid.innerHTML = filteredProjects.map(project => `
-                <div class="component-card project-card" data-id="${project.id}">
-                    <div class="component-title">
-                        <input type="checkbox" class="project-select" data-id="${project.id}" onchange="toggleProjectSelection(${project.id})">
-                        <span class="card-title">${project.project_name}</span>
+                <div class="work-order-tile project-tile" data-id="${project.id}" onclick="showProjectDetails(${project.id})">
+                    <div class="work-order-tile-header">
+                        <div class="work-order-number">Project #${project.id}</div>
+                        <input type="checkbox" class="project-select" data-id="${project.id}" onchange="toggleProjectSelection(${project.id})" onclick="event.stopPropagation()">
                     </div>
-                    <div class="component-preview">
-                        <strong>Client:</strong> ${project.client_name || 'N/A'}<br>
-                        <strong>Type:</strong> ${project.project_type || 'N/A'}<br>
-                        <strong>Duration:</strong> ${project.duration_weeks || 'N/A'} weeks<br>
-                        <strong>Role:</strong> ${project.my_role || 'N/A'}<br>
-                        <strong>Earnings:</strong> $${project.total_earnings || 0}<br>
-                        ${project.project_description ? `<strong>Description:</strong> ${project.project_description.substring(0, 150)}...` : ''}
+                    
+                    <div class="work-order-tile-title">${project.title}</div>
+                    <div class="work-order-tile-company">${project.company_name || 'Various Companies'}</div>
+                    
+                    <div class="work-order-tile-description">
+                        Project with ${project.total_work_orders} work orders in ${project.work_category || 'various'} category
                     </div>
-                    <div class="component-meta">
-                        <span>Priority: ${project.priority_level || 1} | Work Orders: ${project.total_work_orders || 0}</span>
-                        <button onclick="addProjectToCart(${project.id})" class="success" style="padding: 5px 10px; font-size: 12px;">🛒 Add to Cart</button>
+                    
+                    <div class="work-order-tile-tags">
+                        ${project.work_category ? `<span class="work-order-tile-tag">${project.work_category}</span>` : ''}
+                        ${project.work_type ? `<span class="work-order-tile-tag">${project.work_type}</span>` : ''}
+                        ${project.client_type ? `<span class="work-order-tile-tag">${project.client_type}</span>` : ''}
+                    </div>
+                    
+                    <div class="work-order-tile-actions">
+                        <button onclick="showProjectDetails(${project.id}); event.stopPropagation();" class="btn-view">📋 View Details</button>
+                        <button onclick="addProjectToCart(${project.id}); event.stopPropagation();" class="btn-cart">🛒 Add to Cart</button>
                     </div>
                 </div>
             `).join('');
@@ -6151,10 +6156,10 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
                 filteredProjects = [...projects];
             } else {
                 filteredProjects = projects.filter(project => 
-                    project.project_name.toLowerCase().includes(searchTerm) ||
-                    (project.client_name && project.client_name.toLowerCase().includes(searchTerm)) ||
-                    (project.project_description && project.project_description.toLowerCase().includes(searchTerm)) ||
-                    (project.key_achievements && project.key_achievements.toLowerCase().includes(searchTerm))
+                    project.title.toLowerCase().includes(searchTerm) ||
+                    (project.company_name && project.company_name.toLowerCase().includes(searchTerm)) ||
+                    (project.work_category && project.work_category.toLowerCase().includes(searchTerm)) ||
+                    (project.work_type && project.work_type.toLowerCase().includes(searchTerm))
                 );
             }
             
@@ -6169,34 +6174,15 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
             const statusFilter = document.getElementById('project-status-filter').value;
             
             filteredProjects = projects.filter(project => {
-                const matchesType = !projectTypeFilter || project.project_type === projectTypeFilter;
-                const matchesClientType = !clientTypeFilter || project.client_type === clientTypeFilter;
-                const matchesPriority = !priorityFilter || project.priority_level == priorityFilter;
+                const matchesCategory = !projectTypeFilter || project.work_category === projectTypeFilter;
+                const matchesWorkType = !clientTypeFilter || project.work_type === clientTypeFilter;
+                // Priority filter not applicable to simplified table, so always match
+                const matchesPriority = true;
                 
+                // Status filter not applicable to simplified table, so always match
                 let matchesStatus = true;
-                if (statusFilter) {
-                    const now = new Date();
-                    const startDate = project.start_date ? new Date(project.start_date) : null;
-                    const endDate = project.end_date ? new Date(project.end_date) : null;
-                    
-                    switch(statusFilter) {
-                        case 'active':
-                            matchesStatus = startDate && startDate <= now && (!endDate || endDate > now);
-                            break;
-                        case 'completed':
-                            matchesStatus = endDate && endDate <= now;
-                            break;
-                        case 'planned':
-                            matchesStatus = startDate && startDate > now;
-                            break;
-                        case 'on-hold':
-                            // This would need a status field in the database
-                            matchesStatus = true;
-                            break;
-                    }
-                }
                 
-                return matchesType && matchesClientType && matchesPriority && matchesStatus;
+                return matchesCategory && matchesWorkType && matchesPriority && matchesStatus;
             });
             
             displayProjects();
@@ -6329,6 +6315,171 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
             updateCartDisplay();
             showStatus(`Added ${addedCount} projects to cart!`, 'success');
             deselectAllProjects();
+        }
+
+        // Auto-create projects by bundling work orders with the same title
+        async function autoCreateProjectsByTitle() {
+            try {
+                showStatus('Creating projects by bundling work orders with the same title...', 'info');
+                
+                const response = await fetch('/api/projects/auto-create-by-title', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus(result.message, 'success');
+                    // Refresh the projects list to show the new projects
+                    await loadProjects();
+                } else {
+                    showStatus(result.error || 'Error creating projects', 'error');
+                }
+            } catch (error) {
+                console.error('Error auto-creating projects by title:', error);
+                showStatus('Error creating projects by title', 'error');
+            }
+        }
+
+        // Show project details modal with all work orders
+        async function showProjectDetails(projectId) {
+            try {
+                const project = projects.find(p => p.id === projectId);
+                if (!project) {
+                    showStatus('Project not found', 'error');
+                    return;
+                }
+
+                // Get work orders for this project (by title) - get all, not just 50
+                const response = await fetch(`/api/work-orders?title=${encodeURIComponent(project.title)}&limit=1000`);
+                const workOrdersData = await response.json();
+                const projectWorkOrders = workOrdersData.work_orders || [];
+
+                // Create modal content
+                const modalContent = `
+                    <div class="work-order-modal" id="project-details-modal" style="display: block;">
+                        <div class="work-order-modal-content">
+                            <div class="work-order-modal-header">
+                                <h3>📁 Project: ${project.title}</h3>
+                                <button class="work-order-modal-close" onclick="closeProjectDetailsModal()">&times;</button>
+                            </div>
+                            <div class="work-order-modal-body">
+                                <div class="work-order-detail-section">
+                                    <h4>📊 Project Summary</h4>
+                                    <p><strong>Company:</strong> ${project.company_name || 'Various'}</p>
+                                    <p><strong>Category:</strong> ${project.work_category || 'N/A'}</p>
+                                    <p><strong>Type:</strong> ${project.work_type || 'N/A'}</p>
+                                    <p><strong>Total Work Orders:</strong> ${project.total_work_orders}</p>
+                                    <p><strong>Created:</strong> ${new Date(project.created_at).toLocaleDateString()}</p>
+                                </div>
+                                
+                                <div class="work-order-detail-section">
+                                    <h4>🔧 Work Orders in this Project (${projectWorkOrders.length})</h4>
+                                    ${projectWorkOrders.length === 0 ? 
+                                        '<p>No work orders found for this project.</p>' :
+                                        projectWorkOrders.map(wo => `
+                                            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px; background: #f9f9f9;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                    <strong style="color: #007bff;">WO #${wo.work_order_number || wo.id}</strong>
+                                                    <span style="font-size: 12px; color: #666;">${wo.service_date || 'No date'}</span>
+                                                </div>
+                                                <div style="margin-bottom: 5px;"><strong>Title:</strong> ${wo.title}</div>
+                                                <div style="margin-bottom: 5px;"><strong>Company:</strong> ${wo.company_name}</div>
+                                                ${wo.service_description ? `<div style="margin-bottom: 5px;"><strong>Description:</strong> ${wo.service_description.substring(0, 200)}${wo.service_description.length > 200 ? '...' : ''}</div>` : ''}
+                                                ${wo.pay_amount ? `<div style="color: #28a745;"><strong>Pay:</strong> $${wo.pay_amount}</div>` : ''}
+                                            </div>
+                                        `).join('')
+                                    }
+                                </div>
+                            </div>
+                            <div class="work-order-modal-footer">
+                                <button class="btn-cart" onclick="addProjectToCart(${projectId}); closeProjectDetailsModal();">🛒 Add Project to Cart</button>
+                                <button class="btn-view" onclick="closeProjectDetailsModal()">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', modalContent);
+                
+            } catch (error) {
+                console.error('Error loading project details:', error);
+                showStatus('Error loading project details', 'error');
+            }
+        }
+
+        // Close project details modal
+        function closeProjectDetailsModal() {
+            const modal = document.getElementById('project-details-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Toggle project selection
+        function toggleProjectSelection(projectId) {
+            const index = selectedProjects.indexOf(projectId);
+            if (index > -1) {
+                selectedProjects.splice(index, 1);
+            } else {
+                selectedProjects.push(projectId);
+            }
+            updateProjectBulkSelectionCount();
+        }
+
+        // Update project bulk selection count
+        function updateProjectBulkSelectionCount() {
+            const countElement = document.getElementById('project-bulk-selection-count');
+            if (countElement) {
+                countElement.textContent = `${selectedProjects.length} projects selected`;
+            }
+        }
+
+        // Add project to cart
+        function addProjectToCart(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (!project) {
+                showStatus('Project not found', 'error');
+                return;
+            }
+            
+            const cartItem = {
+                id: `project_${project.id}`,
+                title: project.title,
+                content: `${project.company_name || 'Various Companies'} - Project with ${project.total_work_orders} work orders in ${project.work_category || 'various'} category`,
+                section_type: 'projects',
+                section_type_name: 'projects',
+                type: 'project',
+                original_id: project.id,
+                data: project
+            };
+            
+            // Check if already in cart
+            if (cart.find(item => item.id === cartItem.id)) {
+                showStatus('Project already in cart', 'warning');
+                return;
+            }
+            
+            cart.push(cartItem);
+            updateCartDisplay();
+            showStatus(`Added "${project.title}" to cart!`, 'success');
+        }
+
+        // Clear project filters
+        function clearProjectFilters() {
+            document.getElementById('project-search').value = '';
+            document.getElementById('project-type-filter').value = '';
+            document.getElementById('client-type-filter').value = '';
+            document.getElementById('priority-filter').value = '';
+            document.getElementById('project-status-filter').value = '';
+            
+            filteredProjects = [...projects];
+            displayProjects();
+            showStatus('Filters cleared', 'info');
         }
 
         // Placeholder functions for project management

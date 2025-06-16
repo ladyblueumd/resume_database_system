@@ -30,6 +30,7 @@ def get_work_orders():
         work_type = request.args.get('work_type')
         client_type = request.args.get('client_type')
         state = request.args.get('state')
+        title = request.args.get('title')
         project_id = request.args.get('project_id')
         unassigned = request.args.get('unassigned', 'false').lower() == 'true'
         limit = request.args.get('limit', 50, type=int)
@@ -62,6 +63,9 @@ def get_work_orders():
         if state:
             query += " AND state = ?"
             params.append(state)
+        if title:
+            query += " AND title = ?"
+            params.append(title)
         if project_id:
             query = """
                 SELECT wo.* FROM work_orders wo
@@ -376,23 +380,11 @@ def get_projects():
             cursor.execute("SELECT * FROM project_portfolio")
         else:
             cursor.execute("""
-                SELECT p.*, 
-                       COUNT(wopa.work_order_id) as work_order_count,
-                       COALESCE(SUM(wo.pay_amount), 0) as calculated_earnings
-                FROM work_order_projects p
-                LEFT JOIN work_order_project_assignments wopa ON p.id = wopa.project_id
-                LEFT JOIN work_orders wo ON wopa.work_order_id = wo.id
-                GROUP BY p.id
-                ORDER BY p.priority_level, p.end_date DESC
+                SELECT * FROM work_order_projects
+                ORDER BY total_work_orders DESC, created_at DESC
             """)
         
         projects = [dict(row) for row in cursor.fetchall()]
-        
-        # Parse JSON fields
-        for project in projects:
-            for field in ['key_achievements', 'technologies_used', 'skills_demonstrated', 'locations_served', 'target_job_types']:
-                if project.get(field):
-                    project[field] = json.loads(project[field])
         
         conn.close()
         return jsonify(projects)
@@ -620,21 +612,14 @@ def auto_create_projects():
                 # Create project
                 cursor.execute("""
                     INSERT INTO work_order_projects (
-                        project_name, project_description, project_type, client_name,
-                        client_type, start_date, end_date, project_summary,
-                        include_in_resume, priority_level
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        title, company_name, work_type, client_type, total_work_orders
+                    ) VALUES (?, ?, ?, ?, ?)
                 """, (
                     f"{row_dict['company_name']} - {quarter_name} Support",
-                    f"Comprehensive technical support services for {row_dict['company_name']} during {quarter_name}",
-                    "support",
                     row_dict['company_name'],
+                    "support",
                     "enterprise",
-                    row_dict['start_date'],
-                    row_dict['end_date'],
-                    f"Provided {row_dict['work_order_count']} technical support services across {row_dict['categories']} with total value of ${row_dict['total_earnings']:.2f}",
-                    True,
-                    2
+                    row_dict['work_order_count']
                 ))
                 
                 project_id = cursor.lastrowid
@@ -661,6 +646,85 @@ def auto_create_projects():
         return jsonify({
             'message': f'Created {len(created_projects)} projects automatically',
             'projects': created_projects
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/projects/auto-create-by-title', methods=['POST'])
+def auto_create_projects_by_title():
+    """Auto-create projects by grouping work orders with the same title"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get work orders grouped by title
+        cursor.execute("""
+            SELECT title, COUNT(*) as order_count, 
+                   MIN(id) as first_order_id,
+                   GROUP_CONCAT(id) as work_order_ids,
+                   company_name,
+                   work_category,
+                   work_type
+            FROM work_orders 
+            WHERE title IS NOT NULL AND title != ''
+            GROUP BY title 
+            HAVING COUNT(*) >= 2
+            ORDER BY COUNT(*) DESC
+        """)
+        
+        title_groups = cursor.fetchall()
+        created_projects = 0
+        
+        for group in title_groups:
+            title = group['title']
+            work_order_ids = [int(id) for id in group['work_order_ids'].split(',')]
+            company_name = group['company_name']
+            work_category = group['work_category']
+            work_type = group['work_type']
+            
+            # Check if project already exists for this title
+            cursor.execute("SELECT id FROM work_order_projects WHERE title = ?", (title,))
+            existing_project = cursor.fetchone()
+            
+            if not existing_project:
+                # Create project description based on work orders
+                project_description = f"Project encompassing {group['order_count']} similar work orders: {title}"
+                if work_category:
+                    project_description += f" (Category: {work_category})"
+                
+                # Create new project
+                cursor.execute("""
+                    INSERT INTO work_order_projects (title, company_name, work_category, 
+                                                   work_type, client_type, total_work_orders)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    title,
+                    company_name,
+                    work_category,
+                    work_type,
+                    None,  # client_type not available in this query
+                    group['order_count']
+                ))
+                
+                project_id = cursor.lastrowid
+                
+                # Associate work orders with the project
+                for work_order_id in work_order_ids:
+                    cursor.execute("""
+                        INSERT OR IGNORE INTO work_order_project_assignments (project_id, work_order_id)
+                        VALUES (?, ?)
+                    """, (project_id, work_order_id))
+                
+                created_projects += 1
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'message': f'Successfully created {created_projects} projects by grouping work orders with the same title',
+            'created_count': created_projects,
+            'grouped_titles': len(title_groups)
         })
         
     except Exception as e:
@@ -786,11 +850,11 @@ def generate_resume_components_from_projects():
             achievements = json.loads(project['key_achievements']) if project['key_achievements'] else []
             
             # Create project component
-            title = f"Project: {project['project_name']}"
-            if project['client_name']:
-                title += f" - {project['client_name']}"
+            title = f"Project: {project['title']}"
+            if project['company_name']:
+                title += f" - {project['company_name']}"
             
-            content = project['project_description'] or project['project_summary'] or ""
+            content = f"Project with {project['total_work_orders']} work orders in {project['work_category'] or 'various'} category"
             
             # Add project details
             if project['my_role']:
