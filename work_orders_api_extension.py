@@ -746,16 +746,16 @@ def enhanced_job_matcher():
         cursor = conn.cursor()
         
         # Get regular resume components
-        cursor.execute("""
-            SELECT rc.*, st.name as section_type_name
-            FROM resume_components rc
-            JOIN section_types st ON rc.section_type_id = st.id
-        """)
+        cursor.execute("SELECT * FROM resume_components")
         components = [dict(row) for row in cursor.fetchall()]
         
-        # Get work items (individual work orders and projects)
-        cursor.execute("SELECT * FROM resume_ready_work_items")
-        work_items = [dict(row) for row in cursor.fetchall()]
+        # Get work orders
+        cursor.execute("SELECT * FROM work_orders")
+        work_orders = [dict(row) for row in cursor.fetchall()]
+        
+        # Get projects
+        cursor.execute("SELECT * FROM work_order_projects")
+        projects = [dict(row) for row in cursor.fetchall()]
         
         conn.close()
         
@@ -765,15 +765,18 @@ def enhanced_job_matcher():
         # Match components
         component_matches = match_items_to_job(job_description, components, 'component')
         
-        # Match work items (work orders and projects)
-        work_matches = match_items_to_job(job_description, work_items, 'work_item')
+        # Match work orders
+        work_order_matches = match_items_to_job(job_description, work_orders, 'work_order')
+        
+        # Match projects
+        project_matches = match_items_to_job(job_description, projects, 'project')
         
         return jsonify({
             'keywords': keywords,
             'component_matches': component_matches[:10],
-            'work_order_matches': [m for m in work_matches if m['item']['item_type'] == 'work_order'][:10],
-            'project_matches': [m for m in work_matches if m['item']['item_type'] == 'project'][:5],
-            'total_matches': len(component_matches) + len(work_matches)
+            'work_order_matches': work_order_matches[:10],
+            'project_matches': project_matches[:5],
+            'total_matches': len(component_matches) + len(work_order_matches) + len(project_matches)
         })
         
     except Exception as e:
@@ -791,8 +794,10 @@ def match_items_to_job(job_description, items, item_type):
         # Create searchable text based on item type
         if item_type == 'component':
             searchable_text = f"{item['title']} {item['content']} {item.get('keywords', '')}".lower()
-        else:  # work_item
-            searchable_text = f"{item['title']} {item.get('description', '')} {item.get('technologies_used', '')} {item.get('skills_demonstrated', '')}".lower()
+        elif item_type == 'work_order':
+            searchable_text = f"{item['title']} {item.get('work_description', '')} {item.get('service_description', '')} {item.get('company_name', '')} {item.get('work_category', '')} {item.get('work_type', '')}".lower()
+        elif item_type == 'project':
+            searchable_text = f"{item['title']} {item.get('company_name', '')} {item.get('work_category', '')} {item.get('work_type', '')}".lower()
         
         # Count keyword matches
         matched_keywords = []
@@ -803,20 +808,39 @@ def match_items_to_job(job_description, items, item_type):
         
         # Bonus scoring for exact phrase matches
         job_lower = job_description.lower()
-        if item_type == 'work_item':
+        if item_type == 'work_order':
             # Bonus for technology matches
             if item.get('technologies_used'):
-                technologies = json.loads(item['technologies_used']) if isinstance(item['technologies_used'], str) else item['technologies_used']
-                for tech in technologies:
-                    if tech.lower() in job_lower:
-                        score += 2
+                try:
+                    technologies = json.loads(item['technologies_used']) if isinstance(item['technologies_used'], str) else item['technologies_used']
+                    for tech in technologies:
+                        if tech.lower() in job_lower:
+                            score += 2
+                except:
+                    pass
             
             # Bonus for skill matches
             if item.get('skills_demonstrated'):
-                skills = json.loads(item['skills_demonstrated']) if isinstance(item['skills_demonstrated'], str) else item['skills_demonstrated']
-                for skill in skills:
-                    if skill.lower() in job_lower:
-                        score += 1.5
+                try:
+                    skills = json.loads(item['skills_demonstrated']) if isinstance(item['skills_demonstrated'], str) else item['skills_demonstrated']
+                    for skill in skills:
+                        if skill.lower() in job_lower:
+                            score += 1.5
+                except:
+                    pass
+            
+            # Bonus for category and type matches
+            if item.get('work_category') and item['work_category'].lower() in job_lower:
+                score += 1
+            if item.get('work_type') and item['work_type'].lower() in job_lower:
+                score += 1
+        
+        elif item_type == 'project':
+            # Bonus for category and type matches
+            if item.get('work_category') and item['work_category'].lower() in job_lower:
+                score += 1
+            if item.get('work_type') and item['work_type'].lower() in job_lower:
+                score += 1
         
         if score > 0:
             match_percentage = min(100, int((score / max(total_keywords, 1)) * 100))

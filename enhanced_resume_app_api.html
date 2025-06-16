@@ -163,6 +163,83 @@
             border-radius: 12px;
             font-size: 11px;
         }
+
+        .match-section {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+
+        .match-section h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .match-checkbox {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .match-score {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .job-matcher-controls {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .selection-summary {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .checkout-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .checkout-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-buttons .primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .checkout-buttons .primary:hover {
+            background: #0056b3;
+        }
         .employment-entry {
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -2845,25 +2922,43 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
         }
         
         // Job Matcher functions
-        function analyzeJobDescription() {
+        async function analyzeJobDescription() {
             const jobText = document.getElementById('job-description-input').value;
             const companyName = document.getElementById('company-name').value;
             const positionTitle = document.getElementById('position-title').value;
             
             if (!jobText.trim()) {
-                alert('Please paste a job description to analyze.');
+                showStatus('Please paste a job description to analyze.', 'error');
                 return;
             }
             
-            // Update AI status
-            document.getElementById('ai-status').innerHTML = '🔄 Analyzing job description and finding matches...';
+            showStatus('🔄 Analyzing job description and finding matches...', 'info');
             
-            setTimeout(() => {
-                const analysis = db.analyzeJobDescription(jobText);
-                displayJobAnalysis(analysis, jobText, companyName, positionTitle);
+            try {
+                const response = await fetch('/api/job-matcher/enhanced', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        job_description: jobText,
+                        company_name: companyName,
+                        position_title: positionTitle
+                    })
+                });
                 
-                document.getElementById('ai-status').innerHTML = `✅ Analysis complete! Found ${analysis.matches.length} matching components.`;
-            }, 1000);
+                const analysis = await response.json();
+                
+                if (response.ok) {
+                    displayJobAnalysis(analysis, jobText, companyName, positionTitle);
+                    showStatus(`✅ Analysis complete! Found ${analysis.total_matches} total matches.`, 'success');
+                } else {
+                    showStatus(`Error: ${analysis.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error analyzing job description:', error);
+                showStatus('Error analyzing job description', 'error');
+            }
         }
         
         function displayJobAnalysis(analysis, jobText, companyName, positionTitle) {
@@ -2879,44 +2974,207 @@ Senior Software Engineer | TechCorp Inc. | 2020-Present
                 <div class="keyword-list">${keywordsHtml}</div>
             `;
             
-            // Display component suggestions
-            const suggestionsHtml = analysis.matches.map(match => `
-                <div class="suggestion-item" onclick="addComponentToResume('${match.component.id}')">
-                    <div class="match-score">Match: ${match.matchPercentage}%</div>
-                    <strong>${match.component.title}</strong>
-                    <p>${match.component.content.substring(0, 150)}...</p>
-                    <small>Section: ${match.component.section_type} | Score: ${match.score}/${analysis.keywords.length}</small>
-                </div>
-            `).join('');
+            // Display all matches with checkboxes for selection
+            let suggestionsHtml = '';
             
-            document.getElementById('component-suggestions').innerHTML = suggestionsHtml || '<p>No matching components found. Consider adding more components to your library.</p>';
+            // Component matches
+            if (analysis.component_matches && analysis.component_matches.length > 0) {
+                suggestionsHtml += `
+                    <div class="match-section">
+                        <h4>📚 Resume Components (${analysis.component_matches.length})</h4>
+                        ${analysis.component_matches.map(match => `
+                            <div class="suggestion-item">
+                                <div class="match-header">
+                                    <input type="checkbox" class="match-checkbox" data-type="component" data-id="${match.item.id}" onchange="updateJobMatcherCart()">
+                                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                                </div>
+                                <strong>${match.item.title}</strong>
+                                <p>${match.item.content.substring(0, 150)}...</p>
+                                <small>Section: ${match.item.section_type || 'N/A'} | Score: ${match.score} | Keywords: ${match.matched_keywords.join(', ')}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Work Order matches
+            if (analysis.work_order_matches && analysis.work_order_matches.length > 0) {
+                suggestionsHtml += `
+                    <div class="match-section">
+                        <h4>🔧 Work Orders (${analysis.work_order_matches.length})</h4>
+                        ${analysis.work_order_matches.map(match => `
+                            <div class="suggestion-item">
+                                <div class="match-header">
+                                    <input type="checkbox" class="match-checkbox" data-type="work_order" data-id="${match.item.id}" onchange="updateJobMatcherCart()">
+                                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                                </div>
+                                <strong>${match.item.title}</strong>
+                                <p>${match.item.description ? match.item.description.substring(0, 150) + '...' : 'Work order completion'}</p>
+                                <small>Type: ${match.item.item_type} | Score: ${match.score} | Keywords: ${match.matched_keywords.join(', ')}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Project matches
+            if (analysis.project_matches && analysis.project_matches.length > 0) {
+                suggestionsHtml += `
+                    <div class="match-section">
+                        <h4>📁 Projects (${analysis.project_matches.length})</h4>
+                        ${analysis.project_matches.map(match => `
+                            <div class="suggestion-item">
+                                <div class="match-header">
+                                    <input type="checkbox" class="match-checkbox" data-type="project" data-id="${match.item.id}" onchange="updateJobMatcherCart()">
+                                    <div class="match-score">Match: ${match.match_percentage}%</div>
+                                </div>
+                                <strong>${match.item.title}</strong>
+                                <p>${match.item.description ? match.item.description.substring(0, 150) + '...' : 'Project completion'}</p>
+                                <small>Type: ${match.item.item_type} | Score: ${match.score} | Keywords: ${match.matched_keywords.join(', ')}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Add checkout controls
+            suggestionsHtml += `
+                <div class="job-matcher-controls">
+                    <div class="selection-summary">
+                        <span id="job-matcher-selection-count">0 items selected</span>
+                    </div>
+                    <div class="checkout-buttons">
+                        <button onclick="selectAllJobMatches()" class="secondary">☑️ Select All</button>
+                        <button onclick="deselectAllJobMatches()" class="secondary">❌ Deselect All</button>
+                        <button onclick="addSelectedMatchesToCart()" class="success">🛒 Add Selected to Cart</button>
+                        <button onclick="createResumeFromMatches()" class="primary">📄 Create Resume Now</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('component-suggestions').innerHTML = suggestionsHtml || '<p>No matching items found. Consider adding more components to your library.</p>';
         }
         
-        function saveJobDescription() {
+        async function saveJobDescription() {
             const jobText = document.getElementById('job-description-input').value;
             const companyName = document.getElementById('company-name').value;
             const positionTitle = document.getElementById('position-title').value;
             
             if (!jobText.trim() || !companyName.trim() || !positionTitle.trim()) {
-                alert('Please fill in job description, company name, and position title.');
+                showStatus('Please fill in job description, company name, and position title.', 'error');
                 return;
             }
             
-            const jobDesc = {
-                id: Date.now().toString(),
-                company_name: companyName,
-                position_title: positionTitle,
-                job_description: jobText,
-                keywords: db.extractKeywords(jobText),
-                status: 'saved',
-                created_at: new Date().toISOString()
-            };
+            try {
+                const response = await fetch('/api/job-descriptions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        company_name: companyName,
+                        position_title: positionTitle,
+                        job_description: jobText
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus('Job description saved successfully!', 'success');
+                    loadDashboard();
+                } else {
+                    showStatus(`Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving job description:', error);
+                showStatus('Error saving job description', 'error');
+            }
+        }
+
+        // Job Matcher checkout functions
+        function updateJobMatcherCart() {
+            const checkboxes = document.querySelectorAll('.match-checkbox:checked');
+            const count = checkboxes.length;
+            document.getElementById('job-matcher-selection-count').textContent = `${count} items selected`;
+        }
+
+        function selectAllJobMatches() {
+            const checkboxes = document.querySelectorAll('.match-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateJobMatcherCart();
+        }
+
+        function deselectAllJobMatches() {
+            const checkboxes = document.querySelectorAll('.match-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateJobMatcherCart();
+        }
+
+        function addSelectedMatchesToCart() {
+            const checkboxes = document.querySelectorAll('.match-checkbox:checked');
             
-            db.jobDescriptions.push(jobDesc);
-            db.saveJobDescriptions();
+            if (checkboxes.length === 0) {
+                showStatus('Please select items to add to cart', 'warning');
+                return;
+            }
             
-            alert('Job description saved successfully!');
-            loadDashboard();
+            let addedCount = 0;
+            
+            checkboxes.forEach(checkbox => {
+                const type = checkbox.dataset.type;
+                const id = checkbox.dataset.id;
+                const suggestionItem = checkbox.closest('.suggestion-item');
+                const title = suggestionItem.querySelector('strong').textContent;
+                const content = suggestionItem.querySelector('p').textContent;
+                
+                const cartItem = {
+                    id: `${type}_${id}`,
+                    title: title,
+                    content: content,
+                    section_type: type === 'component' ? 'component' : type === 'work_order' ? 'work_experience' : 'projects',
+                    section_type_name: type === 'component' ? 'Component' : type === 'work_order' ? 'Work Experience' : 'Projects',
+                    type: type,
+                    original_id: id,
+                    source: 'job_matcher'
+                };
+                
+                // Check if already in cart
+                if (!cart.find(item => item.id === cartItem.id)) {
+                    cart.push(cartItem);
+                    addedCount++;
+                }
+            });
+            
+            updateCartDisplay();
+            showStatus(`Added ${addedCount} items to cart!`, 'success');
+            
+            // Uncheck the added items
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateJobMatcherCart();
+        }
+
+        async function createResumeFromMatches() {
+            const checkboxes = document.querySelectorAll('.match-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                showStatus('Please select items to create resume', 'warning');
+                return;
+            }
+            
+            // Add selected items to cart first
+            addSelectedMatchesToCart();
+            
+            // Switch to resume builder tab
+            showTab('resume-builder');
+            
+            showStatus(`Ready to build resume with ${checkboxes.length} matched items!`, 'success');
         }
         
         // Resume Importer functions (Working Version)
